@@ -9,7 +9,7 @@ project = (root / "game/project.godot").read_text()
 preset = (root / "game/export_presets.cfg").read_text()
 ignore = (root / ".gitignore").read_text()
 for setting in [
-    'run/main_scene="res://scenes/foundation.tscn"',
+    'run/main_scene="res://scenes/title_menu.tscn"',
     'renderer/rendering_method="mobile"',
     'renderer/rendering_method.mobile="mobile"',
     'rendering_device/driver="vulkan"',
@@ -24,7 +24,9 @@ for setting in ['platform="Android"', 'package/unique_name="com.tpylman.neonfoun
 for pattern in ["*.keystore", "*.jks", "*.pem", "*.apk", "build/"]:
     assert pattern in ignore, pattern
 for name in ["README.md", "SECURITY.md", "game/scripts/foundation.gd",
-             "game/scenes/foundation.tscn", "docs/ROADMAP.md",
+             "game/scenes/foundation.tscn", "game/scenes/title_menu.tscn",
+             "game/scripts/title_menu.gd", "game/scripts/menu_backdrop.gd",
+             "game/tests/menu_smoke_test.gd", "docs/ROADMAP.md",
              "docs/PROJECT_BRIEF.md", "docs/ARCHITECTURE.md", "docs/BUILD_AND_SIGNING.md"]:
     assert (root / name).is_file(), name
 try:

@@ -13,6 +13,16 @@ class TestFoundation(unittest.TestCase):
         self.assertIn('rendering_device/driver.android="vulkan"', s)
         self.assertIn('rendering_device/fallback_to_opengl3=false', s)
 
+    def test_menu_startup_and_navigation_sources(self):
+        root = (ROOT / "game/project.godot").read_text()
+        self.assertIn('run/main_scene="res://scenes/title_menu.tscn"', root)
+        menus = (ROOT / "game/scripts/title_menu.gd").read_text()
+        for symbol in ["func show_title()", "func show_main_menu()", "func open_settings()", "func _open_section("]:
+            self.assertIn(symbol, menus)
+        self.assertIn('cfg.save(SETTINGS_FILE)', menus)
+        self.assertIn("mobile", root)
+        self.assertIn("vulkan", root)
+
     def test_android_identity(self):
         s = (ROOT / "game/export_presets.cfg").read_text()
         self.assertIn("com.tpylman.neonfoundryracing.debug", s)

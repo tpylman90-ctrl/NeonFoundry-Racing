@@ -3,6 +3,7 @@
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 0 | Professional repository, docs, Vulkan shell, CI, Android signing workflow | **Done — CI and signed Android build #1 verified** |
+| 0.5 | Cinematic title, main menu, functional settings, navigation previews | **Implemented — CI and Android review pending** |
 | 1 | Walkable Foundry garage + single detailed original hovercraft | Planned |
 | 2 | Inspection camera, cockpit and interactable components | Planned |
 | 3 | Hover and real free-flight physics on a small proving ground | Planned |

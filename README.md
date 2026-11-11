@@ -33,7 +33,7 @@ We aim for the *ownership and inspection depth* associated with premium racing g
 
 1. Install [Godot 4.5.1](https://godotengine.org/download/archive/4.5.1-stable/) and Blender.
 2. Open **\`game/project.godot\`** in Godot.
-3. Run the minimal **foundation scene**. Its purpose is to verify startup and report the renderer, **not** provide gameplay.
+3. Run the **title screen and main menu**. They include working navigation, local audio/visual preferences and marked previews for future Garage and Race Control systems. They are **not** playable gameplay.
 4. Review [PROJECT_BRIEF](docs/PROJECT_BRIEF.md), [ARCHITECTURE](docs/ARCHITECTURE.md) and [ROADMAP](docs/ROADMAP.md) before developing systems.
 5. Use [BUILD_AND_SIGNING](docs/BUILD_AND_SIGNING.md) for Android CI and release signing.
 
@@ -67,4 +67,4 @@ Start with the [roadmap](docs/ROADMAP.md) and use the [issue templates](.github/
 
 ---
 
-**Current milestone:** Foundation ready → first detailed hovercraft + walkaround garage vertical slice.
+**Current milestone:** Title/main menu vertical slice, then first detailed hovercraft + walkaround garage.
