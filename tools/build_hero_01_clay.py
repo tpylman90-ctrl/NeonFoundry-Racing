@@ -1,4 +1,4 @@
-"""NF-H01 'Forge One' — GATE 02 CLAY ONLY.
+"""NF-H01 'Forge One' — GATE 02 / V7 FACETED ARMOR SILHOUETTE ONLY.
 
 Generate a real, editable, original Blender model from the approved Gate 01
 engineering stations. Outputs eight orthographic/isometric neutral clay views,
@@ -77,7 +77,7 @@ def attach(obj, name, material, col):
     col.objects.link(obj)
     if obj.type == 'MESH':
         for poly in obj.data.polygons:
-            poly.use_smooth = True
+            poly.use_smooth = False
     return obj
 
 def mesh_obj(name, verts, faces, material, col, edge_width=0.018):
@@ -95,11 +95,11 @@ def mesh_obj(name, verts, faces, material, col, edge_width=0.018):
     bm.to_mesh(me)
     bm.free()
     for p in me.polygons:
-        p.use_smooth = True
+        p.use_smooth = False
     if edge_width > 0.0:
         bevel = ob.modifiers.new("Blockout silhouette edge break", "BEVEL")
         bevel.width = edge_width
-        bevel.segments = 2
+        bevel.segments = 1
         bevel.limit_method = 'ANGLE'
         weighted = ob.modifiers.new("Weighted clay normals", "WEIGHTED_NORMAL")
         weighted.keep_sharp = True
@@ -123,49 +123,42 @@ def loft(name, rings, ring_fn, material, col, bevel=.02):
     return mesh_obj(name,verts,faces,material,col,bevel)
 
 def smooth_stations(values, segments=4):
-    """Catmull-Rom interpolation of authored stations; preserve exact endpoints."""
-    expanded=[]
-    for i in range(len(values)-1):
-        p0=values[max(0,i-1)]
-        p1=values[i]
-        p2=values[i+1]
-        p3=values[min(len(values)-1,i+2)]
-        for j in range(segments):
-            t=j/segments
-            row=[]
-            for k in range(len(p1)):
-                v=.5*((2*p1[k])+(-p0[k]+p2[k])*t+
-                        (2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*t*t+
-                        (-p0[k]+3*p1[k]-3*p2[k]+p3[k])*t*t*t)
-                row.append(v)
-            expanded.append(tuple(row))
-    expanded.append(tuple(values[-1]))
-    return expanded
+    """Silhouette-only hard surface: do not subdivide loft stations.
+    
+    Broad planar segments across the Y axis are deliberate armored facets.
+    Gate 03 will introduce production topology and selective bevel control.
+    """
+    return list(values)
 
 def fuselage_ring(y, half, top, bottom):
-    # Rounded crown, two defined shoulder chines, faceted recessed belly.
-    # The top middle is crowned slightly; the bottom is a curved channel.
-    zrange = top-bottom
-    coords = [
-        (0,top+.045),
-        (-half*.34,top+.026),
-        (-half*.72,top-.024),
-        (-half*.96,top-.14),
-        (-half, bottom+zrange*.49),
-        (-half*.83,bottom+zrange*.16),
-        (-half*.40,bottom+.065),
-        (0,bottom+.025),
-        (half*.40,bottom+.065),
-        (half*.83,bottom+zrange*.16),
-        (half,bottom+zrange*.49),
-        (half*.96,top-.14),
-        (half*.72,top-.024),
-        (half*.34,top+.026),
+    # Ten-point hard-surface cross-section: flat armor deck, sharp 45-degree
+    # upper chines, near-vertical flanks, and planar angled lower armor.
+    # This is silhouette massing, not inset panels or actual hollow ducts.
+    dz = top-bottom
+    profile=[
+      (-half*.67,top), (half*.67,top),
+      (half,top-dz*.27), (half,bottom+dz*.26),
+      (half*.70,bottom), (half*.28,bottom+.08),
+      (-half*.28,bottom+.08), (-half*.70,bottom),
+      (-half,bottom+dz*.26), (-half,top-dz*.27),
     ]
-    return [(x,y,z) for x,z in coords]
+    return [(x,y,z) for x,z in profile]
 
 source = DATA["primary_shell_stations"]
-stations = [(p["y"],p["half_width"],p["top_z"],p["bottom_z"]) for p in source]
+# Gate 02 V7: Gate 01 figures are initial targets, not user-approved
+# production limits. The present clay review intentionally opens the width.
+stations=[]
+for p in source:
+    y=p["y"]
+    half=p["half_width"]*1.15
+    top=p["top_z"]
+    bottom=p["bottom_z"]
+    if y <= -3.59:
+        # Squared nose face, deliberately broad and perpendicular to Y.
+        half=.57; top=1.06; bottom=.57
+    elif y <= -3.14:
+        half=.75; top=1.15; bottom=.52
+    stations.append((y,half,top,bottom))
 
 def station_at(y):
     for a,b in zip(stations,stations[1:]):
@@ -174,123 +167,103 @@ def station_at(y):
             return (y,*[a[k]+(b[k]-a[k])*t for k in range(1,4)])
     return stations[0] if y<stations[0][0] else stations[-1]
 
-# Nose and center shell share a narrow hidden structural seam; they are
-# independent physical meshes, NOT one generated solid car.
+# The nose and center are separate construction volumes joined under armor.
 nose = [p for p in stations if p[0]<-1.70] + [station_at(-1.56)]
 center = [station_at(-1.61)] + [p for p in stations if p[0]>=-1.70]
-loft("BLK_010_NosePrimary",smooth_stations(nose,5),fuselage_ring,MAT_NOSE,COL_BODY,.035)
-loft("BLK_020_CenterFuselage",smooth_stations(center,5),fuselage_ring,MAT_BODY,COL_BODY,.035)
+loft("BLK_010_NosePrimary",nose,fuselage_ring,MAT_NOSE,COL_BODY,.045)
+loft("BLK_020_CenterFuselage",center,fuselage_ring,MAT_BODY,COL_BODY,.040)
 
-# Cockpit roof is its own curved, swept volume. The bottom overlaps main
-# shell, ensuring the silhouette looks integrated at Gate 02.
-# Gate 02 v6: a longer swept teardrop footprint, with the approved
-# 2.20 m peak held fixed. The low leading and trailing shoulders bury into
-# the center hull rather than reading as a freestanding roof bubble.
+# V7: low elongated fighter-jet cockpit ENVIRONMENT / envelope only.
+# Canopy frames, hinges, seals and actual transparent glazing are Gate 06.
 canopy = [
-    (-1.28,.18,1.34,1.28),
-    (-1.02,.34,1.49,1.29),
-    (-.63,.52,1.81,1.30),
-    (-.08,.65,2.10,1.32),
-    (.38,.71,2.20,1.33),
-    (.90,.67,2.06,1.34),
-    (1.32,.49,1.78,1.37),
-    (1.69,.22,1.51,1.40),
+    (-1.58,.16,1.35,1.28),
+    (-1.20,.34,1.51,1.29),
+    (-.67,.53,1.91,1.30),
+    (.02,.66,2.16,1.32),
+    (.55,.71,2.20,1.33),
+    (1.05,.64,2.01,1.35),
+    (1.52,.35,1.57,1.37),
+    (1.78,.14,1.47,1.40),
 ]
 def canopy_ring(y,half,top,bottom):
-    # a separate fore-aft swept shell with an arched section, not a box
-    height=top-bottom
-    profile=[
-       (0,top),(-half*.44,top-height*.10),
-       (-half*.82,top-height*.37),(-half,bottom+height*.09),
-       (-half*.73,bottom-.018),(0,bottom-.038),
-       (half*.73,bottom-.018),(half,bottom+height*.09),
-       (half*.82,top-height*.37),(half*.44,top-height*.10)]
-    return [(x,y,z) for x,z in profile]
-loft("BLK_030_CanopyEnvelope",smooth_stations(canopy,4),canopy_ring,MAT_CAB,COL_CAB,.018)
+    h=top-bottom
+    # Flat top and wide cut-glass shoulders, no spherical dome.
+    shape=[
+      (-half*.45,top), (half*.45,top),
+      (half*.91,top-h*.32), (half,bottom+h*.08),
+      (half*.74,bottom-.012), (-half*.74,bottom-.012),
+      (-half,bottom+h*.08), (-half*.91,top-h*.32),
+    ]
+    return [(x,y,z) for x,z in shape]
+loft("BLK_030_CanopyEnvelope",canopy,canopy_ring,MAT_CAB,COL_CAB,.012)
 
 def side_ring(y,center_x,half,top,bottom):
-    points=[
-        (-half*.66,top-.04),(-half*.14,top),(.65*half,top-.025),
-        (half,bottom+(top-bottom)*.55),(.76*half,bottom+.08),
-        (-half*.45,bottom),(-half,bottom+(top-bottom)*.47)
+    # Planar eight-sided armored pontoon / shoulder section with four 
+    # chamfered corners and flat top/side/belly surfaces.
+    h=top-bottom
+    section=[
+      (-.72,0),(.72,0),(1,.24),(1,.77),
+      (.72,1),(-.72,1),(-1,.77),(-1,.24)
     ]
-    return [(center_x+xx,y,zz) for xx,zz in points]
+    return [(center_x+half*x,y,top-h*t) for x,t in section]
 
 for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
-    # Wide separate shoulder/intake support, strongest just behind canopy.
-    # V6: carry the shoulder chine forward underneath the long intake;
-    # the outer shell remains a single separate swept mass per side.
+    # Heavy shoulder rail: parallel planar wall, not flowing teardrop.
     shoulder=[
-        (-2.63,direction*1.08,.15,1.08,.63),
-        (-2.15,direction*1.19,.26,1.20,.55),
-        (-1.66,direction*1.26,.33,1.30,.51),
-        (-.81,direction*1.29,.39,1.41,.50),
-        (.26,direction*1.33,.42,1.48,.52),
-        (1.32,direction*1.32,.43,1.52,.51),
-        (2.19,direction*1.25,.36,1.47,.54),
-        (2.82,direction*1.18,.23,1.22,.66)
+        (-2.80,1.13,.24,1.18,.60),
+        (-2.31,1.29,.34,1.33,.54),
+        (-1.76,1.37,.43,1.43,.49),
+        (-.75,1.41,.46,1.48,.47),
+        (.42,1.42,.47,1.53,.47),
+        (1.38,1.41,.47,1.58,.48),
+        (2.24,1.39,.46,1.56,.51),
+        (3.01,1.36,.41,1.46,.56)
     ]
-    # center_x and profile mirrored using an X geometric transform.
-    base=smooth_stations([(y,abs(cx),h,t,b) for y,cx,h,t,b in shoulder],4)
     def ring_mirror(y, center, half, top, bottom):
         return side_ring(y,direction*center,half,top,bottom)
     loft("BLK_040_Shoulder_"+tag if direction<0 else "BLK_041_Shoulder_"+tag,
-         base,ring_mirror,MAT_SHOULDER,COL_AERO,.025)
+         shoulder,ring_mirror,MAT_SHOULDER,COL_AERO,.042)
 
-    # Preview volume only: no tunnel/grille/duct mechanics until Gate 04.
-    # A broad rounded-hexagonal section blends into the shoulder, rather
-    # than the old short faceted barrel attached to the nose with a gap.
-    # All profile points are real mesh vertices, not shading trickery.
-    def intake_ring(y, cx, half, top, bottom):
-        h=top-bottom
-        section=[
-            (-.98, .27),(-.80,.10),(-.24,.00),(.43,.04),
-            (.87,.17),(1.00,.38),(.98,.72),(.72,.93),
-            (.19,1.01),(-.48,.98),(-.91,.78),(-1.03,.51),
-        ]
-        return [(direction*cx+half*x,y,top-h*t) for x,t in section]
-    # Gate 02 v6: 2.40 m nose-to-shoulder longitudinal envelope. The
-    # forward station has a definite broad lip; the center stays muscular;
-    # the rear fades into the separately modeled shoulder near the canopy.
+    # Envelopes ONLY. Actual rectangular bores, scoops, separators and
+    # mechanical liners are deferred to Gate 04.
     intake=[
-        (-3.20,1.16,.27,1.18,.61),
-        (-3.03,1.23,.39,1.29,.51),
-        (-2.75,1.33,.45,1.41,.43),
-        (-2.30,1.39,.47,1.49,.40),
-        (-1.88,1.41,.47,1.50,.41),
-        (-1.43,1.41,.43,1.46,.45),
-        (-1.05,1.38,.35,1.37,.51),
-        (-.80,1.34,.22,1.31,.59),
+        (-3.32,1.31,.42,1.33,.50), 
+        (-3.15,1.32,.46,1.41,.45),
+        (-2.76,1.37,.49,1.48,.42),
+        (-2.15,1.42,.51,1.53,.40),
+        (-1.64,1.43,.51,1.54,.40),
+        (-1.11,1.44,.48,1.50,.45),
+        (-.68,1.43,.41,1.47,.50),
     ]
-    loft("BLK_IntakeEnvelope_"+tag,smooth_stations(intake,4),
-         intake_ring,MAT_CUT,COL_AERO,.020)
+    def intake_ring(y,center,half,top,bottom):
+        return side_ring(y,direction*center,half,top,bottom)
+    loft("BLK_IntakeEnvelope_"+tag,intake,intake_ring,
+         MAT_CUT,COL_AERO,.036)
 
-# Separate rear cradle adds thickness and structural mass to engine mount.
+# Squared heavy rear bulkhead volume, independently modeled from the hull.
 aft = [
-    (1.27,1.02,1.41,.64),
-    (1.80,1.16,1.53,.58),
-    (2.44,1.24,1.48,.56),
-    (3.14,.99,1.32,.67),
-    (3.43,.72,1.17,.72)
+    (1.18,1.27,1.48,.55),
+    (1.82,1.43,1.59,.50),
+    (2.56,1.49,1.60,.51),
+    (3.20,1.50,1.57,.52),
+    (3.52,1.46,1.53,.54)
 ]
-loft("BLK_050_AftMachinery",smooth_stations(aft,4),
-     fuselage_ring,MAT_REAR,COL_REAR,.045)
+loft("BLK_050_AftMachinery",aft,fuselage_ring,MAT_REAR,COL_REAR,.048)
 
-def cylinder(name,center,radius,depth,mat,segments=40):
-    bpy.ops.mesh.primitive_cylinder_add(vertices=segments,radius=radius,depth=depth,
-        location=center)
+def cylinder(name,center,radius,depth,mat,segments=16):
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=segments,radius=radius,depth=depth,location=center)
     ob=bpy.context.object
     ob.rotation_euler.x=math.pi/2
     return attach(ob,name,mat,COL_REAR)
 
+# Larger OUTER nozzle envelopes only; bells, lips, rings and ribs: Gate 05.
 for tag,sign,index in [("PORT",-1.0,60),("STBD",1.0,61)]:
-    # Only extend the rear engine VOLUMES, not propulsion internals.
-    # The exit plane stays at the Gate 01 proposed Y=+3.60 m.
     cylinder("BLK_%03d_Nozzle_%s"%(index,tag),
-             (sign*1.02,2.96,1.03),.51,1.28,MAT_REAR)
+             (sign*1.18,3.16,1.02),.60,1.70,MAT_REAR,16)
 
-# Short front aerodynamic canard fins. A real thick slab of geometry
-# communicates attachment without panel/bolt detail.
+# Gate 02 winglet masses: thin swept trapezoid, downward from pontoon root.
+# Dedicated structural mounting / actual aero section waits for Gate 04.
 def fin_solid(name,outline,thickness,mat,col):
     verts=[]
     for z in [-thickness/2,thickness/2]:
@@ -300,31 +273,34 @@ def fin_solid(name,outline,thickness,mat,col):
     for i in range(n):
         j=(i+1)%n
         faces.append((i,j,n+j,n+i))
-    return mesh_obj(name,verts,faces,mat,col,.025)
+    return mesh_obj(name,verts,faces,mat,col,.014)
 
 for sign,tag,first,rear in [(-1,"PORT",70,80),(1,"STBD",71,81)]:
     wing=[
-      (sign*1.38,-1.90,.85),
-      (sign*1.79,-1.58,.79),
-      (sign*2.10,-.55,.70),
-      (sign*1.89,-.27,.72),
-      (sign*1.32,-.64,.85)]
-    fin_solid("BLK_%03d_FinFront_%s"%(first,tag),wing,.12,MAT_FIN,COL_AERO)
+        (sign*1.73,-1.18,.66),
+        (sign*2.26,-1.00,.59),
+        (sign*2.32,-.34,.56),
+        (sign*1.75,-.62,.65)
+    ]
+    fin_solid("BLK_%03d_FinFront_%s"%(first,tag),
+              wing,.085,MAT_FIN,COL_AERO)
 
-    # Longitudinal vertical stabilizer: triangular with mild outward rake.
-    base_x=sign*1.27
-    base=[(2.02,1.24),(2.32,2.02),(2.71,2.23),(3.06,2.06),(3.00,1.32)]
+    # Taller swept-outward rear fin, rooted INBOARD on upper engine deck.
+    # An extruded planar fin mass (not a detailed production aerofoil).
+    root_x=sign*1.10
+    base=[(2.08,1.52),(2.28,2.06),(2.82,2.68),
+          (3.28,2.58),(3.36,1.52)]
     verts=[]
-    for offset in [-.068,.068]:
+    for offset in [-.075,.075]:
         for yy,zz in base:
-            verts.append((base_x+sign*(zz-1.20)*.21+offset,yy,zz))
+            verts.append((root_x+sign*(zz-1.50)*.16+offset,yy,zz))
     n=len(base)
     faces=[tuple(reversed(range(n))),tuple(range(n,2*n))]
     for k in range(n):
         j=(k+1)%n
         faces.append((k,j,n+j,n+k))
-    mesh_obj("BLK_%03d_FinRear_%s"%(rear,tag),verts,faces,
-             MAT_FIN,COL_AERO,.023)
+    mesh_obj("BLK_%03d_FinRear_%s"%(rear,tag),
+             verts,faces,MAT_FIN,COL_AERO,.02)
 
 # Studio is NOT part of the production craft geometry.
 def area(name,loc,power,scale,target):
@@ -440,13 +416,14 @@ assert not missing,"Missing approval-gate blockout objects: "+str(missing)
 # A single complete Blender file, not independent concept/raster shapes.
 assert (OUT/"NF-H01_Gate02_Clay.blend").stat().st_size>30000
 manifest={
- "asset_id":"NF-H01","gate":2,"approval":"pending user visual inspection",
+ "asset_id":"NF-H01","gate":2,"revision":"V7-faceted-armor","approval":"pending user visual inspection",
  "references":"Based on user-supplied images, original geometry only",
  "source":"NF-H01_Gate02_Clay.blend",
  "inspection_glb":"NF-H01_Gate02_Inspection.glb",
  "renders":[x[0]+".png" for x in VIEWS],
  "separate_blockout_meshes":expected,
  "dimensions_proposed":DATA["proposed_envelope"],
+ "note":"V7 intentionally deviates from provisional width/length; Gate 02 silhouette pending approval.",
  "future_stages_not_started":[3,4,5,6,7,8,9,10,11,12],
 }
 (OUT/"MANIFEST.json").write_text(json.dumps(manifest,indent=2)+"\n")
