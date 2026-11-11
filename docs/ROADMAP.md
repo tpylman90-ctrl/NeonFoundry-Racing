@@ -3,7 +3,7 @@
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 0 | Professional repository, docs, Vulkan shell, CI, Android signing workflow | **Done — CI and signed Android build #1 verified** |
-| 0.5 | Cinematic title, main menu, functional settings, navigation previews | **Implemented — CI and Android review pending** |
+| 0.5 | Cinematic title, main menu, functional settings, navigation previews | **Implemented — CI and Android build #4 passed; phone review pending** |
 | 1 | Walkable Foundry garage + single detailed original hovercraft | Planned |
 | 2 | Inspection camera, cockpit and interactable components | Planned |
 | 3 | Hover and real free-flight physics on a small proving ground | Planned |
@@ -24,3 +24,5 @@ A milestone is only complete after its code is merged, regression checks pass an
 Do not start building several tracks or vehicles before the first end-to-end loop is demonstrated.
 
 Foundation evidence: [source checks](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/ci.yml) and [Android build #1](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/42939925754). This does not imply gameplay or a completed garage.
+
+Menu milestone verification: [Android build #4](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/42941449060) passed, with real Godot Mobile/Vulkan captures of the title and main menu. The Garage and Race Control screens are explicit placeholders, not playable systems.
