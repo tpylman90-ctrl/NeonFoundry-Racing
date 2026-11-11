@@ -83,3 +83,14 @@ The owner approved the eight-panel illustrated target showing a wide armored hov
 
 
 **V11 verified deliverable:** [GitHub Actions Gate 02 Clay #11](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43106928380) completed successfully with Blender 4.5.3. The validated `NF-H01-Gate02-Clay-11` artifact contains an editable `.blend`, an inspection-only `.glb` (24 independent craft meshes including `BLK_096_GreenhouseAftArmoredCowl` and both separate rear side wings), and eight 1200 × 900 actual Blender camera renders. The source checks, GLB format validation, and eight-view checks all passed. Silhouette acceptance is **still pending** an actual model review by the owner.
+
+### Gate 02 V12 — flatter roof and two inboard rear booster silhouettes
+
+Owner correction: the aft greenhouse armor should sweep nearly straight rearward from the cockpit roof, with blended shoulders, into **two smaller inner boosters** between the two large outer rear thrusters. Owner explicitly requests work on the Blender model, **not concept images**.
+
+Real source revision: [`ffcb91d7`](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/commit/ffcb91d7b26da0b27b9344257e94b0a6ddfec886) modifies actual authored geometry:
+- `BLK_096_GreenhouseAftArmoredCowl`: ten loft stations; crown from 2.34 m near canopy to ~2.16 m aft of bulkhead, nearly level rather than plunging toward the deck; wider outer shoulders gradually descend into existing armor.
+- `BLK_094_GreenhouseShoulder_PORT/STBD`: revised side haunches continue underneath and into rear armor roof, maintaining physical overlap.
+- `BLK_062_InnerBoosterEnvelope_PORT` and `BLK_063_InnerBoosterEnvelope_STBD`: two additional independent faceted nozzle *envelopes* at X ±0.39 m, centered around Z 1.70 m; positioned between original larger main thrusters. Their internal detail and physical mountings remain Gate 05.
+- `BLK_082_RearSideWing_PORT` and `BLK_083_RearSideWing_STBD` remain separate unchanged meshes.
+- No model-texture trickery and no Godot integration. Gate 02 approval stays pending until the owner reviews the real V12 model.
