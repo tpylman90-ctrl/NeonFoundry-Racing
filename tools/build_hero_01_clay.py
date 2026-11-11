@@ -1,4 +1,4 @@
-"""NF-H01 'Forge One' — GATE 02 / V11 INTEGRATED AFT GREENHOUSE ARMOR.
+"""NF-H01 'Forge One' — GATE 02 / V12 LOW-SLOPE REAR ARMOR & INNER BOOSTER MASSES.
 
 Generate a real, editable, original Blender model from the approved Gate 01
 engineering stations. Outputs eight orthographic/isometric neutral clay views,
@@ -204,14 +204,16 @@ loft("BLK_030_CanopyEnvelope",canopy,canopy_ring,MAT_CAB,COL_CAB,.012)
 # hinged canopy or venting reserved for later gates.
 # V10 raised/tapered fuselage spine: the aft greenhouse fairing merges
 # into the deck instead of ending as a featureless flat ramp.
+# V12: under-roof structural mass remains slightly lower than the
+# continuous armored roof, avoiding a sharp visible wedge/ramp.
 aft_cab_fairing = [
-    (0.90,.31,2.04,1.70),
-    (1.20,.41,2.02,1.54),
-    (1.57,.54,1.91,1.41),
+    (0.90,.31,1.99,1.58),
+    (1.20,.41,1.96,1.51),
+    (1.57,.54,1.88,1.42),
     (2.04,.67,1.79,1.40),
-    (2.55,.76,1.68,1.42),
-    (3.14,.80,1.60,1.45),
-    (3.44,.72,1.55,1.45),
+    (2.55,.76,1.74,1.42),
+    (3.14,.79,1.70,1.45),
+    (3.50,.72,1.69,1.47),
 ]
 def fairing_ring(y,half,top,bottom):
     h = top-bottom
@@ -236,16 +238,21 @@ loft("BLK_031_CabAftFairing",aft_cab_fairing,fairing_ring,
 # Each ring: (y, outer_half_width, crown_z, wingroot_z, inside_half_width,
 #            inside_crown_z). Eight deliberate stations create compound
 # Y-longitudinal slopes, not an image/decal or a thin floating ribbon.
+# V12: the central roof is nearly level behind the cockpit rather
+# than diving toward the rear deck. Its side shoulders continue outward
+# and downward, overlapping the separate haunches and side rails.
+# Last roof station meets two small separate inner booster envelopes.
 aft_greenhouse_cowl_stations = [
     (0.41,.54,2.34,2.08,.33,2.23),
-    (0.68,.75,2.38,1.89,.48,2.25),
-    (0.96,.91,2.36,1.66,.60,2.19),
-    (1.26,1.01,2.29,1.52,.65,2.10),
-    (1.60,1.12,2.18,1.44,.70,1.99),
-    (2.06,1.25,2.00,1.42,.78,1.84),
-    (2.58,1.39,1.82,1.43,.87,1.68),
-    (3.04,1.43,1.68,1.44,.95,1.59),
-    (3.36,1.38,1.60,1.45,1.00,1.54),
+    (0.68,.75,2.38,1.88,.48,2.25),
+    (0.96,.91,2.36,1.72,.60,2.20),
+    (1.26,1.01,2.34,1.61,.65,2.16),
+    (1.60,1.09,2.31,1.54,.70,2.12),
+    (2.06,1.19,2.28,1.52,.77,2.08),
+    (2.58,1.28,2.24,1.53,.85,2.05),
+    (3.04,1.37,2.21,1.54,.92,2.01),
+    (3.43,1.39,2.18,1.55,.94,1.97),
+    (3.72,1.29,2.16,1.58,.88,1.94),
 ]
 def aft_cowl_ring(y,half,top,bottom,inner,inner_top):
     assert inner < half and bottom < inner_top < top
@@ -311,17 +318,20 @@ for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
     # Concept V10: two independent broad swept shoulder rails around the
     # cockpit. The cantilevered rear sections blend into aft deck haunches.
     # These are solid silhouette armor pieces, not Gate 06 glazing frames.
+    # Reinforce the side blend into the nearly horizontal armored roof,
+    # keeping the cockpit front narrow and the aft quarter substantial.
     greenhouse_guard=[
         (-1.17,.76,.11,1.39,1.25),
         (-.73,.78,.15,1.55,1.28),
         (-.23,.79,.17,1.86,1.42),
         (.34,.82,.22,2.06,1.53),
         (.69,.85,.27,2.12,1.54),
-        (1.05,.94,.31,2.05,1.49),
-        (1.48,1.03,.33,1.96,1.46),
-        (1.90,1.16,.34,1.82,1.44),
-        (2.43,1.29,.30,1.71,1.43),
-        (3.13,1.33,.22,1.58,1.43),
+        (1.05,.94,.31,2.11,1.50),
+        (1.48,1.03,.34,2.08,1.47),
+        (1.90,1.15,.35,2.04,1.45),
+        (2.43,1.26,.37,1.98,1.44),
+        (3.13,1.32,.37,1.93,1.44),
+        (3.55,1.27,.33,1.87,1.45),
     ]
     loft("BLK_094_GreenhouseShoulder_"+tag,greenhouse_guard,
          ring_mirror,MAT_NOSE,COL_CAB,.028)
@@ -389,6 +399,25 @@ for tag,sign,index in [("PORT",-1.0,60),("STBD",1.0,61)]:
     ]
     loft("BLK_%03d_Nozzle_%s"%(index,tag),
          engine_stations,engine_ring,MAT_REAR,COL_REAR,.018)
+
+# V12: TWO smaller inboard booster silhouette envelopes, under the aft
+# armored roof and between the existing large outboard propulsion bells.
+# These are solid rough housing volumes only (Gate 05 constructs real
+# thrust, nozzles, liners and support structures). Keep completely separate.
+def inboard_booster_ring(y,cx,zc,r):
+    return [(cx+r*math.cos(i*2*math.pi/12),y,
+             zc+r*math.sin(i*2*math.pi/12)) for i in range(12)]
+for sign,tag,idx in [(-1.0,"PORT",62),(1.0,"STBD",63)]:
+    booster_stations=[
+        (3.02,sign*.39,1.69,.18),
+        (3.20,sign*.39,1.69,.24),
+        (3.80,sign*.39,1.71,.24),
+        (4.12,sign*.39,1.71,.27),
+        (4.24,sign*.39,1.71,.27),
+    ]
+    loft("BLK_%03d_InnerBoosterEnvelope_%s"%(idx,tag),
+         booster_stations,inboard_booster_ring,
+         MAT_REAR,COL_REAR,.012)
 
 # Gate 02 winglet masses: thin swept trapezoid, downward from pontoon root.
 # Dedicated structural mounting / actual aero section waits for Gate 04.
@@ -577,15 +606,22 @@ rear_expected = {
   "BLK_083_RearSideWing_STBD",
 }
 assert rear_expected.issubset(existing), "V9 rear transition / wing geometry missing"
-assert len(craft_meshes) >= 24, "V11 must export the aft armored canopy bridge as independent mesh"
-assert "BLK_096_GreenhouseAftArmoredCowl" in existing
+assert len(craft_meshes) >= 26, "V12 must export both distinct inner booster envelopes"
+for required in (
+    "BLK_096_GreenhouseAftArmoredCowl",
+    "BLK_062_InnerBoosterEnvelope_PORT",
+    "BLK_063_InnerBoosterEnvelope_STBD",
+    "BLK_082_RearSideWing_PORT",
+    "BLK_083_RearSideWing_STBD",
+):
+    assert required in existing, "Missing required V12 mesh: "+required
 for side in ("PORT","STBD"):
     assert "BLK_094_GreenhouseShoulder_"+side in existing
     assert "BLK_095_ForwardHoodShoulder_"+side in existing
 # A single complete Blender file, not independent concept/raster shapes.
 assert (OUT/"NF-H01_Gate02_Clay.blend").stat().st_size>30000
 manifest={
- "asset_id":"NF-H01","gate":2,"revision":"V11-formed-greenhouse-aft-armored-cowl","approval":"pending user visual inspection",
+ "asset_id":"NF-H01","gate":2,"revision":"V12-low-slope-aft-roof-and-paired-inner-booster-masses","approval":"pending user visual inspection",
  "references":"Based on user-supplied images, original geometry only",
  "source":"NF-H01_Gate02_Clay.blend",
  "inspection_glb":"NF-H01_Gate02_Inspection.glb",
@@ -594,9 +630,11 @@ manifest={
  "extra_gate02_silhouette_meshes":sorted(rear_expected | {
     "BLK_094_GreenhouseShoulder_PORT","BLK_094_GreenhouseShoulder_STBD",
     "BLK_095_ForwardHoodShoulder_PORT","BLK_095_ForwardHoodShoulder_STBD",
-    "BLK_096_GreenhouseAftArmoredCowl"}),
+    "BLK_096_GreenhouseAftArmoredCowl",
+    "BLK_062_InnerBoosterEnvelope_PORT",
+    "BLK_063_InnerBoosterEnvelope_STBD"}),
  "dimensions_proposed":DATA["proposed_envelope"],
- "note":"V11 builds one solid 16-point U-section, nine-station rear greenhouse armored bridge, thickens side guards to merge with the cowl, preserves both separate rear wings. This is Gate 02 silhouette-only; actual-mesh approval pending.",
+ "note":"V12 keeps the rear armor roof nearly level into the tail; broadens its side haunch blends; adds two small independent inner booster volumes between two large outer thrusters. Preserves both rear wings. Gate 02 silhouette only; model approval pending.",
  "future_stages_not_started":[3,4,5,6,7,8,9,10,11,12],
 }
 (OUT/"MANIFEST.json").write_text(json.dumps(manifest,indent=2)+"\n")
