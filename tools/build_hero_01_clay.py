@@ -183,14 +183,18 @@ loft("BLK_020_CenterFuselage",smooth_stations(center,5),fuselage_ring,MAT_BODY,C
 
 # Cockpit roof is its own curved, swept volume. The bottom overlaps main
 # shell, ensuring the silhouette looks integrated at Gate 02.
+# Gate 02 v6: a longer swept teardrop footprint, with the approved
+# 2.20 m peak held fixed. The low leading and trailing shoulders bury into
+# the center hull rather than reading as a freestanding roof bubble.
 canopy = [
-    (-.92,.22,1.32,1.25),
-    (-.63,.46,1.56,1.30),
-    (-.22,.60,1.99,1.32),
-    (.38,.69,2.20,1.33),
-    (.86,.68,2.10,1.34),
-    (1.23,.52,1.80,1.38),
-    (1.50,.30,1.52,1.40),
+    (-1.28,.18,1.34,1.28),
+    (-1.02,.34,1.49,1.29),
+    (-.63,.52,1.81,1.30),
+    (-.08,.65,2.10,1.32),
+    (.38,.71,2.20,1.33),
+    (.90,.67,2.06,1.34),
+    (1.32,.49,1.78,1.37),
+    (1.69,.22,1.51,1.40),
 ]
 def canopy_ring(y,half,top,bottom):
     # a separate fore-aft swept shell with an arched section, not a box
@@ -214,13 +218,16 @@ def side_ring(y,center_x,half,top,bottom):
 
 for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
     # Wide separate shoulder/intake support, strongest just behind canopy.
+    # V6: carry the shoulder chine forward underneath the long intake;
+    # the outer shell remains a single separate swept mass per side.
     shoulder=[
-        (-2.17,direction*1.13,.18,1.10,.62),
-        (-1.66,direction*1.23,.29,1.26,.55),
-        (-.81,direction*1.28,.38,1.39,.50),
-        (.26,direction*1.32,.40,1.46,.52),
-        (1.32,direction*1.30,.41,1.52,.51),
-        (2.19,direction*1.23,.34,1.46,.54),
+        (-2.63,direction*1.08,.15,1.08,.63),
+        (-2.15,direction*1.19,.26,1.20,.55),
+        (-1.66,direction*1.26,.33,1.30,.51),
+        (-.81,direction*1.29,.39,1.41,.50),
+        (.26,direction*1.33,.42,1.48,.52),
+        (1.32,direction*1.32,.43,1.52,.51),
+        (2.19,direction*1.25,.36,1.47,.54),
         (2.82,direction*1.18,.23,1.22,.66)
     ]
     # center_x and profile mirrored using an X geometric transform.
@@ -230,24 +237,33 @@ for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
     loft("BLK_040_Shoulder_"+tag if direction<0 else "BLK_041_Shoulder_"+tag,
          base,ring_mirror,MAT_SHOULDER,COL_AERO,.025)
 
-    # Preview volume for the later truly open intake. This is NOT claimed
-    # to be a finished duct, lining or detailed grille.
+    # Preview volume only: no tunnel/grille/duct mechanics until Gate 04.
+    # A broad rounded-hexagonal section blends into the shoulder, rather
+    # than the old short faceted barrel attached to the nose with a gap.
+    # All profile points are real mesh vertices, not shading trickery.
     def intake_ring(y, cx, half, top, bottom):
-        return side_ring(y,direction*cx,half,top,bottom)
-    # Gate 02 user review: the two front gray pods were short and undersized.
-    # Give each a long, muscular side-mounted intake envelope with tapered
-    # attachment points. No intake tunnel or advanced details before Gate 04.
-    # Approx 2.0 m front-to-back, half-width peaks at 0.48 m, height 1.09 m.
+        h=top-bottom
+        section=[
+            (-.98, .27),(-.80,.10),(-.24,.00),(.43,.04),
+            (.87,.17),(1.00,.38),(.98,.72),(.72,.93),
+            (.19,1.01),(-.48,.98),(-.91,.78),(-1.03,.51),
+        ]
+        return [(direction*cx+half*x,y,top-h*t) for x,t in section]
+    # Gate 02 v6: 2.40 m nose-to-shoulder longitudinal envelope. The
+    # forward station has a definite broad lip; the center stays muscular;
+    # the rear fades into the separately modeled shoulder near the canopy.
     intake=[
-        (-3.07,1.22,.28,1.18,.59),  # blunt forward intake lip
-        (-2.88,1.33,.42,1.35,.47),  # immediate boxy expansion
-        (-2.47,1.39,.47,1.49,.40),  # broad forward shoulder
-        (-2.05,1.40,.48,1.50,.41),  # chunky sustained volume
-        (-1.57,1.40,.45,1.45,.46),  # substantial rearward extension
-        (-1.09,1.37,.34,1.36,.54),  # overlap/attachment into shoulder
+        (-3.20,1.16,.27,1.18,.61),
+        (-3.03,1.23,.39,1.29,.51),
+        (-2.75,1.33,.45,1.41,.43),
+        (-2.30,1.39,.47,1.49,.40),
+        (-1.88,1.41,.47,1.50,.41),
+        (-1.43,1.41,.43,1.46,.45),
+        (-1.05,1.38,.35,1.37,.51),
+        (-.80,1.34,.22,1.31,.59),
     ]
-    loft("BLK_IntakeEnvelope_"+tag,smooth_stations(intake,3),
-         intake_ring,MAT_CUT,COL_AERO,.014)
+    loft("BLK_IntakeEnvelope_"+tag,smooth_stations(intake,4),
+         intake_ring,MAT_CUT,COL_AERO,.020)
 
 # Separate rear cradle adds thickness and structural mass to engine mount.
 aft = [
@@ -268,8 +284,10 @@ def cylinder(name,center,radius,depth,mat,segments=40):
     return attach(ob,name,mat,COL_REAR)
 
 for tag,sign,index in [("PORT",-1.0,60),("STBD",1.0,61)]:
+    # Only extend the rear engine VOLUMES, not propulsion internals.
+    # The exit plane stays at the Gate 01 proposed Y=+3.60 m.
     cylinder("BLK_%03d_Nozzle_%s"%(index,tag),
-             (sign*1.02,3.06,1.03),.51,1.05,MAT_REAR)
+             (sign*1.02,2.96,1.03),.51,1.28,MAT_REAR)
 
 # Short front aerodynamic canard fins. A real thick slab of geometry
 # communicates attachment without panel/bolt detail.
