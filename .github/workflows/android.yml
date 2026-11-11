@@ -18,7 +18,7 @@ env:
 jobs:
   android:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - name: Verify project contract
@@ -66,6 +66,40 @@ jobs:
           p=Path("game/export_presets.cfg")
           p.write_text(p.read_text().replace("version/code=1", "version/code="+os.environ["GITHUB_RUN_NUMBER"]))
           PY
+      - name: Cache rendered Blender hero scene
+        id: menu-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            game/assets/menu/launch_scene.png
+            build/menu_hero.blend
+          key: neon-menu-hero-blender45-v1-${{ hashFiles('tools/build_menu_hero.py') }}
+      - name: Render original 3D menu art with Blender 4.5
+        if: steps.menu-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          mkdir -p game/assets/menu build
+          curl --fail --location --retry 3 https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz -o /tmp/blender.tar.xz
+          tar -xf /tmp/blender.tar.xz -C /tmp
+          NEON_MENU_SAMPLES=28 /tmp/blender-4.5.3-linux-x64/blender --background --threads 4 --python tools/build_menu_hero.py 2>&1 | tee build/blender-menu.log
+          grep -q NEON_FOUNDRY_BLENDER_MENU_OK build/blender-menu.log
+          test -s game/assets/menu/launch_scene.png
+          test -s build/menu_hero.blend
+      - name: Validate Blender scene output
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          p=Path('game/assets/menu/launch_scene.png')
+          data=p.read_bytes()
+          assert data[:8]==bytes((137,80,78,71,13,10,26,10))
+          assert struct.unpack_from('>II',data,16)==(1600,900)
+          assert p.stat().st_size>150000
+          assert Path('build/menu_hero.blend').stat().st_size>100000
+          print('NEON_FOUNDRY_RENDERED_ART_OK 1600x900')
+          PY
       - name: Import and smoke-test project
         run: |
           set -euo pipefail
@@ -87,13 +121,16 @@ jobs:
           ICD="$(find /usr/share/vulkan/icd.d -name 'lvp_icd*.json' -print -quit)"
           test -n "$ICD"
           export VK_ICD_FILENAMES="$ICD"
-          for screen in title menu; do
+          for screen in title menu settings; do
             timeout 120 xvfb-run -a godot --audio-driver Dummy --path game --rendering-method mobile --rendering-driver vulkan --resolution 1280x720 res://scenes/title_menu.tscn -- --capture-"$screen" 2>&1 | tee "build/menu-capture-$screen.log"
             if grep -E 'SCRIPT ERROR:|ERROR:' "build/menu-capture-$screen.log"; then exit 1; fi
             grep -q NEON_FOUNDRY_MENU_CAPTURE_OK "build/menu-capture-$screen.log"
           done
           test -s build/NeonFoundry-Title.png
           test -s build/NeonFoundry-MainMenu.png
+          test -s build/NeonFoundry-Settings.png
+          grep -q NEON_FOUNDRY_BLENDER_BACKDROP_READY build/menu-capture-title.log
+          grep -q NEON_FOUNDRY_BLENDER_BACKDROP_READY build/menu-capture-menu.log
       - name: Build debug APK
         run: |
           set -euo pipefail
