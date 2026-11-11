@@ -59,3 +59,16 @@ Owner's new reference images and critique identified three deficiencies in V7: t
 - **Status:** Still **Gate 02 / awaiting owner silhouette approval**. The owner supplied corrections, not a Gate 02 approval. No Gate 03 geometry or later materials, mechanical ductwork, engine internals, lift units or Godot integration has been authorized.
 
 **Next requested inspection:** compare V9 with V7 from port side, top and rear three-quarter views. Verify that the formed rear cab haunches read as part of the fuselage and both rear flares have adequate span and sweep, then request explicit silhouette approval or precise additional feedback.
+
+
+### V10 — owner-approved CONCEPT translated to a real Gate 02 clay model (2026-11-11)
+
+The owner approved the eight-panel illustrated target showing a wide armored hover racer with visible high rear flares, canopy surround, a substantial central rear fairing and massive twin rear propulsion. The image is **a design reference only**, never evidence that these complex elements already exist as Blender geometry.
+
+**Actual engineering changes**: commit `bebd3a3a8a5aad94d92aac06b81075aadb1b601e` modifies `tools/build_hero_01_clay.py`. It builds 23 separate real mesh volumes, including raised bilateral rear wing flares, new cockpit/greenhouse shoulder guards, front hood shoulder masses, a refitted cab-to-rear spine and expanded faceted aft thruster outer envelopes.
+
+**Verified build**: [NF-H01 Gate 02 Clay Model #10](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43093668298) passed its Blender 4.5.3 construction and validation. The downloadable `NF-H01-Gate02-Clay-10` artifact includes editable `.blend`, inspection-only `.glb` and eight 1200 × 900 actual Blender PNG camera views. The GLB is independently inspected for 23 meshes and presence of all new named parts.
+
+**Silhouette not yet approved**: User approval of the *illustration* is the target; proof that the current real mesh matches the target requires user review of the exported GLB and actual eight-angle PNGs. Keep `progress.json` at Gate 02. No subsequent gate was started.
+
+**Explicit differences from concept**: The real clay render currently does not include deep intake ducts, engine internals, finished canopy frames/windows, mechanical belly skids, cooling vent louvers, detailed access panels, or production paint. These belong to Gates 04, 05, 06, 07 and 08. The complete high-detail concept is a multi-gate goal, not a single Gate 02 deliverable.
