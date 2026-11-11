@@ -197,6 +197,31 @@ def canopy_ring(y,half,top,bottom):
     return [(x,y,z) for x,z in shape]
 loft("BLK_030_CanopyEnvelope",canopy,canopy_ring,MAT_CAB,COL_CAB,.012)
 
+# Gate 02 V8: formed dorsal cab-to-rear transition, made from a NEW
+# independent eight-sided hard-surface mass. Its low forward portion
+# physically overlaps the existing canopy taper and the rear deck.
+# This is an exterior fairing VOLUME, not the detailed engine scoop,
+# hinged canopy or venting reserved for later gates.
+aft_cab_fairing = [
+    (1.09,.37,1.86,1.35),
+    (1.37,.51,1.83,1.39),
+    (1.73,.63,1.81,1.41),
+    (2.16,.71,1.73,1.44),
+    (2.68,.73,1.66,1.46),
+    (3.20,.64,1.57,1.46),
+]
+def fairing_ring(y,half,top,bottom):
+    h = top-bottom
+    section = [
+        (-half*.54,top), (half*.54,top),
+        (half,top-h*.35), (half,bottom+h*.20),
+        (half*.68,bottom), (-half*.68,bottom),
+        (-half,bottom+h*.20), (-half,top-h*.35),
+    ]
+    return [(x,y,z) for x,z in section]
+loft("BLK_031_CabAftFairing",aft_cab_fairing,fairing_ring,
+     MAT_SHOULDER,COL_CAB,.035)
+
 def side_ring(y,center_x,half,top,bottom):
     # Planar eight-sided armored pontoon / shoulder section with four 
     # chamfered corners and flat top/side/belly surfaces.
@@ -285,22 +310,44 @@ for sign,tag,first,rear in [(-1,"PORT",70,80),(1,"STBD",71,81)]:
     fin_solid("BLK_%03d_FinFront_%s"%(first,tag),
               wing,.085,MAT_FIN,COL_AERO)
 
-    # Taller swept-outward rear fin, rooted INBOARD on upper engine deck.
-    # An extruded planar fin mass (not a detailed production aerofoil).
-    root_x=sign*1.10
-    base=[(2.08,1.52),(2.28,2.06),(2.82,2.68),
-          (3.28,2.58),(3.36,1.52)]
+    # V8: strongly swept back and outward-canted rear vertical fins.
+    # Both the leading and trailing silhouette edges lean toward +Y,
+    # replacing the almost upright V7 fin profile. Roots stay inboard
+    # on the real rear deck, distinct from the thruster tubes.
+    root_x=sign*1.09
+    base=[
+        (1.86,1.52),
+        (2.13,1.75),
+        (2.78,2.37),
+        (3.16,2.56),
+        (3.48,2.45),
+        (3.22,1.52),
+    ]
     verts=[]
-    for offset in [-.075,.075]:
+    for offset in [-.078,.078]:
         for yy,zz in base:
-            verts.append((root_x+sign*(zz-1.50)*.16+offset,yy,zz))
+            verts.append((root_x+sign*(zz-1.50)*.31+offset,yy,zz))
     n=len(base)
     faces=[tuple(reversed(range(n))),tuple(range(n,2*n))]
     for k in range(n):
         j=(k+1)%n
         faces.append((k,j,n+j,n+k))
     mesh_obj("BLK_%03d_FinRear_%s"%(rear,tag),
-             verts,faces,MAT_FIN,COL_AERO,.02)
+             verts,faces,MAT_FIN,COL_AERO,.024)
+
+    # V8: the missing REAR SIDE wing flare, a separate low-set,
+    # aft-swept trapezoid on each outer shoulder. The broad root
+    # physically penetrates the rear shoulder mass, while the tips
+    # descend gently outboard; these are actual thick mesh solids.
+    # Mounts, hinges and aerodynamic surface detailing are Gate 04.
+    rear_flare=[
+        (sign*1.65,1.92,.97),
+        (sign*2.48,2.38,.83),
+        (sign*2.55,2.77,.80),
+        (sign*1.69,3.05,.95),
+    ]
+    fin_solid("BLK_%03d_RearSideWing_%s"%(82 if sign<0 else 83,tag),
+              rear_flare,.15,MAT_FIN,COL_AERO)
 
 # Studio is NOT part of the production craft geometry.
 def area(name,loc,power,scale,target):
@@ -413,17 +460,26 @@ expected=DATA["object_blockout"]
 existing={o.name for o in bpy.data.objects}
 missing=[n for n in expected if n not in existing]
 assert not missing,"Missing approval-gate blockout objects: "+str(missing)
+# V8 review must include three independently constructed new silhouette masses.
+v8_expected = {
+  "BLK_031_CabAftFairing",
+  "BLK_082_RearSideWing_PORT",
+  "BLK_083_RearSideWing_STBD",
+}
+assert v8_expected.issubset(existing), "V8 rear transition / wing geometry missing"
+assert len(craft_meshes) >= 17, "V8 must export separate rear fairing and wings"
 # A single complete Blender file, not independent concept/raster shapes.
 assert (OUT/"NF-H01_Gate02_Clay.blend").stat().st_size>30000
 manifest={
- "asset_id":"NF-H01","gate":2,"revision":"V7-faceted-armor","approval":"pending user visual inspection",
+ "asset_id":"NF-H01","gate":2,"revision":"V8-rear-cab-fairing-swept-fins-rear-wings","approval":"pending user visual inspection",
  "references":"Based on user-supplied images, original geometry only",
  "source":"NF-H01_Gate02_Clay.blend",
  "inspection_glb":"NF-H01_Gate02_Inspection.glb",
  "renders":[x[0]+".png" for x in VIEWS],
  "separate_blockout_meshes":expected,
+ "extra_gate02_silhouette_meshes":sorted(v8_expected),
  "dimensions_proposed":DATA["proposed_envelope"],
- "note":"V7 intentionally deviates from provisional width/length; Gate 02 silhouette pending approval.",
+ "note":"V8 adds separate dorsal transition and two rear side-wing masses; Gate 02 silhouette pending approval.",
  "future_stages_not_started":[3,4,5,6,7,8,9,10,11,12],
 }
 (OUT/"MANIFEST.json").write_text(json.dumps(manifest,indent=2)+"\n")
