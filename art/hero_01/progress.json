@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "asset_id": "NF-H01",
+  "working_name": "Forge One",
+  "sequence_locked": true,
+  "current_stage": 1,
+  "last_approved_stage": 0,
+  "gates": [
+    {
+      "id": 1,
+      "title": "Engineering and proportion plan",
+      "state": "in_progress",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 2,
+      "title": "Clay silhouette blockout",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 3,
+      "title": "Main fuselage surfacing",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 4,
+      "title": "Structural layers and aero",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 5,
+      "title": "Propulsion and lift hardware",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 6,
+      "title": "Canopy and cockpit",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 7,
+      "title": "Secondary geometry",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 8,
+      "title": "UV and PBR finish",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 9,
+      "title": "High-detail hero audit",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 10,
+      "title": "Godot export and inspection",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 11,
+      "title": "Mobile optimization and validation",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    },
+    {
+      "id": 12,
+      "title": "Game integration",
+      "state": "pending",
+      "evidence": [],
+      "user_review": null
+    }
+  ]
+}
