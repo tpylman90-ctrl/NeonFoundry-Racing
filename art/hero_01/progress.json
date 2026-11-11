@@ -10,7 +10,10 @@
       "id": 1,
       "title": "Engineering and proportion plan",
       "state": "in_progress",
-      "evidence": [],
+      "evidence": [
+        "art/hero_01/01_ENGINEERING_SPEC.md",
+        "art/hero_01/01_PROPORTIONS.json"
+      ],
       "user_review": null
     },
     {
