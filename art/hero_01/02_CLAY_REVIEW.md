@@ -94,3 +94,5 @@ Real source revision: [`ffcb91d7`](https://github.com/tpylman90-ctrl/NeonFoundry
 - `BLK_062_InnerBoosterEnvelope_PORT` and `BLK_063_InnerBoosterEnvelope_STBD`: two additional independent faceted nozzle *envelopes* at X ±0.39 m, centered around Z 1.70 m; positioned between original larger main thrusters. Their internal detail and physical mountings remain Gate 05.
 - `BLK_082_RearSideWing_PORT` and `BLK_083_RearSideWing_STBD` remain separate unchanged meshes.
 - No model-texture trickery and no Godot integration. Gate 02 approval stays pending until the owner reviews the real V12 model.
+
+**V12 verified build:** [GitHub Actions NF-H01 Gate 02 Clay #12](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43112335705) completed successfully and uploaded `NF-H01-Gate02-Clay-12`. Its real Blender 4.5.3 source, inspection GLB and eight 1200×900 clay PNGs passed workflow validation. Independent inspection of the extracted GLB confirmed **26 meshes** and the named cowl, both new inboard booster volumes and both rear wings. The generated `MANIFEST.json` still marks Gate 02 **pending user visual approval**. No later gate was unlocked.
