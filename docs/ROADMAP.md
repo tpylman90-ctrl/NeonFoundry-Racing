@@ -2,7 +2,7 @@
 
 | Phase | Deliverable | Status |
 | --- | --- | --- |
-| 0 | Professional repository, docs, Vulkan shell, CI, Android signing workflow | **Foundation / verification** |
+| 0 | Professional repository, docs, Vulkan shell, CI, Android signing workflow | **Done — CI and signed Android build #1 verified** |
 | 1 | Walkable Foundry garage + single detailed original hovercraft | Planned |
 | 2 | Inspection camera, cockpit and interactable components | Planned |
 | 3 | Hover and real free-flight physics on a small proving ground | Planned |
@@ -21,3 +21,5 @@ A milestone is only complete after its code is merged, regression checks pass an
 5. Establish first real Android FPS/temperature benchmark before increasing visual budgets.
 
 Do not start building several tracks or vehicles before the first end-to-end loop is demonstrated.
+
+Foundation evidence: [source checks](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/ci.yml) and [Android build #1](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/42939925754). This does not imply gameplay or a completed garage.
