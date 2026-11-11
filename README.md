@@ -61,7 +61,7 @@ tools/                  Local and CI validation utilities
 
 ## Project management
 
-Start with the [roadmap](docs/ROADMAP.md) and use the [issue templates](.github/ISSUE_TEMPLATE) to scope work. Every pull request should include the test evidence and screenshots where relevant.
+Start with the [roadmap](docs/ROADMAP.md). **The first hero craft has a [locked twelve-gate implementation order](docs/HERO_CRAFT_BUILD_ORDER.md)** with explicit visual user approval at each stage. Its authoritative progress record is [NF-H01 progress](art/hero_01/progress.json); an automated validator checks sequencing in CI. Use the [issue templates](.github/ISSUE_TEMPLATE) to scope other work. Every pull request should include the test evidence and screenshots where relevant.
 
 **Licensing:** No code or asset license has been selected yet. Public visibility is not an open-source license; obtain the repository owner's decision before distributing or reusing project content.
 

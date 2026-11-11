@@ -3,6 +3,7 @@
 from pathlib import Path
 import re
 import subprocess
+import sys
 
 root = Path(__file__).resolve().parents[1]
 project = (root / "game/project.godot").read_text()
@@ -36,4 +37,5 @@ except (OSError, subprocess.CalledProcessError):
     tracked = []
 for path in tracked:
     assert not re.search(r"(?i)\.(keystore|jks|p12|pfx|key|pem|der|apk|aab)$", path), path
+subprocess.run([sys.executable, str(root / "tools/validate_hero_workflow.py")], cwd=root, check=True)
 print("NEON_FOUNDRY_FOUNDATION_OK")

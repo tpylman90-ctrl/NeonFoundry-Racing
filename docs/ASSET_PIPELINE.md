@@ -27,3 +27,7 @@ Texture mipmaps, ETC2/ASTC-capable imports, lean material counts, conservative t
 The original main menu is authored by tools/build_menu_hero.py using Blender 4.5.3. The independent layers include a promotional hovercraft, reflective launch platform, illuminated aerial raceways, and modeled city geometry. In CI Blender Cycles renders a 1600 x 900 background PNG at game/assets/menu/launch_scene.png, alongside a source menu_hero.blend in the build artifact. The PNG is cached by Blender-script hash, imported into Godot, and composited as a single inexpensive background texture. Native Godot controls, settings, and animated telemetry run with Mobile/Vulkan. This is real authored/engine-rendered game presentation, not a static visual mockup.
 
 A source checkout without the Blender output shows a procedural fallback; to reproduce the final graphics locally, run Blender 4.5.3 with tools/build_menu_hero.py before Godot import. This promotional hovercraft is not yet the production garage craft.
+
+## Hero craft production sequence
+
+For production craft NF-H01, the stage-by-stage acceptance rules in [HERO_CRAFT_BUILD_ORDER](HERO_CRAFT_BUILD_ORDER.md) override ad-hoc asset iteration. Silhouette and primary geometry are approved before later detail, materials or Godot import. A generated image is never accepted as proof of a constructed mesh. The required signed-off stage status is checked by tools/validate_hero_workflow.py.

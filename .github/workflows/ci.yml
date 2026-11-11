@@ -22,6 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/check_repository.py
+          python3 tools/validate_hero_workflow.py
           python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
       - name: Install pinned Godot
         run: |
