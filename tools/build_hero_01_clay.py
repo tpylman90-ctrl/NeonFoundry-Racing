@@ -249,6 +249,20 @@ for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
     loft("BLK_040_Shoulder_"+tag if direction<0 else "BLK_041_Shoulder_"+tag,
          shoulder,ring_mirror,MAT_SHOULDER,COL_AERO,.042)
 
+    # V9: a separate formed canopy-to-shoulder HAUNCH on each side.
+    # Together with the independent central fairing they form a proper
+    # Y-shaped aft cockpit transition instead of a loose bubble on a deck.
+    # This is silhouette armor MASS only, not the later Gate 04 plate seams.
+    rear_cab_haunch=[
+        (1.12,.70,.16,1.70,1.36),
+        (1.47,.82,.24,1.76,1.37),
+        (1.84,.94,.31,1.74,1.38),
+        (2.34,1.14,.34,1.64,1.39),
+        (2.88,1.30,.31,1.56,1.43),
+    ]
+    loft("BLK_032_CabRearHaunch_"+tag,rear_cab_haunch,ring_mirror,
+         MAT_SHOULDER,COL_CAB,.030)
+
     # Envelopes ONLY. Actual rectangular bores, scoops, separators and
     # mechanical liners are deferred to Gate 04.
     intake=[
@@ -326,7 +340,7 @@ for sign,tag,first,rear in [(-1,"PORT",70,80),(1,"STBD",71,81)]:
     verts=[]
     for offset in [-.078,.078]:
         for yy,zz in base:
-            verts.append((root_x+sign*(zz-1.50)*.31+offset,yy,zz))
+            verts.append((root_x+sign*(zz-1.50)*.45+offset,yy,zz))
     n=len(base)
     faces=[tuple(reversed(range(n))),tuple(range(n,2*n))]
     for k in range(n):
@@ -341,13 +355,13 @@ for sign,tag,first,rear in [(-1,"PORT",70,80),(1,"STBD",71,81)]:
     # descend gently outboard; these are actual thick mesh solids.
     # Mounts, hinges and aerodynamic surface detailing are Gate 04.
     rear_flare=[
-        (sign*1.65,1.92,.97),
-        (sign*2.48,2.38,.83),
-        (sign*2.55,2.77,.80),
-        (sign*1.69,3.05,.95),
+        (sign*1.65,1.70,1.03),     # broad inboard leading root
+        (sign*2.63,2.16,.85),     # swept leading edge and wide span
+        (sign*2.72,2.76,.79),     # thick, sharply truncated outer tip
+        (sign*1.65,3.07,.97),     # rear inboard attachment to aft shoulder
     ]
     fin_solid("BLK_%03d_RearSideWing_%s"%(82 if sign<0 else 83,tag),
-              rear_flare,.15,MAT_FIN,COL_AERO)
+              rear_flare,.18,MAT_FIN,COL_AERO)
 
 # Studio is NOT part of the production craft geometry.
 def area(name,loc,power,scale,target):
@@ -461,25 +475,27 @@ existing={o.name for o in bpy.data.objects}
 missing=[n for n in expected if n not in existing]
 assert not missing,"Missing approval-gate blockout objects: "+str(missing)
 # V8 review must include three independently constructed new silhouette masses.
-v8_expected = {
+rear_expected = {
   "BLK_031_CabAftFairing",
+  "BLK_032_CabRearHaunch_PORT",
+  "BLK_032_CabRearHaunch_STBD",
   "BLK_082_RearSideWing_PORT",
   "BLK_083_RearSideWing_STBD",
 }
-assert v8_expected.issubset(existing), "V8 rear transition / wing geometry missing"
-assert len(craft_meshes) >= 17, "V8 must export separate rear fairing and wings"
+assert rear_expected.issubset(existing), "V9 rear transition / wing geometry missing"
+assert len(craft_meshes) >= 19, "V9 must export separate rear fairing, haunches and wings"
 # A single complete Blender file, not independent concept/raster shapes.
 assert (OUT/"NF-H01_Gate02_Clay.blend").stat().st_size>30000
 manifest={
- "asset_id":"NF-H01","gate":2,"revision":"V8-rear-cab-fairing-swept-fins-rear-wings","approval":"pending user visual inspection",
+ "asset_id":"NF-H01","gate":2,"revision":"V9-aft-cab-haunches-and-wide-rear-wing-flares","approval":"pending user visual inspection",
  "references":"Based on user-supplied images, original geometry only",
  "source":"NF-H01_Gate02_Clay.blend",
  "inspection_glb":"NF-H01_Gate02_Inspection.glb",
  "renders":[x[0]+".png" for x in VIEWS],
  "separate_blockout_meshes":expected,
- "extra_gate02_silhouette_meshes":sorted(v8_expected),
+ "extra_gate02_silhouette_meshes":sorted(rear_expected),
  "dimensions_proposed":DATA["proposed_envelope"],
- "note":"V8 adds separate dorsal transition and two rear side-wing masses; Gate 02 silhouette pending approval.",
+ "note":"V9 reinforces the central dorsal transition with paired cab-to-shoulder haunches, broadens rear side wings and increases rear fin outward cant; owner Gate 02 approval pending.",
  "future_stages_not_started":[3,4,5,6,7,8,9,10,11,12],
 }
 (OUT/"MANIFEST.json").write_text(json.dumps(manifest,indent=2)+"\n")
