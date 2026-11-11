@@ -139,29 +139,29 @@ func _build_title() -> void:
 	anywhere.pressed.connect(show_main_menu)
 	_title_page.add_child(anywhere)
 
-	var col := _column(0.075, 0.17, 0.59, 0.84, 5)
+	var col := _column(0.075, 0.165, 0.59, 0.815, 4)
 	_title_page.add_child(col)
 	col.add_child(_label("◢   SEASON ZERO   /   INITIALIZATION", 18, AMBER, true))
 	var gap := Control.new()
-	gap.custom_minimum_size.y = 22.0
+	gap.custom_minimum_size.y = 8.0
 	col.add_child(gap)
-	col.add_child(_label("NEON", 94, PALE, true))
-	col.add_child(_label("FOUNDRY", 94, PALE, true))
-	col.add_child(_label("R A C I N G", 44, CYAN, true))
+	col.add_child(_label("NEON", 87, PALE, true))
+	col.add_child(_label("FOUNDRY", 87, PALE, true))
+	col.add_child(_label("R A C I N G", 40, CYAN, true))
 	var spacer := Control.new()
-	spacer.custom_minimum_size.y = 19.0
+	spacer.custom_minimum_size.y = 8.0
 	col.add_child(spacer)
 	col.add_child(_label("CRAFT YOUR LEGACY.  OWN THE SKY.", 20, PALE, true))
 	col.add_child(_label("THE FUTURE OF HOVER MOTORSPORT STARTS HERE", 15, MUTED))
 	var spacer2 := Control.new()
-	spacer2.custom_minimum_size.y = 14
+	spacer2.custom_minimum_size.y = 7
 	col.add_child(spacer2)
 	var enter: Button = _button("››    ENTER THE FOUNDRY", true)
 	enter.custom_minimum_size.x = 390
 	enter.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	enter.pressed.connect(show_main_menu)
 	col.add_child(enter)
-	col.add_child(_label("TAP TO INITIALIZE     /     PRESS ENTER", 14, CYAN, true))
+	col.add_child(_label("TAP TO INITIALIZE     /     PRESS ENTER", 12, CYAN, true))
 
 func _build_menu() -> void:
 	var col := _column(0.075, 0.158, 0.434, 0.916, 4)
