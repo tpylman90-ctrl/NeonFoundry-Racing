@@ -1,0 +1,24 @@
+name: Feature proposal
+description: Scope a feature before building.
+title: "[FEATURE] "
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Player goal
+    validations:
+      required: true
+  - type: textarea
+    id: interaction
+    attributes:
+      label: Expected interaction
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Android / Vulkan / asset constraints
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance and test criteria
