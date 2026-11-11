@@ -1,4 +1,4 @@
-"""NF-H01 'Forge One' — GATE 02 / V7 FACETED ARMOR SILHOUETTE ONLY.
+"""NF-H01 'Forge One' — GATE 02 / V10 CONCEPT-TARGET SILHOUETTE.
 
 Generate a real, editable, original Blender model from the approved Gate 01
 engineering stations. Outputs eight orthographic/isometric neutral clay views,
@@ -202,13 +202,16 @@ loft("BLK_030_CanopyEnvelope",canopy,canopy_ring,MAT_CAB,COL_CAB,.012)
 # physically overlaps the existing canopy taper and the rear deck.
 # This is an exterior fairing VOLUME, not the detailed engine scoop,
 # hinged canopy or venting reserved for later gates.
+# V10 raised/tapered fuselage spine: the aft greenhouse fairing merges
+# into the deck instead of ending as a featureless flat ramp.
 aft_cab_fairing = [
-    (1.09,.37,1.86,1.35),
-    (1.37,.51,1.83,1.39),
-    (1.73,.63,1.81,1.41),
-    (2.16,.71,1.73,1.44),
-    (2.68,.73,1.66,1.46),
-    (3.20,.64,1.57,1.46),
+    (0.90,.31,2.04,1.70),
+    (1.20,.41,2.02,1.54),
+    (1.57,.54,1.91,1.41),
+    (2.04,.67,1.79,1.40),
+    (2.55,.76,1.68,1.42),
+    (3.14,.80,1.60,1.45),
+    (3.44,.72,1.55,1.45),
 ]
 def fairing_ring(y,half,top,bottom):
     h = top-bottom
@@ -254,14 +257,45 @@ for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
     # Y-shaped aft cockpit transition instead of a loose bubble on a deck.
     # This is silhouette armor MASS only, not the later Gate 04 plate seams.
     rear_cab_haunch=[
-        (1.12,.70,.16,1.70,1.36),
-        (1.47,.82,.24,1.76,1.37),
-        (1.84,.94,.31,1.74,1.38),
-        (2.34,1.14,.34,1.64,1.39),
-        (2.88,1.30,.31,1.56,1.43),
+        (0.95,.74,.18,1.77,1.35),
+        (1.28,.82,.26,1.89,1.38),
+        (1.70,.99,.34,1.83,1.39),
+        (2.22,1.15,.38,1.72,1.42),
+        (2.83,1.30,.38,1.60,1.44),
+        (3.25,1.31,.30,1.56,1.46),
     ]
     loft("BLK_032_CabRearHaunch_"+tag,rear_cab_haunch,ring_mirror,
          MAT_SHOULDER,COL_CAB,.030)
+
+    # Concept V10: two independent broad swept shoulder rails around the
+    # cockpit. The cantilevered rear sections blend into aft deck haunches.
+    # These are solid silhouette armor pieces, not Gate 06 glazing frames.
+    greenhouse_guard=[
+        (-1.17,.76,.11,1.39,1.25),
+        (-.73,.78,.15,1.55,1.28),
+        (-.23,.79,.17,1.86,1.42),
+        (.34,.82,.19,2.06,1.53),
+        (.83,.85,.20,2.03,1.54),
+        (1.32,.94,.24,1.88,1.48),
+        (1.82,1.12,.25,1.74,1.44),
+        (2.43,1.29,.24,1.64,1.42),
+        (3.13,1.33,.20,1.55,1.43),
+    ]
+    loft("BLK_094_GreenhouseShoulder_"+tag,greenhouse_guard,
+         ring_mirror,MAT_NOSE,COL_CAB,.028)
+
+    # Raised planar hood spine/edge volumes along the long armored snout.
+    # No cut-in vents, panels or fake geometry substitutes are used.
+    forward_deck_guard=[
+        (-3.48,.49,.14,1.13,.91),
+        (-3.10,.65,.15,1.21,.96),
+        (-2.63,.79,.17,1.34,1.04),
+        (-2.06,.89,.16,1.43,1.13),
+        (-1.55,.91,.13,1.42,1.16),
+        (-1.16,.86,.11,1.40,1.17),
+    ]
+    loft("BLK_095_ForwardHoodShoulder_"+tag,forward_deck_guard,
+         ring_mirror,MAT_NOSE,COL_AERO,.025)
 
     # Envelopes ONLY. Actual rectangular bores, scoops, separators and
     # mechanical liners are deferred to Gate 04.
@@ -298,8 +332,21 @@ def cylinder(name,center,radius,depth,mat,segments=16):
 
 # Larger OUTER nozzle envelopes only; bells, lips, rings and ribs: Gate 05.
 for tag,sign,index in [("PORT",-1.0,60),("STBD",1.0,61)]:
-    cylinder("BLK_%03d_Nozzle_%s"%(index,tag),
-             (sign*1.18,3.16,1.02),.60,1.70,MAT_REAR,16)
+    # V10: broad projecting flared bell SILHOUETTE, no nozzle lining.
+    # Deliberate polygonal rings allow silhouette review from all angles.
+    def engine_ring(y,cx,zcenter,radius):
+        return [(cx+radius*math.cos(i*2*math.pi/16),y,
+                 zcenter+radius*math.sin(i*2*math.pi/16))
+                for i in range(16)]
+    engine_stations=[
+        (2.32,sign*1.18,1.03,.53),
+        (2.55,sign*1.18,1.03,.62),
+        (3.45,sign*1.18,1.03,.61),
+        (3.94,sign*1.18,1.03,.68),
+        (4.10,sign*1.18,1.03,.70),
+    ]
+    loft("BLK_%03d_Nozzle_%s"%(index,tag),
+         engine_stations,engine_ring,MAT_REAR,COL_REAR,.018)
 
 # Gate 02 winglet masses: thin swept trapezoid, downward from pontoon root.
 # Dedicated structural mounting / actual aero section waits for Gate 04.
@@ -328,14 +375,14 @@ for sign,tag,first,rear in [(-1,"PORT",70,80),(1,"STBD",71,81)]:
     # Both the leading and trailing silhouette edges lean toward +Y,
     # replacing the almost upright V7 fin profile. Roots stay inboard
     # on the real rear deck, distinct from the thruster tubes.
-    root_x=sign*1.09
+    root_x=sign*1.11
     base=[
-        (1.86,1.52),
-        (2.13,1.75),
-        (2.78,2.37),
-        (3.16,2.56),
-        (3.48,2.45),
-        (3.22,1.52),
+        (1.94,1.55),
+        (2.22,1.79),
+        (2.87,2.44),
+        (3.26,2.79),
+        (3.55,2.72),
+        (3.37,1.56),
     ]
     verts=[]
     for offset in [-.078,.078]:
@@ -354,14 +401,19 @@ for sign,tag,first,rear in [(-1,"PORT",70,80),(1,"STBD",71,81)]:
     # physically penetrates the rear shoulder mass, while the tips
     # descend gently outboard; these are actual thick mesh solids.
     # Mounts, hinges and aerodynamic surface detailing are Gate 04.
+    # V10: large REAR WING, elevated at shoulder/engine-deck height:
+    # the V9 wing was hidden below the outer armor rail in top/3-quarter
+    # views. Retain these as real independent, closed mesh components.
     rear_flare=[
-        (sign*1.65,1.70,1.03),     # broad inboard leading root
-        (sign*2.63,2.16,.85),     # swept leading edge and wide span
-        (sign*2.72,2.76,.79),     # thick, sharply truncated outer tip
-        (sign*1.65,3.07,.97),     # rear inboard attachment to aft shoulder
+        (sign*1.50,1.98,1.47),   # root at aft shoulder
+        (sign*2.25,2.08,1.43),   # tapering leading edge sweep
+        (sign*2.96,2.57,1.33),   # strong visible outboard wing tip
+        (sign*2.97,2.81,1.31),
+        (sign*2.64,2.91,1.35),
+        (sign*1.53,3.22,1.46),   # swept trailing root
     ]
     fin_solid("BLK_%03d_RearSideWing_%s"%(82 if sign<0 else 83,tag),
-              rear_flare,.18,MAT_FIN,COL_AERO)
+              rear_flare,.15,MAT_FIN,COL_AERO)
 
 # Studio is NOT part of the production craft geometry.
 def area(name,loc,power,scale,target):
@@ -483,19 +535,24 @@ rear_expected = {
   "BLK_083_RearSideWing_STBD",
 }
 assert rear_expected.issubset(existing), "V9 rear transition / wing geometry missing"
-assert len(craft_meshes) >= 19, "V9 must export separate rear fairing, haunches and wings"
+assert len(craft_meshes) >= 23, "V10 must export independently built greenhouse and hood shoulders"
+for side in ("PORT","STBD"):
+    assert "BLK_094_GreenhouseShoulder_"+side in existing
+    assert "BLK_095_ForwardHoodShoulder_"+side in existing
 # A single complete Blender file, not independent concept/raster shapes.
 assert (OUT/"NF-H01_Gate02_Clay.blend").stat().st_size>30000
 manifest={
- "asset_id":"NF-H01","gate":2,"revision":"V9-aft-cab-haunches-and-wide-rear-wing-flares","approval":"pending user visual inspection",
+ "asset_id":"NF-H01","gate":2,"revision":"V10-concept-silhouette-actual-blender-model","approval":"pending user visual inspection",
  "references":"Based on user-supplied images, original geometry only",
  "source":"NF-H01_Gate02_Clay.blend",
  "inspection_glb":"NF-H01_Gate02_Inspection.glb",
  "renders":[x[0]+".png" for x in VIEWS],
  "separate_blockout_meshes":expected,
- "extra_gate02_silhouette_meshes":sorted(rear_expected),
+ "extra_gate02_silhouette_meshes":sorted(rear_expected | {
+    "BLK_094_GreenhouseShoulder_PORT","BLK_094_GreenhouseShoulder_STBD",
+    "BLK_095_ForwardHoodShoulder_PORT","BLK_095_ForwardHoodShoulder_STBD"}),
  "dimensions_proposed":DATA["proposed_envelope"],
- "note":"V9 reinforces the central dorsal transition with paired cab-to-shoulder haunches, broadens rear side wings and increases rear fin outward cant; owner Gate 02 approval pending.",
+ "note":"V10 translates the owner-approved 8-view concept's MAJOR MASSES into real Blender geometry. Fine ducts, nozzle internals, ribbing and glazing remain correctly gated for later engineering stages; Gate 02 actual-mesh approval pending.",
  "future_stages_not_started":[3,4,5,6,7,8,9,10,11,12],
 }
 (OUT/"MANIFEST.json").write_text(json.dumps(manifest,indent=2)+"\n")
