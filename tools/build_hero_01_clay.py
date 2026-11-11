@@ -234,11 +234,17 @@ for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
     # to be a finished duct, lining or detailed grille.
     def intake_ring(y, cx, half, top, bottom):
         return side_ring(y,direction*cx,half,top,bottom)
-    # Reserve substantial forward-facing intake volumes, not small dots.
-    # Duct walls and grille mechanics remain strictly for Gate 04.
+    # Gate 02 user review: the two front gray pods were short and undersized.
+    # Give each a long, muscular side-mounted intake envelope with tapered
+    # attachment points. No intake tunnel or advanced details before Gate 04.
+    # Approx 2.0 m front-to-back, half-width peaks at 0.48 m, height 1.09 m.
     intake=[
-        (-2.26,1.39,.34,1.25,.58),(-1.95,1.42,.39,1.30,.54),
-        (-1.63,1.45,.32,1.27,.59)
+        (-3.07,1.22,.28,1.18,.59),  # blunt forward intake lip
+        (-2.88,1.33,.42,1.35,.47),  # immediate boxy expansion
+        (-2.47,1.39,.47,1.49,.40),  # broad forward shoulder
+        (-2.05,1.40,.48,1.50,.41),  # chunky sustained volume
+        (-1.57,1.40,.45,1.45,.46),  # substantial rearward extension
+        (-1.09,1.37,.34,1.36,.54),  # overlap/attachment into shoulder
     ]
     loft("BLK_IntakeEnvelope_"+tag,smooth_stations(intake,3),
          intake_ring,MAT_CUT,COL_AERO,.014)
@@ -377,6 +383,26 @@ cam_obj.rotation_euler=(Vector((0,0,1.2))-cam_obj.location).to_track_quat('-Z','
 camera.ortho_scale=9.0
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/"NF-H01_Gate02_Clay.blend"))
 
+# Viewer-only GLB: export the *same* independent craft meshes with the
+# parent root, but exclude floor, studio lamps and review camera. This
+# is NOT a production export (Gate 10 stays locked).
+bpy.ops.object.select_all(action='DESELECT')
+ROOT_EMPTY.select_set(True)
+craft_meshes = [obj for obj in bpy.data.objects
+                if obj.parent == ROOT_EMPTY and obj.type == 'MESH']
+for obj in craft_meshes:
+    obj.select_set(True)
+bpy.context.view_layer.objects.active = ROOT_EMPTY
+bpy.ops.export_scene.gltf(
+    filepath=str(OUT/"NF-H01_Gate02_Inspection.glb"),
+    export_format='GLB',
+    use_selection=True,
+    export_yup=True,
+)
+assert (OUT/"NF-H01_Gate02_Inspection.glb").stat().st_size > 30000
+print("NF_H01_GATE02_INSPECTION_GLB_OK meshes=%d" % len(craft_meshes), flush=True)
+bpy.ops.object.select_all(action='DESELECT')
+
 for label, loc, target, scale in VIEWS:
     floor.hide_render=(label in ("05_top","06_underside"))
     cam_obj.location=loc
@@ -399,6 +425,7 @@ manifest={
  "asset_id":"NF-H01","gate":2,"approval":"pending user visual inspection",
  "references":"Based on user-supplied images, original geometry only",
  "source":"NF-H01_Gate02_Clay.blend",
+ "inspection_glb":"NF-H01_Gate02_Inspection.glb",
  "renders":[x[0]+".png" for x in VIEWS],
  "separate_blockout_meshes":expected,
  "dimensions_proposed":DATA["proposed_envelope"],

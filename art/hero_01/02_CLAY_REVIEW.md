@@ -34,3 +34,7 @@ The first render had cropped planform views and washed-out clay. The corrected r
 ### Next step
 
 Obtain direct visual feedback on the eight camera renders. Iterate **within Gate 02** until explicitly approved. Do not advance the progress manifest as a side effect of CI success.
+
+### Gate 02 feedback: longer, chunkier forward gray pieces
+
+The owner marked both forward intake housings on a front three-quarter clay render and requested: **"the front gray pieces need to be longer more chunky"**. This is a Gate 02 silhouette correction, *not* Gate 04 duct detailing. The mirrored intake envelope now spans about Y=-3.07 to -1.09 m (versus -2.26 to -1.63 previously), with a 0.48 m maximum half-width and approx. 1.09 m section height. The model generator now exports a **viewer-only GLB** from the exact Blender meshes with all studio objects excluded. This preview is not the optimized Godot export reserved for Gate 10. Owner silhouette sign-off is still pending.

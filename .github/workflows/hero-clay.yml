@@ -48,6 +48,7 @@ jobs:
             --python tools/build_hero_01_clay.py \
             2>&1 | tee build/hero_01_gate02/BLENDER_BUILD_LOG.txt
           grep -q NF_H01_GATE02_CLAY_COMPLETE build/hero_01_gate02/BLENDER_BUILD_LOG.txt
+          grep -q NF_H01_GATE02_INSPECTION_GLB_OK build/hero_01_gate02/BLENDER_BUILD_LOG.txt
       - name: Validate real model + review set
         run: |
           set -euo pipefail
@@ -60,12 +61,24 @@ jobs:
           assert manifest['approval']=='pending user visual inspection'
           assert (d/'NF-H01_Gate02_Clay.blend').stat().st_size>30000
           assert (d/'NF-H01_Gate02_Clay.blend').read_bytes()[:7]==b'BLENDER'
+          import json
+          glb=(d/manifest['inspection_glb']).read_bytes()
+          magic,version,byte_length=struct.unpack_from('<4sII',glb,0)
+          assert magic==b'glTF' and version==2 and byte_length==len(glb)
+          chunk_length,chunk_type=struct.unpack_from('<I4s',glb,12)
+          assert chunk_type==b'JSON'
+          gltf=json.loads(glb[20:20+chunk_length])
+          node_names={node.get('name','') for node in gltf.get('nodes',[])}
+          assert 'BLK_IntakeEnvelope_PORT' in node_names
+          assert 'BLK_IntakeEnvelope_STBD' in node_names
+          assert 'STUDIO | matte ground' not in node_names
+          assert len(gltf.get('meshes',[]))>=12
           for rel in manifest['renders']:
               data=(d/rel).read_bytes()
               assert data[:8]==bytes([137,80,78,71,13,10,26,10])
               assert struct.unpack_from('>II',data,16)==(1200,900)
               assert len(data)>10000
-          print('NF_H01_REAL_MODEL_REVIEW_SET_OK eight actual Blender images plus editable .blend')
+          print('NF_H01_REAL_MODEL_REVIEW_SET_OK 8 Blender PNGs + editable blend + inspection GLB')
           PY
       - name: Upload editable Blender craft and orthographic clay gallery
         if: always()
