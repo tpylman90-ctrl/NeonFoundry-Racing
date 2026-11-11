@@ -3,23 +3,27 @@
   "asset_id": "NF-H01",
   "working_name": "Forge One",
   "sequence_locked": true,
-  "current_stage": 1,
-  "last_approved_stage": 0,
+  "current_stage": 2,
+  "last_approved_stage": 1,
   "gates": [
     {
       "id": 1,
       "title": "Engineering and proportion plan",
-      "state": "in_progress",
+      "state": "approved",
       "evidence": [
         "art/hero_01/01_ENGINEERING_SPEC.md",
         "art/hero_01/01_PROPORTIONS.json"
       ],
-      "user_review": null
+      "user_review": {
+        "decision": "approved",
+        "reference": "User message in current conversation, 2026-11-11: 'Ok proceed to the model for visual inspection'",
+        "note": "User explicitly authorized proceeding from engineering spec to first actual Blender clay model and visual inspection; Gate 01 proportions accepted as initial blockout targets, subject to silhouette review."
+      }
     },
     {
       "id": 2,
       "title": "Clay silhouette blockout",
-      "state": "pending",
+      "state": "in_progress",
       "evidence": [],
       "user_review": null
     },
