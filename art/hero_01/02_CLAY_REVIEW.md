@@ -48,3 +48,14 @@ The owner marked both forward intake housings on a front three-quarter clay rend
 - **Revision caveat:** V7 width, tail span and nozzle length deviate from provisional Gate 01 engineering dimensions. These must be accepted or corrected in the Gate 02 visual review; `01_PROPORTIONS.json` is not treated as the new geometry measurement.
 
 **Owner review priority:** squared front nose versus side-pod proportions; canopy footprint and roofline; overhang/tip size of twin nozzle volumes; effective shape and position of thin canards; top-view span and the newly tall tail fins. Silhouette alterations are allowed here; fine surface detailing is not.
+
+### Gate 02 V8–V9 rear silhouette corrections — 2026-11-11
+
+Owner's new reference images and critique identified three deficiencies in V7: the canopy lacked a formed junction into the rear deck, the rear vertical fins were too upright, and the rear side wing flares were absent.
+
+- **V8** (commit `ec009edad2e238673808b6b9a8960380d0e460c3`): Added a separate `BLK_031_CabAftFairing`, swept both rear fins farther backward and outward, and authored two independent rear trapezoid wings (`BLK_082_RearSideWing_PORT`, `BLK_083_RearSideWing_STBD`). Blender run #8 passed. The three-quarter views revealed that the new rear wings still looked like small tabs.
+- **V9** (commit `08d00b5789b4333066f8b3629bfe0c7e1fd595eb`): Added separate `BLK_032_CabRearHaunch_PORT` and `BLK_032_CabRearHaunch_STBD` to bridge the aft canopy into the shoulder deck; widened and lengthened both rear side wings; increased the rear stabilizers' outward cant. All are real editable clay masses, without false duct/panel/cockpit claims.
+- **Verified build:** [GitHub Actions Gate 02 clay run #9](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43082533902) completed successfully with a Blender source, an inspection-only GLB containing **19 independent craft meshes**, and all eight 1200x900 clay renders. Artifact `NF-H01-Gate02-Clay-9`, subject to GitHub retention limits.
+- **Status:** Still **Gate 02 / awaiting owner silhouette approval**. The owner supplied corrections, not a Gate 02 approval. No Gate 03 geometry or later materials, mechanical ductwork, engine internals, lift units or Godot integration has been authorized.
+
+**Next requested inspection:** compare V9 with V7 from port side, top and rear three-quarter views. Verify that the formed rear cab haunches read as part of the fuselage and both rear flares have adequate span and sweep, then request explicit silhouette approval or precise additional feedback.
