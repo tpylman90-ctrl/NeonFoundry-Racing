@@ -232,6 +232,25 @@ for band in range(2):
         pts.append((xx,yy,zz))
     route("Sky transit %d"%band,pts,CYAN_L if band==0 else AMBER_L)
 
+# A foreground elevated raceway is set *in front* of the first tower layer
+# so the actual rendered camera can see it. The earlier high skyways were
+# occluded by the city: this closer route restores the airborne race identity.
+for lane in range(2):
+    points=[]
+    for step in range(57):
+        t=step/56.0
+        xx=-4.0+92.0*t
+        yy=9.0+lane*5.0+4.5*math.sin(t*math.tau+lane*.7)
+        zz=21.5+lane*3.2+2.7*math.sin(t*math.pi*2.0+lane*.4)
+        points.append((xx,yy,zz))
+    route("VISIBLE aerial raceway / lane %d"%lane,points,
+          CYAN_L if lane==0 else AMBER_L)
+    # Segmented guardlights turn a narrow curve into a readable sky-road.
+    for q in range(0,57,5):
+        x,y,z=points[q]
+        circle("Skyway beacon / %d %d"%(lane,q),(x,y,z+.34),
+               .095,.19,AMBER_L if lane==0 else CYAN_L,vertices=10)
+
 # Distinct floating gate silhouettes along the far track.
 for i in range(5):
     x=-31+i*20
@@ -365,15 +384,15 @@ for i in range(14):
 camera_data=bpy.data.cameras.new("Cinematic 35mm / right-hand craft framing")
 camera=bpy.data.objects.new("MENU HERO CAMERA",camera_data)
 bpy.context.collection.objects.link(camera)
-camera.location=(17.5,-26.0,14.4)
-target=Vector((3.3,4.0,5.9))
+camera.location=(15.0,-18.8,11.2)
+target=Vector((3.0,3.7,5.2))
 direction=target-camera.location
 camera.rotation_euler=direction.to_track_quat('-Z','Y').to_euler()
 camera_data.type='PERSP'
-camera_data.lens=41
+camera_data.lens=44
 camera_data.clip_end=400
 # Force the hero rightward in frame so the left menu stays readable.
-camera_data.shift_x=-.10
+camera_data.shift_x=-.21
 bpy.context.scene.camera=camera
 
 world=bpy.data.worlds.new("Midnight blue atmosphere")
@@ -385,7 +404,7 @@ world.node_tree.nodes["Background"].inputs["Strength"].default_value=.38
 scene=bpy.context.scene
 scene.render.engine='CYCLES'
 scene.cycles.device='CPU'
-scene.cycles.samples=int(os.environ.get('NEON_MENU_SAMPLES','28'))
+scene.cycles.samples=int(os.environ.get('NEON_MENU_SAMPLES','32'))
 scene.cycles.use_denoising=True
 scene.render.resolution_x=1600
 scene.render.resolution_y=900
