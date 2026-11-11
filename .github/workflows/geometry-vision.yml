@@ -1,0 +1,161 @@
+name: NF-H01 / Vision-Assisted Geometry Review
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/geometry_vision.py'
+      - 'tools/blender_vision_masks.py'
+      - 'tools/tests/test_geometry_vision.py'
+      - '.github/workflows/geometry-vision.yml'
+  workflow_dispatch:
+    inputs:
+      clay_run_id:
+        description: 'Existing Gate 02 run with actual Blender .blend artifact (V12 baseline: 43112335705)'
+        required: false
+        default: '43112335705'
+        type: string
+      clay_artifact:
+        description: 'Artifact name of the original Gate 02 clay build'
+        required: false
+        default: 'NF-H01-Gate02-Clay-12'
+        type: string
+      reference_path:
+        description: 'OPTIONAL already-licensed reference PNG path in checkout (leave blank for mesh-only audit)'
+        required: false
+        type: string
+      reference_mask_path:
+        description: 'OPTIONAL explicit black/white reference mask; reference PNG alpha works too'
+        required: false
+        type: string
+      view:
+        description: 'Camera angle for reference-versus-real-model comparison'
+        required: false
+        default: '02_rear'
+        type: choice
+        options:
+          - '01_front'
+          - '02_rear'
+          - '03_port_side'
+          - '04_starboard_side'
+          - '05_top'
+          - '06_underside'
+          - '07_front_three_quarter'
+          - '08_rear_three_quarter'
+      dino:
+        description: 'Opt-in free CPU DINOv2 feature similarity download (only with reference image)'
+        required: false
+        type: boolean
+        default: false
+      depth:
+        description: 'Opt-in free CPU Depth Anything V2 relative-depth inference'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nfr-vision-geometry-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  geometry-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate geometry tooling and deterministic synthetic samples
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'Pillow>=10,<13'
+          python -m py_compile tools/geometry_vision.py tools/blender_vision_masks.py
+          python -m unittest discover -s tools/tests -p 'test_geometry_vision.py' -v
+      - name: Retrieve real Gate 02 Blender artifact without rebuilding/altering the craft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.clay_run_id || '43112335705' }}
+          ARTIFACT_NAME: ${{ inputs.clay_artifact || 'NF-H01-Gate02-Clay-12' }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/hero_01_gate02
+          gh run download "$RUN_ID" -R "${{ github.repository }}" -n "$ARTIFACT_NAME" -D build/hero_01_gate02
+          test -s build/hero_01_gate02/NF-H01_Gate02_Clay.blend
+      - name: Install pinned Blender 4.5.3
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz \
+            -o /tmp/blender.tar.xz
+          tar -xf /tmp/blender.tar.xz -C /tmp
+          /tmp/blender-4.5.3-linux-x64/blender --version | head -n 2
+      - name: Generate 8 masks and measured mesh-part geometry from actual craft
+        run: |
+          set -euo pipefail
+          mkdir -p build/geometry_vision/masks
+          /tmp/blender-4.5.3-linux-x64/blender --background \
+            build/hero_01_gate02/NF-H01_Gate02_Clay.blend --threads 4 \
+            --python tools/blender_vision_masks.py \
+            -- --output-dir build/geometry_vision/masks \
+            2>&1 | tee build/geometry_vision/BLENDER_MASK_LOG.txt
+          grep -q NFR_VISION_MASKS_OK build/geometry_vision/BLENDER_MASK_LOG.txt
+      - name: Verify masks and engineering measurements
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import numpy as np
+          from PIL import Image
+          root = Path("build/geometry_vision/masks")
+          manifest = json.loads((root / "mesh_metrics.json").read_text())
+          assert manifest["gate"] == 2 and len(manifest["masks"]) == 8
+          parts = manifest["part_metrics"]
+          for name in ("BLK_096_GreenhouseAftArmoredCowl",
+                       "BLK_082_RearSideWing_PORT", "BLK_083_RearSideWing_STBD",
+                       "BLK_062_InnerBoosterEnvelope_PORT",
+                       "BLK_063_InnerBoosterEnvelope_STBD"):
+              assert name in parts
+              assert all(v > 0 for v in parts[name]["dimensions_m"]), name
+          for filename in manifest["masks"]:
+              rgba = np.asarray(Image.open(root / filename).convert("RGBA"))
+              assert rgba.shape == (900, 1200, 4)
+              assert np.any(rgba[:, :, 3] > 127), filename
+              assert np.any(rgba[:, :, 3] == 0), filename
+          print("NFR_ACTUAL_MESH_AUDIT_OK masks=8 components=" + str(len(parts)))
+          PY
+      - name: Install optional free AI inference dependencies
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.reference_path != '' && (inputs.dino || inputs.depth) }}
+        run: |
+          python -m pip install --disable-pip-version-check 'torch>=2.3,<3' 'transformers>=4.44,<5'
+      - name: Compare a user-approved reference with the actual model
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.reference_path != '' }}
+        env:
+          NFR_REFERENCE: ${{ inputs.reference_path }}
+          NFR_REFERENCE_MASK: ${{ inputs.reference_mask_path }}
+          NFR_VIEW: ${{ inputs.view }}
+          NFR_DINO: ${{ inputs.dino }}
+          NFR_DEPTH: ${{ inputs.depth }}
+        run: |
+          set -euo pipefail
+          test -f "$NFR_REFERENCE"
+          params=(--reference "$NFR_REFERENCE"
+                  --render "build/hero_01_gate02/${NFR_VIEW}.png"
+                  --render-mask "build/geometry_vision/masks/${NFR_VIEW}.png"
+                  --out build/geometry_vision/comparison)
+          if [ -n "$NFR_REFERENCE_MASK" ]; then params+=(--reference-mask "$NFR_REFERENCE_MASK"); fi
+          if [ "$NFR_DINO" = true ]; then params+=(--dino); fi
+          if [ "$NFR_DEPTH" = true ]; then params+=(--depth); fi
+          python tools/geometry_vision.py "${params[@]}"
+      - name: Upload real mesh metrics, silhouette masks and comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-Vision-Geometry-${{ github.run_number }}
+          path: build/geometry_vision/
+          if-no-files-found: warn
+          retention-days: 14
