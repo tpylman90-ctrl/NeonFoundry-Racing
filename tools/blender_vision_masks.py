@@ -95,9 +95,7 @@ scene.render.image_settings.file_format = "PNG"
 scene.render.image_settings.color_mode = "RGBA"
 scene.render.image_settings.color_depth = "8"
 scene.view_settings.view_transform = "Standard"
-scene.view_settings.look = "Medium High Contrast" if "Medium High Contrast" in [
-    item.name for item in bpy.context.scene.view_settings.bl_rna.properties["look"].enum_items_static
-] else "Medium High Contrast"
+scene.view_settings.look = "Medium High Contrast"
 # An emission mask is insensitive to lighting and existing clay surface color.
 camera_object = scene.camera
 if camera_object is None:
