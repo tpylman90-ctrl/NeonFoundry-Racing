@@ -72,3 +72,11 @@ The owner approved the eight-panel illustrated target showing a wide armored hov
 **Silhouette not yet approved**: User approval of the *illustration* is the target; proof that the current real mesh matches the target requires user review of the exported GLB and actual eight-angle PNGs. Keep `progress.json` at Gate 02. No subsequent gate was started.
 
 **Explicit differences from concept**: The real clay render currently does not include deep intake ducts, engine internals, finished canopy frames/windows, mechanical belly skids, cooling vent louvers, detailed access panels, or production paint. These belong to Gates 04, 05, 06, 07 and 08. The complete high-detail concept is a multi-gate goal, not a single Gate 02 deliverable.
+
+### V11 — marked rear greenhouse cladding constructed as actual geometry
+
+**Request:** Owner accepted the revised concept of a formed armor roof that wraps over the *rear* of the cockpit/greenhouse and tapers down into the rear deck while maintaining the rear side wings. Owner requested implementation in the 3D model, **not another image**.
+
+**Source change:** `tools/build_hero_01_clay.py`, commit `b4324deebfee4d0c9a02b4ef982c4fcf4fe207f3` authors `BLK_096_GreenhouseAftArmoredCowl`, a fully constructed, closed U-section shell with sixteen profile vertices at each of nine fore-aft stations. Roof, angled shoulder transitions and canopy underside clearance are actual geometry. Bilateral `BLK_094_GreenhouseShoulder_*` volumes have been broadened and shaped to overlap the new roof transitions. Both `BLK_082_RearSideWing_PORT` and `BLK_083_RearSideWing_STBD` remain intact and separate.
+
+**Process:** Still Gate 02 clay silhouette, `progress.json` unchanged. Concept approval does not establish approval of the resulting actual GLB. Detailed cockpit frames, seals, hinge, vents, and production engine hardware remain deferred to their assigned gates. A completed CI build plus multi-view visual owner review is still required.
