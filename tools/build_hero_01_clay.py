@@ -60,7 +60,7 @@ def clay(name, value, rough=.82):
 
 MAT_BODY = clay("CLAY / primary neutral warm gray",.53)
 MAT_NOSE = clay("CLAY / front shell light gray",.62)
-MAT_CAB = clay("CLAY / canopy volume charcoal",.30)
+MAT_CAB = clay("CLAY / canopy volume charcoal",.23)
 MAT_SHOULDER = clay("CLAY / layered shoulder silver",.58)
 MAT_REAR = clay("CLAY / engine exterior dark gray",.37)
 MAT_FIN = clay("CLAY / aerostructure",.66)
@@ -234,9 +234,11 @@ for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
     # to be a finished duct, lining or detailed grille.
     def intake_ring(y, cx, half, top, bottom):
         return side_ring(y,direction*cx,half,top,bottom)
+    # Reserve substantial forward-facing intake volumes, not small dots.
+    # Duct walls and grille mechanics remain strictly for Gate 04.
     intake=[
-        (-2.23,1.40,.18,1.02,.71),(-1.90,1.43,.25,1.05,.67),
-        (-1.63,1.42,.24,1.07,.68)
+        (-2.26,1.39,.34,1.25,.58),(-1.95,1.42,.39,1.30,.54),
+        (-1.63,1.45,.32,1.27,.59)
     ]
     loft("BLK_IntakeEnvelope_"+tag,smooth_stations(intake,3),
          intake_ring,MAT_CUT,COL_AERO,.014)
@@ -312,9 +314,9 @@ def area(name,loc,power,scale,target):
     vec=Vector(target)-obj.location
     obj.rotation_euler=vec.to_track_quat('-Z','Y').to_euler()
 
-area("Studio softbox / forward",(-4,-8,9),1550,7,(0,0,1))
-area("Studio softbox / aft",(5,6,9),1200,8,(0,0,1))
-area("Studio strip / top",(0,1,13),1550,9,(0,0,1))
+area("Studio softbox / forward",(-4,-8,9),950,7,(0,0,1))
+area("Studio softbox / aft",(5,6,9),780,8,(0,0,1))
+area("Studio strip / top",(0,1,13),880,9,(0,0,1))
 area("Studio fill",(0,-1,4),250,5,(0,0,1))
 
 bpy.ops.mesh.primitive_plane_add(size=200, location=(0,0,-.035))
@@ -329,7 +331,7 @@ world=bpy.data.worlds.new("Matte graphite ambient studio")
 scene.world=world
 world.use_nodes=True
 world.node_tree.nodes['Background'].inputs['Color'].default_value=(.16,.18,.21,1)
-world.node_tree.nodes['Background'].inputs['Strength'].default_value=.75
+world.node_tree.nodes['Background'].inputs['Strength'].default_value=.48
 
 scene.render.engine='CYCLES'
 scene.cycles.device='CPU'
@@ -343,6 +345,7 @@ scene.render.image_settings.color_mode='RGB'
 scene.render.image_settings.color_depth='8'
 scene.render.film_transparent=False
 scene.view_settings.view_transform='AgX'
+scene.view_settings.view_settings.exposure = -0.25
 try:
     scene.view_settings.look="AgX - Medium High Contrast"
 except Exception:
@@ -351,12 +354,12 @@ except Exception:
 # Eight actual camera renders. Orthographic images are used for proportion
 # checking; isometric views show overlapping volumes and attachment depth.
 VIEWS = [
-  ("01_front",(0,-17,2.2),(0,0,1.2),9.0),
-  ("02_rear",(0,17,2.0),(0,0,1.2),9.0),
+  ("01_front",(0,-17,2.2),(0,0,1.2),7.9),
+  ("02_rear",(0,17,2.0),(0,0,1.2),7.9),
   ("03_port_side",(-17,0,2.1),(0,0,1.18),9.4),
   ("04_starboard_side",(17,0,2.1),(0,0,1.18),9.4),
-  ("05_top",(0,0,18.0),(0,0,1.20),9.6),
-  ("06_underside",(0,0,-17.0),(0,0,1.18),9.6),
+  ("05_top",(0,0,18.0),(0,0,1.20),11.8),
+  ("06_underside",(0,0,-17.0),(0,0,1.18),11.8),
   ("07_front_three_quarter",(-12.7,-14.5,9.0),(0,0,1.06),10.1),
   ("08_rear_three_quarter",(-12.7,14.5,8.2),(0,0,1.04),10.1),
 ]
@@ -375,7 +378,7 @@ camera.ortho_scale=9.0
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/"NF-H01_Gate02_Clay.blend"))
 
 for label, loc, target, scale in VIEWS:
-    floor.hide_render=(label=="06_underside")
+    floor.hide_render=(label in ("05_top","06_underside"))
     cam_obj.location=loc
     look=Vector(target)-cam_obj.location
     cam_obj.rotation_euler=look.to_track_quat('-Z','Y').to_euler()
