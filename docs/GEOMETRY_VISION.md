@@ -89,7 +89,7 @@ shadows or body openings for geometry.
 Optional AI:
 
 ```bash
-python -m pip install 'torch>=2.3,<3' 'transformers>=4.44,<5'
+python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.6.0'\npython -m pip install 'transformers>=4.44,<5'
 python tools/geometry_vision.py \
   --reference /private/rear.png --reference-mask /private/rear_mask.png \
   --render build/hero_01_gate02/02_rear.png \
