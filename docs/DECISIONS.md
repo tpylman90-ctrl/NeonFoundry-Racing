@@ -10,9 +10,8 @@
 | D-006 | No paid development tools or mandatory cloud runtime | Accepted |
 | D-007 | Final source/asset license | Unresolved — owner decision |
 | D-008 | Final store branding, icons, economy and pricing | Unresolved |
+| D-009 | Lock NF-H01 to twelve sequential model-review gates; user sign-off required and no stage jumps | **Accepted (2026-11-11)** |
 
 Log future architecture reversals as decisions, not silent source changes.
-
-| D-009 | Lock NF-H01 to twelve sequential model-review gates; user sign-off required and no stage jumps | **Accepted (2026-11-11)** |
 
 The normative gate order is in [HERO_CRAFT_BUILD_ORDER](HERO_CRAFT_BUILD_ORDER.md). The progress manifest and CI validator prevent silently claiming later-stage completion without evidence. CI cannot authenticate user consent; human acceptance remains mandatory.
