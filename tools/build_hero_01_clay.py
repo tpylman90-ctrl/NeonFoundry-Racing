@@ -1,4 +1,4 @@
-"""NF-H01 'Forge One' — GATE 02 / V10 CONCEPT-TARGET SILHOUETTE.
+"""NF-H01 'Forge One' — GATE 02 / V11 INTEGRATED AFT GREENHOUSE ARMOR.
 
 Generate a real, editable, original Blender model from the approved Gate 01
 engineering stations. Outputs eight orthographic/isometric neutral clay views,
@@ -225,6 +225,47 @@ def fairing_ring(y,half,top,bottom):
 loft("BLK_031_CabAftFairing",aft_cab_fairing,fairing_ring,
      MAT_SHOULDER,COL_CAB,.035)
 
+# V11 / GATE 02 — ACTUAL INTEGRATED AFT GREENHOUSE COWL.
+# Owner marked an armored formed roof/bridge over the rear THIRD of the
+# canopy, sweeping continuously into the aft shoulders and rear deck.
+# This is NOT a glass canopy frame or detailed engine scoop. Model as one
+# closed, physically thick, U-section armored shell with a cleared canopy
+# underside. The front cockpit remains exposed, and both aft wings remain
+# separate and completely intact.
+#
+# Each ring: (y, outer_half_width, crown_z, wingroot_z, inside_half_width,
+#            inside_crown_z). Eight deliberate stations create compound
+# Y-longitudinal slopes, not an image/decal or a thin floating ribbon.
+aft_greenhouse_cowl_stations = [
+    (0.41,.54,2.34,2.08,.33,2.23),
+    (0.68,.75,2.38,1.89,.48,2.25),
+    (0.96,.91,2.36,1.66,.60,2.19),
+    (1.26,1.01,2.29,1.52,.65,2.10),
+    (1.60,1.12,2.18,1.44,.70,1.99),
+    (2.06,1.25,2.00,1.42,.78,1.84),
+    (2.58,1.39,1.82,1.43,.87,1.68),
+    (3.04,1.43,1.68,1.44,.95,1.59),
+    (3.36,1.38,1.60,1.45,1.00,1.54),
+]
+def aft_cowl_ring(y,half,top,bottom,inner,inner_top):
+    assert inner < half and bottom < inner_top < top
+    # The faceted outer crown falls into broad root shoulders.
+    # At the center a real hollow underside clears the bubble envelope.
+    points = [
+        (-half*.68,top), (half*.68,top),
+        (half*.93,top-.045), (half,top-.16),
+        (half,bottom+.095), (half*.83,bottom),
+        (inner,bottom), (inner,inner_top-.055),
+        (inner*.70,inner_top), (-inner*.70,inner_top),
+        (-inner,inner_top-.055), (-inner,bottom),
+        (-half*.83,bottom), (-half,bottom+.095),
+        (-half,top-.16), (-half*.93,top-.045),
+    ]
+    return [(x,y,z) for x,z in points]
+loft("BLK_096_GreenhouseAftArmoredCowl",
+     aft_greenhouse_cowl_stations,aft_cowl_ring,
+     MAT_NOSE,COL_CAB,.018)
+
 def side_ring(y,center_x,half,top,bottom):
     # Planar eight-sided armored pontoon / shoulder section with four 
     # chamfered corners and flat top/side/belly surfaces.
@@ -274,12 +315,13 @@ for direction, tag in [(-1.0,"PORT"),(1.0,"STBD")]:
         (-1.17,.76,.11,1.39,1.25),
         (-.73,.78,.15,1.55,1.28),
         (-.23,.79,.17,1.86,1.42),
-        (.34,.82,.19,2.06,1.53),
-        (.83,.85,.20,2.03,1.54),
-        (1.32,.94,.24,1.88,1.48),
-        (1.82,1.12,.25,1.74,1.44),
-        (2.43,1.29,.24,1.64,1.42),
-        (3.13,1.33,.20,1.55,1.43),
+        (.34,.82,.22,2.06,1.53),
+        (.69,.85,.27,2.12,1.54),
+        (1.05,.94,.31,2.05,1.49),
+        (1.48,1.03,.33,1.96,1.46),
+        (1.90,1.16,.34,1.82,1.44),
+        (2.43,1.29,.30,1.71,1.43),
+        (3.13,1.33,.22,1.58,1.43),
     ]
     loft("BLK_094_GreenhouseShoulder_"+tag,greenhouse_guard,
          ring_mirror,MAT_NOSE,COL_CAB,.028)
@@ -535,14 +577,15 @@ rear_expected = {
   "BLK_083_RearSideWing_STBD",
 }
 assert rear_expected.issubset(existing), "V9 rear transition / wing geometry missing"
-assert len(craft_meshes) >= 23, "V10 must export independently built greenhouse and hood shoulders"
+assert len(craft_meshes) >= 24, "V11 must export the aft armored canopy bridge as independent mesh"
+assert "BLK_096_GreenhouseAftArmoredCowl" in existing
 for side in ("PORT","STBD"):
     assert "BLK_094_GreenhouseShoulder_"+side in existing
     assert "BLK_095_ForwardHoodShoulder_"+side in existing
 # A single complete Blender file, not independent concept/raster shapes.
 assert (OUT/"NF-H01_Gate02_Clay.blend").stat().st_size>30000
 manifest={
- "asset_id":"NF-H01","gate":2,"revision":"V10-concept-silhouette-actual-blender-model","approval":"pending user visual inspection",
+ "asset_id":"NF-H01","gate":2,"revision":"V11-formed-greenhouse-aft-armored-cowl","approval":"pending user visual inspection",
  "references":"Based on user-supplied images, original geometry only",
  "source":"NF-H01_Gate02_Clay.blend",
  "inspection_glb":"NF-H01_Gate02_Inspection.glb",
@@ -550,9 +593,10 @@ manifest={
  "separate_blockout_meshes":expected,
  "extra_gate02_silhouette_meshes":sorted(rear_expected | {
     "BLK_094_GreenhouseShoulder_PORT","BLK_094_GreenhouseShoulder_STBD",
-    "BLK_095_ForwardHoodShoulder_PORT","BLK_095_ForwardHoodShoulder_STBD"}),
+    "BLK_095_ForwardHoodShoulder_PORT","BLK_095_ForwardHoodShoulder_STBD",
+    "BLK_096_GreenhouseAftArmoredCowl"}),
  "dimensions_proposed":DATA["proposed_envelope"],
- "note":"V10 translates the owner-approved 8-view concept's MAJOR MASSES into real Blender geometry. Fine ducts, nozzle internals, ribbing and glazing remain correctly gated for later engineering stages; Gate 02 actual-mesh approval pending.",
+ "note":"V11 builds one solid 16-point U-section, nine-station rear greenhouse armored bridge, thickens side guards to merge with the cowl, preserves both separate rear wings. This is Gate 02 silhouette-only; actual-mesh approval pending.",
  "future_stages_not_started":[3,4,5,6,7,8,9,10,11,12],
 }
 (OUT/"MANIFEST.json").write_text(json.dumps(manifest,indent=2)+"\n")
