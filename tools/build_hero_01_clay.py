@@ -345,7 +345,7 @@ scene.render.image_settings.color_mode='RGB'
 scene.render.image_settings.color_depth='8'
 scene.render.film_transparent=False
 scene.view_settings.view_transform='AgX'
-scene.view_settings.view_settings.exposure = -0.25
+scene.view_settings.exposure = -0.25
 try:
     scene.view_settings.look="AgX - Medium High Contrast"
 except Exception:
