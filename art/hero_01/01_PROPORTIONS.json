@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "craft_id": "NF-H01",
+  "revision": "G01-R1",
+  "approval_status": "proposed",
+  "units": "meters",
+  "coordinate_system": {
+    "up": "+Z",
+    "forward": "-Y",
+    "rear": "+Y",
+    "starboard": "+X",
+    "port": "-X",
+    "origin": [
+      0,
+      0,
+      0
+    ]
+  },
+  "proposed_envelope": {
+    "length_m": 7.2,
+    "hull_max_width_m": 2.8,
+    "body_and_intakes_max_width_m": 3.45,
+    "span_with_fins_m": 4.2,
+    "canopy_peak_z_m": 2.2,
+    "hover_clearance_m": [
+      0.35,
+      0.5
+    ]
+  },
+  "primary_shell_stations": [
+    {
+      "y": -3.6,
+      "half_width": 0.23,
+      "top_z": 0.93,
+      "bottom_z": 0.72
+    },
+    {
+      "y": -3.15,
+      "half_width": 0.6,
+      "top_z": 1.02,
+      "bottom_z": 0.59
+    },
+    {
+      "y": -2.6,
+      "half_width": 0.91,
+      "top_z": 1.13,
+      "bottom_z": 0.53
+    },
+    {
+      "y": -1.7,
+      "half_width": 1.11,
+      "top_z": 1.24,
+      "bottom_z": 0.49
+    },
+    {
+      "y": -0.7,
+      "half_width": 1.27,
+      "top_z": 1.3,
+      "bottom_z": 0.48
+    },
+    {
+      "y": 0.35,
+      "half_width": 1.33,
+      "top_z": 1.35,
+      "bottom_z": 0.49
+    },
+    {
+      "y": 1.35,
+      "half_width": 1.4,
+      "top_z": 1.45,
+      "bottom_z": 0.49
+    },
+    {
+      "y": 2.3,
+      "half_width": 1.32,
+      "top_z": 1.4,
+      "bottom_z": 0.53
+    },
+    {
+      "y": 3.1,
+      "half_width": 1.11,
+      "top_z": 1.28,
+      "bottom_z": 0.6
+    },
+    {
+      "y": 3.6,
+      "half_width": 0.8,
+      "top_z": 1.16,
+      "bottom_z": 0.74
+    }
+  ],
+  "cockpit": {
+    "front_y": -0.7,
+    "rear_y": 1.4,
+    "apex_y": 0.35,
+    "peak_z": 2.2,
+    "max_half_width_m": 0.69,
+    "pilot_count": 1
+  },
+  "main_nozzles": {
+    "left_x": -1.02,
+    "right_x": 1.02,
+    "exit_y": 3.6,
+    "outer_diameter_m": 1.02,
+    "detail_stage": 5
+  },
+  "lift_module_packing_approx": [
+    {
+      "id": "front_port",
+      "x": -1.06,
+      "y": -1.65
+    },
+    {
+      "id": "front_starboard",
+      "x": 1.06,
+      "y": -1.65
+    },
+    {
+      "id": "aft_port",
+      "x": -1.06,
+      "y": 1.8
+    },
+    {
+      "id": "aft_starboard",
+      "x": 1.06,
+      "y": 1.8
+    }
+  ],
+  "fin_max_halfspan_m": 2.1,
+  "object_blockout": [
+    "BLK_010_NosePrimary",
+    "BLK_020_CenterFuselage",
+    "BLK_030_CanopyEnvelope",
+    "BLK_040_Shoulder_PORT",
+    "BLK_041_Shoulder_STBD",
+    "BLK_050_AftMachinery",
+    "BLK_060_Nozzle_PORT",
+    "BLK_061_Nozzle_STBD",
+    "BLK_070_FinFront_PORT",
+    "BLK_071_FinFront_STBD",
+    "BLK_080_FinRear_PORT",
+    "BLK_081_FinRear_STBD"
+  ],
+  "required_review_views": [
+    "front",
+    "rear",
+    "port_side",
+    "starboard_side",
+    "top",
+    "underside",
+    "front_three_quarter",
+    "rear_three_quarter"
+  ],
+  "visual_reference_media": "User-supplied images in project conversation; not imported to public GitHub",
+  "next_gate_locked": true
+}
