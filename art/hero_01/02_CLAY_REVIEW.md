@@ -27,7 +27,7 @@ An original continuous tapered nose, separately swept central fuselage, curved r
 - Transparent articulated canopy, cockpit and interior HUD: Gate 06.
 - Panels, detailed vents, screws, wear: Gate 07.
 - UVs, PBR metal textures and original livery: Gate 08.
-- GLB, interactive Godot garage inspection, Android race LOD: Gates 10–12.
+- **Production GLB**, interactive Godot garage inspection, Android race LOD: Gates 10–12. **Inspection-only GLB** is now required for future review packages beginning at Gate 02, per owner request.
 
 The first render had cropped planform views and washed-out clay. The corrected run #4 has full planform framing, revised intake volumes and improved tonal contrast. No claim is made that this silhouette is accepted.
 
