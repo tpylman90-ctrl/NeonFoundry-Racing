@@ -1,0 +1,28 @@
+config_version=5
+
+[application]
+config/name="Neon Foundry Racing"
+run/main_scene="res://scenes/foundation.tscn"
+config/features=PackedStringArray("4.5", "Mobile")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=0
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+rendering_device/driver="vulkan"
+rendering_device/driver.android="vulkan"
+rendering_device/driver.linuxbsd="vulkan"
+rendering_device/fallback_to_opengl3=false
+textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(0.018, 0.032, 0.049, 1)
+anti_aliasing/quality/msaa_3d=1
+lights_and_shadows/directional_shadow/size=2048
+
+[physics]
+common/physics_ticks_per_second=60

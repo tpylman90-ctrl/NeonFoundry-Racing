@@ -1,0 +1,40 @@
+# Godot generated data and exported packages
+**/.godot/
+**/.import/
+**/.mono/
+**/android/build/
+**/android/.gradle/
+build/
+dist/
+*.apk
+*.aab
+*.apks
+# Keep public repo free of private signing credentials and secrets
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.key
+*.pem
+*.der
+*.env
+.env*
+*.secret
+*secrets*.txt
+# Blender backups, cache and local editor files
+*.blend1
+*.blend2
+*.blend@
+*.blend.lock
+*.autosave
+*.blendcache/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+local/
+private/
+signing/
