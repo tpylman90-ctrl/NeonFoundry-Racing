@@ -38,3 +38,13 @@ Obtain direct visual feedback on the eight camera renders. Iterate **within Gate
 ### Gate 02 feedback: longer, chunkier forward gray pieces
 
 The owner marked both forward intake housings on a front three-quarter clay render and requested: **"the front gray pieces need to be longer more chunky"**. This is a Gate 02 silhouette correction, *not* Gate 04 duct detailing. The mirrored intake envelope now spans about Y=-3.07 to -1.09 m (versus -2.26 to -1.63 previously), with a 0.48 m maximum half-width and approx. 1.09 m section height. The model generator now exports a **viewer-only GLB** from the exact Blender meshes with all studio objects excluded. This preview is not the optimized Godot export reserved for Gate 10. Owner silhouette sign-off is still pending.
+
+### Gate 02 V7 — owner's industrial FORGE hard-surface direction (2026-11-11)
+
+- **Verified implementation:** `tools/build_hero_01_clay.py` now authors an angular, heavier and wider hard-surface massing: boxy 8-sided side pontoons, flat-deck central fuselage, truncated squared nose, longer faceted canopy, larger block rear deck, extended 16-sided engine volumes, revised downward trapezoidal canards and taller canted rear fin volumes.
+- **Real Blender evidence:** [Gate 02 Clay Model run #7](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43078882117) successfully built Blender 4.5.3 `.blend`, inspection `.glb`, and eight 1200x900 PNG views, with the validation job passing. Artifact: `NF-H01-Gate02-Clay-7` (retained 30 days).
+- **Honest limitations:** Rectangular intake ducts, Boolean insets, hood trenches, canopy structural ribs, louver slots, detailed nozzle rings, and hover skids are NOT present in the V7 clay artifact. Those are design features for numbered Gates 03–07, and are recorded in `DEFERRED.md`. No textures or integration are claimed.
+- **Gate lock:** `progress.json` remains current stage 2, last approved stage 1. Owner has not approved V7 silhouette; no advancement to stage 3.
+- **Revision caveat:** V7 width, tail span and nozzle length deviate from provisional Gate 01 engineering dimensions. These must be accepted or corrected in the Gate 02 visual review; `01_PROPORTIONS.json` is not treated as the new geometry measurement.
+
+**Owner review priority:** squared front nose versus side-pod proportions; canopy footprint and roofline; overhang/tip size of twin nozzle volumes; effective shape and position of thin canards; top-view span and the newly tall tail fins. Silhouette alterations are allowed here; fine surface detailing is not.
