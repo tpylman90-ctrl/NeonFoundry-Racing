@@ -1,0 +1,77 @@
+name: NF-H01 / Gate 02 Clay Model
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/build_hero_01_clay.py'
+      - 'art/hero_01/progress.json'
+      - 'art/hero_01/01_PROPORTIONS.json'
+      - '.github/workflows/hero-clay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nfr-hero01-clay-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clay-review:
+    name: Actual Blender model and 8 clay camera views
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout original craft source
+        uses: actions/checkout@v4
+      - name: Verify gate lock and engineering data
+        run: |
+          set -euo pipefail
+          python3 tools/check_repository.py
+          python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
+      - name: Install pinned Blender 4.5.3
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz \
+            -o /tmp/blender.tar.xz
+          tar -xf /tmp/blender.tar.xz -C /tmp
+          /tmp/blender-4.5.3-linux-x64/blender --version | head -n 3
+      - name: Construct actual NF-H01 multi-part clay model and render 8 views
+        env:
+          NFR_CLAY_SAMPLES: '12'
+        run: |
+          set -euo pipefail
+          mkdir -p build/hero_01_gate02
+          /tmp/blender-4.5.3-linux-x64/blender --background --threads 4 \
+            --python tools/build_hero_01_clay.py \
+            2>&1 | tee build/hero_01_gate02/BLENDER_BUILD_LOG.txt
+          grep -q NF_H01_GATE02_CLAY_COMPLETE build/hero_01_gate02/BLENDER_BUILD_LOG.txt
+      - name: Validate real model + review set
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, struct
+          d=Path('build/hero_01_gate02')
+          manifest=json.loads((d/'MANIFEST.json').read_text())
+          assert manifest['gate']==2 and len(manifest['renders'])==8
+          assert manifest['approval']=='pending user visual inspection'
+          assert (d/'NF-H01_Gate02_Clay.blend').stat().st_size>30000
+          assert (d/'NF-H01_Gate02_Clay.blend').read_bytes()[:7]==b'BLENDER'
+          for rel in manifest['renders']:
+              data=(d/rel).read_bytes()
+              assert data[:8]==bytes([137,80,78,71,13,10,26,10])
+              assert struct.unpack_from('>II',data,16)==(1200,900)
+              assert len(data)>10000
+          print('NF_H01_REAL_MODEL_REVIEW_SET_OK eight actual Blender images plus editable .blend')
+          PY
+      - name: Upload editable Blender craft and orthographic clay gallery
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-Gate02-Clay-${{ github.run_number }}
+          path: build/hero_01_gate02/
+          if-no-files-found: warn
+          retention-days: 30
