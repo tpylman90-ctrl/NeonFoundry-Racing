@@ -26,6 +26,7 @@ for pattern in ["*.keystore", "*.jks", "*.pem", "*.apk", "build/"]:
 for name in ["README.md", "SECURITY.md", "game/scripts/foundation.gd",
              "game/scenes/foundation.tscn", "game/scenes/title_menu.tscn",
              "game/scripts/title_menu.gd", "game/scripts/menu_backdrop.gd",
+             "game/scripts/menu_chrome.gd", "tools/build_menu_hero.py",
              "game/tests/menu_smoke_test.gd", "docs/ROADMAP.md",
              "docs/PROJECT_BRIEF.md", "docs/ARCHITECTURE.md", "docs/BUILD_AND_SIGNING.md"]:
     assert (root / name).is_file(), name

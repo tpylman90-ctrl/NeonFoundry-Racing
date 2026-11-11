@@ -23,6 +23,17 @@ class TestFoundation(unittest.TestCase):
         self.assertIn("mobile", root)
         self.assertIn("vulkan", root)
 
+    def test_blender_menu_production_contract(self):
+        script = (ROOT / "tools/build_menu_hero.py").read_text()
+        ui = (ROOT / "game/scripts/title_menu.gd").read_text()
+        self.assertIn("bpy.ops.render.render(write_still=True)", script)
+        self.assertIn("bpy.ops.wm.save_as_mainfile", script)
+        self.assertIn("Repulsor housing", script)
+        self.assertIn("VISIBLE aerial raceway", script)
+        self.assertIn("BlenderCinematicBackdrop", ui)
+        self.assertIn("func _set_menu_preview(", ui)
+        self.assertIn("func _on_motion_changed(", ui)
+
     def test_android_identity(self):
         s = (ROOT / "game/export_presets.cfg").read_text()
         self.assertIn("com.tpylman.neonfoundryracing.debug", s)

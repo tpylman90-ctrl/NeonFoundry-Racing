@@ -26,3 +26,5 @@ Do not start building several tracks or vehicles before the first end-to-end loo
 Foundation evidence: [source checks](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/ci.yml) and [Android build #1](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/42939925754). This does not imply gameplay or a completed garage.
 
 Menu milestone verification: [Android build #4](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/42941449060) passed, with real Godot Mobile/Vulkan captures of the title and main menu. The Garage and Race Control screens are explicit placeholders, not playable systems.
+
+Menu V2 visual milestone: Blender-produced hero/deck/airway/city, native Godot motorsport UI, and automated Vulkan screenshots. The Android build and device review must confirm quality/performance before final approval.
