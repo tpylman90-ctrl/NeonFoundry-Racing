@@ -2,7 +2,7 @@
   "version": 1,
   "craft_id": "NF-H01",
   "revision": "G01-R1",
-  "approval_status": "proposed",
+  "approval_status": "approved_for_blockout",
   "units": "meters",
   "coordinate_system": {
     "up": "+Z",

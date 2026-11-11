@@ -24,7 +24,7 @@ DATA = json.loads((ROOT / "art/hero_01/01_PROPORTIONS.json").read_text())
 PROGRESS = json.loads((ROOT / "art/hero_01/progress.json").read_text())
 assert PROGRESS["last_approved_stage"] == 1 and PROGRESS["current_stage"] == 2
 assert PROGRESS["gates"][1]["state"] == "in_progress"
-assert DATA["approval_status"] == "proposed", "Gate 01 design metadata must remain transparent"
+assert DATA["approval_status"] == "approved_for_blockout", "Gate 01 dimensions must be explicitly approved before modeling"
 
 OUT = ROOT / "build" / "hero_01_gate02"
 OUT.mkdir(parents=True, exist_ok=True)

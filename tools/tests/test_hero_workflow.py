@@ -30,18 +30,14 @@ class HeroCraftGateTests(unittest.TestCase):
 
     def test_approval_without_evidence_is_rejected(self):
         data = copy.deepcopy(self.baseline)
-        data["last_approved_stage"] = 1
-        data["current_stage"] = 2
-        data["gates"][0]["state"] = "approved"
-        data["gates"][1]["state"] = "in_progress"
+        # Current baseline already has approved Gate 01; deliberately strip
+        # its evidence to ensure an unsupported approval still fails.
+        data["gates"][0]["evidence"] = []
         self.assertTrue(validate_status(data))
 
     def test_evidence_requires_named_user_review(self):
         data = copy.deepcopy(self.baseline)
-        data["last_approved_stage"] = 1
-        data["current_stage"] = 2
-        data["gates"][0].update(state="approved", evidence=["art/hero_01/01/spec.md"])
-        data["gates"][1]["state"] = "in_progress"
+        data["gates"][0]["user_review"] = None
         self.assertTrue(validate_status(data))
         data["gates"][0]["user_review"] = {
             "decision": "approved",

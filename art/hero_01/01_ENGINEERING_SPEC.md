@@ -1,6 +1,6 @@
 # NF-H01 / Forge One — Gate 01 Engineering & Proportion Specification
 
-**Design revision:** G01-R1 — proposed, **not yet approved**  
+**Design revision:** G01-R1 — **approved for Gate 02 clay blockout** by the user’s explicit “Ok proceed to the model for visual inspection” on 2026-11-11. Numeric dimensions remain tentative for the Gate 02 visual silhouette review.  
 **Project:** Neon Foundry Racing · Android-first Godot Mobile/Vulkan + Blender  
 **Source:** Three user-supplied reference images in conversation (rear-three-quarter, front-three-quarter, top).  
 **Gate constraint:** No Blender mesh, material pass, cockpit construction, or Godot vehicle scene may start until the owner explicitly accepts this specification.  
@@ -164,4 +164,4 @@ The owner should approve or adjust:
 - [ ] Single-seat cockpit and rear-canopy pivot assumptions
 - [ ] **Eight-view clay-only deliverables** before any finer modeling or material work
 
-**Gate 01 state today: PROPOSED FOR REVIEW.** These numbers define our first modeling target only if explicitly approved. The sequence validator will keep gate 02 pending until then.
+**Gate 01 state: APPROVED FOR INITIAL CLAY BLOCKOUT.** The user accepted the design as a starting point and authorized Blender silhouette inspection. Gate 02 remains in progress and **is not approved**; do not proceed to surfacing or details until the eight renders are visually accepted.

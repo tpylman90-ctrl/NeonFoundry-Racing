@@ -18,7 +18,7 @@ class TestHeroEngineeringPlan(unittest.TestCase):
     def test_reference_is_original_and_not_claimed_as_measured(self):
         s=self.spec
         self.assertEqual(s["craft_id"],"NF-H01")
-        self.assertEqual(s["approval_status"],"proposed")
+        self.assertEqual(s["approval_status"],"approved_for_blockout")
         self.assertEqual(s["units"],"meters")
         self.assertEqual(s["coordinate_system"]["forward"],"-Y")
 
@@ -62,9 +62,12 @@ class TestHeroEngineeringPlan(unittest.TestCase):
     def test_no_premature_blockout_approval(self):
         p=self.progress
         self.assertIn(str(SPEC_PATH.relative_to(ROOT)),p["gates"][0]["evidence"])
-        self.assertEqual(p["gates"][0]["state"],"in_progress")
-        self.assertIsNone(p["gates"][0]["user_review"])
-        self.assertEqual(p["gates"][1]["state"],"pending")
+        self.assertEqual(p["gates"][0]["state"],"approved")
+        self.assertEqual(p["gates"][0]["user_review"]["decision"],"approved")
+        self.assertEqual(p["last_approved_stage"],1)
+        self.assertEqual(p["current_stage"],2)
+        self.assertEqual(p["gates"][1]["state"],"in_progress")
+        self.assertIsNone(p["gates"][1]["user_review"])
 
 
 if __name__=="__main__":
