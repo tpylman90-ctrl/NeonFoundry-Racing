@@ -1,0 +1,29 @@
+{
+  "model": "FORGE V16",
+  "baseline": "FORGE_V15_ReferenceRebuild.glb",
+  "reference": "4209.jpg (eight-view owner artwork)",
+  "source_ai": "DINOv2-small patch correspondences and Depth Anything V2 relative depth reviewed; AI results are not metric coordinates",
+  "new_meshes": 92,
+  "meshes": 319,
+  "triangles": 13288,
+  "bounds": [
+    [
+      -2.3120999336242676,
+      0.06412500143051147,
+      -4.375
+    ],
+    [
+      2.3120999336242676,
+      2.0152499675750732,
+      3.880000114440918
+    ]
+  ],
+  "changes": [
+    "Replaced capped intake-front facades with physical open duct liners and real internal louvers",
+    "Rebuilt swept dorsal armor as hollow U-section with independent side haunches",
+    "Additional nose shoulder fabrication and real side-machinery assemblies",
+    "Preserved main engines, lift modules, rear wings, canopy geometry and cockpit location"
+  ],
+  "gate": "Gate 02 experimental inspection only; no production approval",
+  "completed_via": "Procedural construction and image-guided geometry; not automatic DINO-to-mesh"
+}

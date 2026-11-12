@@ -1,0 +1,89 @@
+{
+  "method": "Fixed manually calibrated 4-view orthographic silhouette projections, GrabCut-based masks (approximately orthographic source art); qualitative AI features, not ground truth measurements",
+  "results": {
+    "left_side": {
+      "V15": {
+        "iou": 0.77629,
+        "precision": 0.92971,
+        "recall": 0.82469,
+        "f2": 0.84375,
+        "missing": 11671,
+        "extra": 4151
+      },
+      "V16": {
+        "iou": 0.76072,
+        "precision": 0.88282,
+        "recall": 0.84616,
+        "f2": 0.85324,
+        "missing": 10242,
+        "extra": 7477
+      }
+    },
+    "top": {
+      "V15": {
+        "iou": 0.78158,
+        "precision": 0.841,
+        "recall": 0.9171,
+        "f2": 0.9008,
+        "missing": 7117,
+        "extra": 14886
+      },
+      "V16": {
+        "iou": 0.78213,
+        "precision": 0.83473,
+        "recall": 0.92543,
+        "f2": 0.90575,
+        "missing": 6402,
+        "extra": 15730
+      }
+    },
+    "front": {
+      "V15": {
+        "iou": 0.66979,
+        "precision": 0.85383,
+        "recall": 0.75653,
+        "f2": 0.77417,
+        "missing": 6311,
+        "extra": 3357
+      },
+      "V16": {
+        "iou": 0.69477,
+        "precision": 0.82887,
+        "recall": 0.81112,
+        "f2": 0.81461,
+        "missing": 4896,
+        "extra": 4341
+      }
+    },
+    "rear": {
+      "V15": {
+        "iou": 0.69607,
+        "precision": 0.89646,
+        "recall": 0.75692,
+        "f2": 0.78124,
+        "missing": 6612,
+        "extra": 2378
+      },
+      "V16": {
+        "iou": 0.72125,
+        "precision": 0.86837,
+        "recall": 0.80979,
+        "f2": 0.82086,
+        "missing": 5174,
+        "extra": 3339
+      }
+    },
+    "V15_average": {
+      "iou": 0.7309325,
+      "recall": 0.81381,
+      "precision": 0.88025,
+      "f2": 0.82499
+    },
+    "V16_average": {
+      "iou": 0.7397175,
+      "recall": 0.848125,
+      "precision": 0.8536975000000001,
+      "f2": 0.848615
+    }
+  }
+}
