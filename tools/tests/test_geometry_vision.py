@@ -43,6 +43,20 @@ class GeometryVisionTests(unittest.TestCase):
         self.assertLess(result["silhouette_iou"], 1.0)
         self.assertEqual(result["bbox_height_error_pct"], 0)
 
+    def test_shrinking_a_vehicle_reduces_reference_coverage(self):
+        # A smaller rendered shape can have perfect precision while missing
+        # important canopy/wing regions. The score must expose that loss.
+        reference = np.zeros((100, 120), dtype=bool)
+        model = np.zeros_like(reference)
+        reference[10:90, 10:110] = True
+        model[20:80, 30:90] = True
+        result = compare_masks(reference, model)
+        self.assertEqual(result["silhouette_precision"], 1.0)
+        self.assertLess(result["silhouette_recall"], 0.5)
+        self.assertGreater(result["missing_reference_pixels"], 0)
+        self.assertEqual(result["excess_render_pixels"], 0)
+        self.assertLess(result["silhouette_f2_recall_weighted"], 0.6)
+
     def test_different_dimensions_rejected(self):
         with self.assertRaises(ValueError):
             compare_masks(np.ones((10, 10), dtype=bool), np.ones((20, 20), dtype=bool))
