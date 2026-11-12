@@ -1,0 +1,64 @@
+{
+  "prototype": "FORGE V18 \u2014 Stage 02 broad full-depth sidewall structure",
+  "source": "V17 dimensions and exploded component sheet 4223/4224",
+  "purpose": "Correct owner feedback: frame too slender; side walls too shallow. Widen footprint and deepen port/stbd structural trusses.",
+  "gate": "Design experiment, not production vehicle or engineering-certified chassis",
+  "mesh_count": 235,
+  "triangles": 11460,
+  "frame_nodes": 95,
+  "frame_edges": 184,
+  "single_connected_load_path_graph": true,
+  "watertight_independent_parts": 235,
+  "bounds_m": [
+    [
+      -2.03,
+      0.228,
+      -3.881
+    ],
+    [
+      2.03,
+      2.212,
+      3.674
+    ]
+  ],
+  "distinct_mounts": [
+    "MOUNT_PORT_BODY_AFT",
+    "MOUNT_PORT_BODY_FWD",
+    "MOUNT_PORT_INTAKE_AFT",
+    "MOUNT_PORT_INTAKE_FWD",
+    "MOUNT_PORT_WING_ROOT",
+    "MOUNT_STBD_BODY_AFT",
+    "MOUNT_STBD_BODY_FWD",
+    "MOUNT_STBD_INTAKE_AFT",
+    "MOUNT_STBD_INTAKE_FWD",
+    "MOUNT_STBD_WING_ROOT"
+  ],
+  "modules": {
+    "00/Chassis": 12,
+    "01/Ladder": 118,
+    "02/Keel": 22,
+    "03/CockpitCage": 23,
+    "04/MountingHardpoints": 40,
+    "05/EngineCradle": 15,
+    "06/Undertray": 5
+  },
+  "note": "Physical frame members overlap at named joints. No FEM structural strength analysis; not CAD toleranced for manufacture.",
+  "study_module_meshes": 19,
+  "sidewall_station_depths_m": {
+    "0": 0.92,
+    "1": 0.92,
+    "2": 0.92,
+    "3": 0.92,
+    "4": 0.92,
+    "5": 1.04,
+    "6": 1.02,
+    "7": 1.02,
+    "8": 1.12,
+    "9": 1.12
+  },
+  "sidewall_depth_front_m": 0.92,
+  "sidewall_depth_rear_m": 1.12,
+  "outer_main_rail_width_front_m": 1.76,
+  "outer_main_rail_width_rear_m": 2.24,
+  "model_revision": "FORGE V18.02 wide and deep sides, geometry-only"
+}
