@@ -1,0 +1,88 @@
+name: NF-H01 / V19 Curvature-Controlled Surface Trial
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/build_forge_v19_surfaces.py'
+      - '.github/workflows/forge-v19-surfaces.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nfr-forge-v19-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  surface-trial:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free CPU geometry tooling
+        run: |
+          python -m pip install --disable-pip-version-check             'numpy==2.3.5' 'scipy==1.17.0' 'trimesh==4.11.1'             'networkx==3.6.1' 'pillow>=10,<13' 'opencv-python-headless>=4.8,<5'
+      - name: Run actual V17-to-V19 GLB surface experiment
+        run: |
+          set -euo pipefail
+          python tools/build_forge_v19_surfaces.py 2>&1 | tee /tmp/v19.log
+          grep -q NFR_V19_REAL_GLB_SURFACE_TRIAL_PASS /tmp/v19.log
+      - name: Independently audit saved model and comparison metrics
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import trimesh
+          from PIL import Image
+          dest=Path("build/forge_v19_surfaces")
+          f=dest/"FORGE_V19_CurvatureStudy.glb"
+          m=trimesh.load(f,force="scene",process=False)
+          r=json.loads((dest/"FORGE_V19_REPORT.json").read_text())
+          assert f.stat().st_size>100_000
+          assert r["source_geometry_count"]==330==r["result_geometry_count"]
+          assert r["AI_reconstruction_performed"] is False
+          assert r["promoted_to_game"] is False
+          assert len(r["changed_components"])==3
+          assert r["result_total_triangles"]>r["source_total_triangles"]
+          assert set(r["changed_components"]).issubset(m.geometry)
+          for key in r["changed_components"]:
+              assert m.geometry[key].is_watertight,key
+          for key in r["protected_rear_wings"]:
+              assert key in m.geometry,key
+          for view in ("side","top","rear"):
+              assert Image.open(dest/("FORGE_V19_AB_"+view+".png")).size==(1040,700)
+              assert r["silhouette_comparison"][view]["candidate_foreground_px"]>0
+          print("NFR_V19_EXPORTED_GEOMETRY_INDEPENDENT_AUDIT_OK")
+          PY
+      - name: Upload the actual experimental GLB plus silhouette inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-FORGE-V19-Surface-Experiment
+          path: |
+            build/forge_v19_surfaces/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Publish verified experimental GLB (never production assets)
+        if: success()
+        run: |
+          set -euo pipefail
+          mkdir -p art/hero_01/experiments/V19
+          cp build/forge_v19_surfaces/FORGE_V19_CurvatureStudy.glb art/hero_01/experiments/V19/
+          cp build/forge_v19_surfaces/FORGE_V19_REPORT.json art/hero_01/experiments/V19/
+          cp build/forge_v19_surfaces/FORGE_V19_AB_*.png art/hero_01/experiments/V19/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add art/hero_01/experiments/V19/
+          if git diff --cached --quiet; then
+            echo 'V19 artifacts unchanged'
+          else
+            git commit -m 'Publish audited V19 inspection-only GLB and shape comparisons'
+            git push
+          fi
