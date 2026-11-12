@@ -1,0 +1,66 @@
+name: NF-H01 / DINOv2 + Depth Anything V2 Pilot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/dino-depth-pilot.yml'
+      - 'tools/vision_ai_pilot.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nfr-neural-geometry-pilot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  neural-pilot:
+    name: Confirm pretrained CPU inference on genuine FORGE clay renders
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download existing Gate 02 V12 real Blender inspection artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/hero_01_gate02
+          gh run download 43112335705 -R "${{ github.repository }}" \
+            -n NF-H01-Gate02-Clay-12 -D build/hero_01_gate02
+          test -s build/hero_01_gate02/04_starboard_side.png
+          test -s build/hero_01_gate02/08_rear_three_quarter.png
+      - name: Install CPU-only inference dependencies (no paid GPU)
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --index-url \
+            https://download.pytorch.org/whl/cpu 'torch==2.6.0'
+          python -m pip install --disable-pip-version-check \
+            'transformers==4.46.3' 'Pillow>=10,<13' 'numpy>=1.26,<2'
+      - name: Run actual DINOv2 and Depth Anything V2 models
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DISABLE_XET: '1'
+          OMP_NUM_THREADS: '2'
+        run: |
+          set -euo pipefail
+          mkdir -p build/vision_ai_pilot
+          python tools/vision_ai_pilot.py \
+            2>&1 | tee build/vision_ai_pilot/AI_RUN_LOG.txt
+          grep -q NFR_DINOV2_INFERENCE_OK build/vision_ai_pilot/AI_RUN_LOG.txt
+          grep -q NFR_DEPTH_ANYTHING_V2_INFERENCE_OK build/vision_ai_pilot/AI_RUN_LOG.txt
+          grep -q NFR_AI_PILOT_OK build/vision_ai_pilot/AI_RUN_LOG.txt
+      - name: Upload actual inference report and relative-depth maps
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-DINO-Depth-Pilot-${{ github.run_number }}
+          path: build/vision_ai_pilot/
+          if-no-files-found: warn
+          retention-days: 14
