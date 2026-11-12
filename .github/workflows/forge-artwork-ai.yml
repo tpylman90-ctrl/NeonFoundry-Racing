@@ -1,0 +1,89 @@
+name: NF-H01 / Original Artwork DINOv2 + Depth Anything V2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'art/hero_01/references/forge_8view_original.jpg'
+      - 'tools/forge_reference_ai.py'
+      - '.github/workflows/forge-artwork-ai.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nfr-real-artwork-ai-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  original-artwork-ai:
+    name: Run both pretrained vision networks on all eight artwork crops
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify original reference asset and Python syntax
+        run: |
+          set -euo pipefail
+          test -s art/hero_01/references/forge_8view_original.jpg
+          python -m py_compile tools/forge_reference_ai.py
+          sha256sum art/hero_01/references/forge_8view_original.jpg
+      - name: Install free CPU-only neural inference environment
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --index-url \
+            https://download.pytorch.org/whl/cpu 'torch==2.6.0'
+          python -m pip install --disable-pip-version-check \
+            'transformers==4.46.3' 'Pillow>=10,<13' 'numpy>=1.26,<2'
+      - name: Run ACTUAL DINOv2 and Depth Anything V2 on original eight-view image
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DISABLE_XET: '1'
+          OMP_NUM_THREADS: '2'
+          OPENBLAS_NUM_THREADS: '2'
+        run: |
+          set -euo pipefail
+          mkdir -p build/forge_artwork_ai
+          python tools/forge_reference_ai.py \
+            2>&1 | tee build/forge_artwork_ai/RUN_LOG.txt
+          grep -q NFR_REAL_REFERENCE_CROPS_OK build/forge_artwork_ai/RUN_LOG.txt
+          grep -q NFR_ARTWORK_DINOV2_OK build/forge_artwork_ai/RUN_LOG.txt
+          grep -q NFR_REAL_ARTWORK_BOTH_MODELS_COMPLETE build/forge_artwork_ai/RUN_LOG.txt
+      - name: Validate reference-derived result and all eight depth outputs
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib, json
+          folder=Path("build/forge_artwork_ai")
+          report=json.loads((folder/"ARTWORK_AI_REPORT.json").read_text())
+          source=Path("art/hero_01/references/forge_8view_original.jpg").read_bytes()
+          assert report["reference_sha256"]==hashlib.sha256(source).hexdigest()
+          assert report["reference_used"] is True
+          assert report["validated_on"].startswith("owner-uploaded")
+          assert len(report["view_crop_boxes_px"])==8
+          assert len(report["relative_depth_statistics"])==8
+          assert len(report["dino_global_cosine_similarity"])==8
+          assert len(report["dino_mutual_nearest_neighbor_patch_examples"])==5
+          for name in report["view_crop_boxes_px"]:
+              assert Image.open(folder/(name+"_relative_depth.png")).size==Image.open(folder/(name+"_reference.png")).size
+              assert Image.open(folder/(name+"_dinov2_features.png")).size==(336,336)
+          for name in ("dinov2_global_similarity.png","depth_all_8_views.jpg"):
+              assert (folder/name).stat().st_size>2000,name
+          assert report["geometry_reconstruction_performed"] is False
+          assert report["source_blender_model_modified"] is False
+          print("NFR_ORIGINAL_ARTWORK_EIGHT_DEPTH_AND_DINO_VERIFIED")
+          PY
+      - name: Upload DINO/Depth visual maps and measured scores
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-Original-Artwork-DINO-Depth-\${{ github.run_number }}
+          path: build/forge_artwork_ai/
+          if-no-files-found: warn
+          retention-days: 30
