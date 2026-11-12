@@ -1,0 +1,123 @@
+{
+  "source_model": "FORGE_V16_ReferenceFit.glb",
+  "model": "FORGE_V17_ConnectedPanels.glb",
+  "inspection_only": true,
+  "unchanged_original_mesh_names": 319,
+  "new_components": [
+    "V17_PORT_HoodShoulderIntegratedWeb",
+    "V17_STBD_HoodShoulderIntegratedWeb",
+    "V17_ForgedHoodToWindshieldLoadBridge",
+    "V17_PORT_HoodStructuralRib_0",
+    "V17_PORT_HoodStructuralRib_1",
+    "V17_PORT_HoodStructuralRib_2",
+    "V17_STBD_HoodStructuralRib_0",
+    "V17_STBD_HoodStructuralRib_1",
+    "V17_STBD_HoodStructuralRib_2",
+    "V17_PORT_RearCowlStructuralSaddle",
+    "V17_STBD_RearCowlStructuralSaddle"
+  ],
+  "hood_rear_station_m_before": 0.48,
+  "hood_rear_station_m_after": 0.17,
+  "hood_extension_m": 0.31,
+  "mesh_count": 330,
+  "triangles": 13836,
+  "watertight_new_components": 11,
+  "body_parts_preserved": true,
+  "verified_section_contacts_m2": {
+    "PORT_hood_bridge_z_1.0": {
+      "hood": 0.017834195565065342,
+      "hull": 0.07715830173012361,
+      "intake": 0.02230155712737526
+    },
+    "PORT_hood_bridge_z_1.45": {
+      "hood": 0.019362612100305127,
+      "hull": 0.06717062214505523,
+      "intake": 0.038254568589763345
+    },
+    "PORT_hood_bridge_z_1.8": {
+      "hood": 0.019707930414537934,
+      "hull": 0.062406729034778514,
+      "intake": 0.029938795659705666
+    },
+    "PORT_hood_bridge_z_2.3": {
+      "hood": 0.020669652106325414,
+      "hull": 0.07054355823091973,
+      "intake": 0.03595884798029344
+    },
+    "PORT_hood_bridge_z_2.75": {
+      "hood": 0.01663825018979181,
+      "hull": 0.0801222501790445,
+      "intake": 0.041777478238141985
+    },
+    "PORT_hood_bridge_z_3.0": {
+      "hood": 0.01410029808181297,
+      "hull": 0.08328714491702542,
+      "intake": 0.0437543328861935
+    },
+    "PORT_rear_saddle_z_-3.45": {
+      "cowl": 0.10158239183571949,
+      "hull": 0.03626072101247866
+    },
+    "PORT_rear_saddle_z_-3.1": {
+      "cowl": 0.1466751220449924,
+      "hull": 0.0706942837104411
+    },
+    "PORT_rear_saddle_z_-2.65": {
+      "cowl": 0.16584735823411448,
+      "hull": 0.0742278070427626
+    },
+    "PORT_rear_saddle_z_-2.2": {
+      "cowl": 0.11467677432130459,
+      "hull": 0.0800328443902554
+    },
+    "STBD_hood_bridge_z_1.0": {
+      "hood": 0.01776426230927253,
+      "hull": 0.0771699811966284,
+      "intake": 0.022301557127375256
+    },
+    "STBD_hood_bridge_z_1.45": {
+      "hood": 0.01920640982018206,
+      "hull": 0.06839075723901451,
+      "intake": 0.038254568589763345
+    },
+    "STBD_hood_bridge_z_1.8": {
+      "hood": 0.01957805317335117,
+      "hull": 0.06259847425354699,
+      "intake": 0.029938795659705662
+    },
+    "STBD_hood_bridge_z_2.3": {
+      "hood": 0.020657679786065766,
+      "hull": 0.07143671068887365,
+      "intake": 0.03595884798029343
+    },
+    "STBD_hood_bridge_z_2.75": {
+      "hood": 0.016771868929772116,
+      "hull": 0.08022954272363127,
+      "intake": 0.041777478238141985
+    },
+    "STBD_hood_bridge_z_3.0": {
+      "hood": 0.014249294067923806,
+      "hull": 0.08328714491702541,
+      "intake": 0.0437543328861935
+    },
+    "STBD_rear_saddle_z_-3.45": {
+      "cowl": 0.10156816631688313,
+      "hull": 0.03743395189507779
+    },
+    "STBD_rear_saddle_z_-3.1": {
+      "cowl": 0.14678571436374796,
+      "hull": 0.0713814954435257
+    },
+    "STBD_rear_saddle_z_-2.65": {
+      "cowl": 0.1659399044324235,
+      "hull": 0.07487201476307251
+    },
+    "STBD_rear_saddle_z_-2.2": {
+      "cowl": 0.11467677432130283,
+      "hull": 0.08017616090927002
+    }
+  },
+  "physical_section_checks": 20,
+  "known_limitation": "Separate overlapping armor pieces form an engineered assembly, not a single boolean-unioned/manifold chassis; visual inspection and in-game collision audit still needed.",
+  "gate": "Gate 02 owner visual review pending"
+}
