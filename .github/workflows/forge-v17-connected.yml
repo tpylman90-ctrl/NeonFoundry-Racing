@@ -1,0 +1,74 @@
+name: NF-H01 / Reproduce V17 Connected Panels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-v17-connected.yml'
+      - 'tools/build_forge_v17_connections.py'
+      - 'art/hero_01/experiments/V17/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  geometry-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install mesh construction and cross-sectional geometry tools
+        run: |
+          python -m pip install --disable-pip-version-check "numpy==2.3.5" "trimesh==4.11.1" "networkx==3.6.1" "scipy==1.17.0" "shapely==2.1.2"
+      - name: Rebuild and verify attachment volume with actual geometry sections
+        run: |
+          set -euo pipefail
+          python tools/build_forge_v17_connections.py
+          test -s build/FORGE_V17_ConnectedPanels.glb
+          test -s build/FORGE_V17_Attachment_Audit.json
+      - name: Compare generated geometry to published V17 GLB
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, hashlib
+          import numpy as np
+          import trimesh
+          published=Path("art/hero_01/experiments/V17/FORGE_V17_ConnectedPanels.glb")
+          rebuilt=Path("build/FORGE_V17_ConnectedPanels.glb")
+          report=json.loads(Path("build/FORGE_V17_Attachment_Audit.json").read_text())
+          assert report["mesh_count"]==330
+          assert report["triangles"]==13836
+          assert report["watertight_new_components"]==11
+          assert report["physical_section_checks"]==20
+          assert report["hood_extension_m"]==0.31
+          a=trimesh.load(published,force="scene",process=False)
+          b=trimesh.load(rebuilt,force="scene",process=False)
+          assert set(a.geometry)==set(b.geometry)
+          assert len(a.geometry)==330
+          for name in a.geometry:
+              x,y=a.geometry[name],b.geometry[name]
+              assert x.vertices.shape==y.vertices.shape,name
+              assert x.faces.shape==y.faces.shape,name
+              assert np.array_equal(x.faces,y.faces),name
+              assert np.allclose(x.vertices,y.vertices,atol=1e-5,rtol=0),name
+          for side in ["PORT","STBD"]:
+              for z in [1.0,1.45,1.8,2.3,2.75,3.0]:
+                  contacts=report["verified_section_contacts_m2"][f"{side}_hood_bridge_z_{z}"]
+                  assert min(contacts.values())>.008,contacts
+              for z in [-3.45,-3.1,-2.65,-2.2]:
+                  contacts=report["verified_section_contacts_m2"][f"{side}_rear_saddle_z_{z}"]
+                  assert min(contacts.values())>.025,contacts
+          print("NFR_V17_ATTACHED_GEOMETRY_REPRODUCTION_PASS",len(a.geometry))
+          PY
+      - name: Export standalone inspection model
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-V17-Connected-Hood-GLB
+          path: |
+            build/FORGE_V17_ConnectedPanels.glb
+            build/FORGE_V17_Attachment_Audit.json
+          retention-days: 14
