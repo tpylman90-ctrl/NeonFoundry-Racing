@@ -1,0 +1,74 @@
+name: NF-H01 / V18 Modular Frame Verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-v18-stage01.yml'
+      - 'tools/build_forge_v18_stage01.py'
+      - 'art/hero_01/experiments/V18_Stage01/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frame-and-hardware:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free geometry tools
+        run: |
+          python -m pip install --disable-pip-version-check "numpy==2.3.5" "trimesh==4.11.1" "networkx==3.6.1" "scipy==1.17.0" "Pillow>=10,<13"
+      - name: Rebuild physical frame and independent modules
+        run: |
+          set -euo pipefail
+          python tools/build_forge_v18_stage01.py
+      - name: Inspect hierarchy, physical geometry, and graph audit
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import numpy as np, trimesh
+          base = Path('build/forge_v18_stage01')
+          summary = json.loads((base/'V18_Stage01_Summary.json').read_text())
+          assert summary['mesh_count'] == 191, summary
+          assert summary['triangles'] == 9060
+          assert summary['frame_nodes'] == 75
+          assert summary['frame_edges'] == 140
+          assert summary['single_connected_load_path_graph'] is True
+          assert len(summary['distinct_mounts']) == 10
+          for file, expected in [('FORGE_V18_01_Structural_Subframe.glb', 191),
+                                 ('FORGE_V18_01_Frame_With_Modules.glb', 210)]:
+              src = Path('art/hero_01/experiments/V18_Stage01')/file
+              local = base/file
+              assert src.exists() and local.exists()
+              a = trimesh.load(src,force='scene',process=False)
+              b = trimesh.load(local,force='scene',process=False)
+              assert len(a.geometry)==len(b.geometry)==expected
+              assert set(a.geometry)==set(b.geometry)
+              for name in a.geometry:
+                  m,n=a.geometry[name],b.geometry[name]
+                  assert m.vertices.shape==n.vertices.shape,name
+                  assert m.faces.shape==n.faces.shape,name
+                  assert np.array_equal(m.faces,n.faces),name
+                  assert np.allclose(m.vertices,n.vertices,rtol=0,atol=1e-5),name
+                  if name.startswith(('LOWER_','UPPER_','LOAD_ARM_','CANOPY_','ENGINE_','JUNCTION_','BRACKET_')):
+                      assert n.is_watertight,name
+              groups = {name for name in b.graph.nodes if name.startswith('ASSEMBLY_')}
+              assert len(groups)==(7 if expected==191 else 11),groups
+          print('NFR_V18_MODULAR_LOADFRAME_VERIFIED',summary['mesh_count'])
+          PY
+      - name: Upload inspectable GLBs and part manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-V18-Stage01-Frame-Modules
+          path: |
+            build/forge_v18_stage01/FORGE_V18_01_Structural_Subframe.glb
+            build/forge_v18_stage01/FORGE_V18_01_Frame_With_Modules.glb
+            build/forge_v18_stage01/V18_Stage01_Summary.json
+          retention-days: 14
