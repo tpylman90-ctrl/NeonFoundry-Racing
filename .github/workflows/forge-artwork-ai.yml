@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: nfr-real-artwork-ai-\${{ github.ref }}
+  group: nfr-real-artwork-ai-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -83,7 +83,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: NF-H01-Original-Artwork-DINO-Depth-\${{ github.run_number }}
+          name: NF-H01-Original-Artwork-DINO-Depth-${{ github.run_number }}
           path: build/forge_artwork_ai/
           if-no-files-found: warn
           retention-days: 30
