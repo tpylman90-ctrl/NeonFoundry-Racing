@@ -1,0 +1,70 @@
+name: NF-H01 / V18.02 Deep Sidewall Geometry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-v18-stage02.yml'
+      - 'tools/build_forge_v18_stage02.py'
+      - 'art/hero_01/experiments/V18_Stage02/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free modeling dependencies
+        run: |
+          python -m pip install --disable-pip-version-check "numpy==2.3.5" "trimesh==4.11.1" "networkx==3.6.1" "scipy==1.17.0" "Pillow>=10,<13"
+      - name: Rebuild tall-sided FORGE frame from actual V17 mesh baseline
+        run: |
+          set -euo pipefail
+          python tools/build_forge_v18_stage02.py
+          test -s build/forge_v18_stage02/FORGE_V18_02_WideDeep_Chassis.glb
+      - name: Verify real sidewall dimensions and GLB hierarchy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json,numpy as np,trimesh
+          published=Path("art/hero_01/experiments/V18_Stage02/FORGE_V18_02_WideDeep_Chassis.glb")
+          rebuilt=Path("build/forge_v18_stage02/FORGE_V18_02_WideDeep_Chassis.glb")
+          a=trimesh.load(published,force="scene",process=False)
+          b=trimesh.load(rebuilt,force="scene",process=False)
+          assert len(a.geometry)==len(b.geometry)==235
+          assert sum(len(g.faces) for g in b.geometry.values())==11460
+          assert set(a.geometry)==set(b.geometry)
+          for name in a.geometry:
+              x,y=a.geometry[name],b.geometry[name]
+              assert x.vertices.shape==y.vertices.shape,name
+              assert x.faces.shape==y.faces.shape,name
+              assert np.array_equal(x.faces,y.faces),name
+              assert np.allclose(x.vertices,y.vertices,atol=1e-5,rtol=0),name
+              assert y.is_watertight,name
+          d=json.loads(Path("build/forge_v18_stage02/V18_02_Summary.json").read_text())
+          assert d["sidewall_depth_front_m"]>=.90
+          assert d["sidewall_depth_rear_m"]>=1.10
+          assert d["outer_main_rail_width_front_m"]>=1.75
+          assert d["outer_main_rail_width_rear_m"]>=2.22
+          assert d["single_connected_load_path_graph"]
+          assert len(d["distinct_mounts"])==10
+          for side in ("PORT","STBD"):
+              for index in range(9):
+                  assert f"MID_SIDEWALL_RAIL_{side}_{index:02}" in b.geometry
+          print("NFR_V18_02_DEEP_SIDEWALL_MESH_VERIFIED",len(b.geometry))
+          PY
+      - name: Upload frame GLB (inspection, not finalized craft)
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-V18-02-WideDeep-Chassis
+          path: |
+            build/forge_v18_stage02/FORGE_V18_02_WideDeep_Chassis.glb
+            build/forge_v18_stage02/V18_02_Summary.json
+          retention-days: 14
