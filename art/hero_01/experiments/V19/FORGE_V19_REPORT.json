@@ -1,0 +1,153 @@
+{
+  "experiment": "FORGE V19 / C2-interpolated rear roof and shoulder shapes",
+  "status": "Inspection-only, requires owner approval",
+  "input": "art/hero_01/experiments/V17/FORGE_V17_ConnectedPanels.glb",
+  "output": "build/forge_v19_surfaces/FORGE_V19_CurvatureStudy.glb",
+  "source_geometry_count": 330,
+  "result_geometry_count": 330,
+  "changed_components": [
+    "V16_FabricatedDorsalCowlHollowUSection",
+    "V16_PORT_IntegratedRearCowlHaunch",
+    "V16_STBD_IntegratedRearCowlHaunch"
+  ],
+  "original_panels": {
+    "V16_FabricatedDorsalCowlHollowUSection": {
+      "vertices": 112,
+      "faces": 220,
+      "watertight": true,
+      "bounds": [
+        [
+          -0.79,
+          1.31,
+          -3.84
+        ],
+        [
+          0.79,
+          1.89,
+          -1.79
+        ]
+      ]
+    },
+    "V16_PORT_IntegratedRearCowlHaunch": {
+      "vertices": 48,
+      "faces": 92,
+      "watertight": true,
+      "bounds": [
+        [
+          -1.63,
+          1.13,
+          -3.72
+        ],
+        [
+          -0.84,
+          1.76,
+          -1.72
+        ]
+      ]
+    },
+    "V16_STBD_IntegratedRearCowlHaunch": {
+      "vertices": 48,
+      "faces": 92,
+      "watertight": true,
+      "bounds": [
+        [
+          0.84,
+          1.13,
+          -3.72
+        ],
+        [
+          1.63,
+          1.76,
+          -1.72
+        ]
+      ]
+    }
+  },
+  "reworked_panels": {
+    "V16_FabricatedDorsalCowlHollowUSection": {
+      "vertices": 496,
+      "faces": 988,
+      "watertight": true,
+      "bounds": [
+        [
+          -0.772,
+          1.3146,
+          -3.84
+        ],
+        [
+          0.772,
+          1.8717,
+          -1.79
+        ]
+      ]
+    },
+    "V16_PORT_IntegratedRearCowlHaunch": {
+      "vertices": 248,
+      "faces": 492,
+      "watertight": true,
+      "bounds": [
+        [
+          -1.6409,
+          1.1298,
+          -3.72
+        ],
+        [
+          -0.84,
+          1.7709,
+          -1.72
+        ]
+      ]
+    },
+    "V16_STBD_IntegratedRearCowlHaunch": {
+      "vertices": 248,
+      "faces": 492,
+      "watertight": true,
+      "bounds": [
+        [
+          0.84,
+          1.1298,
+          -3.72
+        ],
+        [
+          1.6409,
+          1.7709,
+          -1.72
+        ]
+      ]
+    }
+  },
+  "source_total_triangles": 13836,
+  "result_total_triangles": 15404,
+  "protected_rear_wings": [
+    "V15_320_PORT_IntegratedSweptRearSideWing",
+    "V15_320_STBD_IntegratedSweptRearSideWing"
+  ],
+  "material_strategy": "Keep original GLB materials; only three panel meshes rebuilt",
+  "curvature": "Natural cubic spline longitudinal station interpolation; not globally curvature-continuous Class A surfaces",
+  "silhouette_comparison": {
+    "side": {
+      "baseline_foreground_px": 291492,
+      "candidate_foreground_px": 291470,
+      "added_pixels": 0,
+      "removed_pixels": 22,
+      "intersection_over_union": 0.999925
+    },
+    "top": {
+      "baseline_foreground_px": 319797,
+      "candidate_foreground_px": 319797,
+      "added_pixels": 0,
+      "removed_pixels": 0,
+      "intersection_over_union": 1.0
+    },
+    "rear": {
+      "baseline_foreground_px": 233113,
+      "candidate_foreground_px": 232477,
+      "added_pixels": 441,
+      "removed_pixels": 1077,
+      "intersection_over_union": 0.9935
+    }
+  },
+  "reference_comparison": "Not scored: original artwork has no owner-verified exact projection calibration and segmentation for this GLB",
+  "AI_reconstruction_performed": false,
+  "promoted_to_game": false
+}
