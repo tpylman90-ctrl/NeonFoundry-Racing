@@ -1,0 +1,100 @@
+name: NF-H01 / Vision-Guided V13 Inspection Model
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/build_vision_guided_hero.py'
+      - '.github/workflows/vision-guided-hero.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nfr-v13-vision-model-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  geometry-v13:
+    name: Build actual Blender V13 from original V12 model
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the locked original approval gate
+        run: |
+          set -euo pipefail
+          python3 tools/validate_hero_workflow.py
+      - name: Retrieve the actual approved-for-review V12 Blender source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/hero_01_gate02
+          gh run download 43112335705 -R "${{ github.repository }}" \
+            -n NF-H01-Gate02-Clay-12 -D build/hero_01_gate02
+          test -s build/hero_01_gate02/NF-H01_Gate02_Clay.blend
+          test -s build/hero_01_gate02/NF-H01_Gate02_Inspection.glb
+      - name: Install same pinned Blender 4.5.3 engine
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz \
+            -o /tmp/blender.tar.xz
+          tar -xf /tmp/blender.tar.xz -C /tmp
+          /tmp/blender-4.5.3-linux-x64/blender --version | head -n 3
+      - name: Build REAL V13 physical parts, editable scene, GLB, and eight clay renders
+        env:
+          NFR_CLAY_SAMPLES: '10'
+        run: |
+          set -euo pipefail
+          mkdir -p build/hero_01_vision_v13
+          /tmp/blender-4.5.3-linux-x64/blender --background --threads 4 \
+            --python tools/build_vision_guided_hero.py \
+            2>&1 | tee build/hero_01_vision_v13/BLENDER_BUILD_LOG.txt
+          grep -q NFR_V13_REAL_GEOMETRY_COMPLETE build/hero_01_vision_v13/BLENDER_BUILD_LOG.txt
+      - name: Verify exported editable mesh and PREVIEW GLB against manifest
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, struct
+          d=Path("build/hero_01_vision_v13")
+          m=json.loads((d/"MANIFEST.json").read_text())
+          assert m["gate"]==2 and m["mesh_count"]>=26
+          assert m["gate_approval"]=="pending owner visual inspection"
+          assert len(m["render_views"])==8
+          blend=(d/m["source"]).read_bytes()
+          assert blend[:7]==b"BLENDER" and len(blend)>30000
+          raw=(d/m["inspection_glb"]).read_bytes()
+          magic,version,size=struct.unpack_from("<4sII",raw,0)
+          assert magic==b"glTF" and version==2 and size==len(raw)
+          sz,typ=struct.unpack_from("<I4s",raw,12)
+          assert typ==b"JSON"
+          gltf=json.loads(raw[20:20+sz])
+          names={n.get("name") for n in gltf.get("nodes",[])}
+          for required in (
+             "BLK_096_GreenhouseAftArmoredCowl",
+             "BLK_082_RearSideWing_PORT", "BLK_083_RearSideWing_STBD",
+             "BLK_060_Nozzle_PORT","BLK_061_Nozzle_STBD",
+             "BLK_062_InnerBoosterEnvelope_PORT",
+             "BLK_063_InnerBoosterEnvelope_STBD",
+          ):
+              assert required in names,required
+          for filename in m["render_views"]:
+              png=(d/filename).read_bytes()
+              assert png[:8]==bytes([137,80,78,71,13,10,26,10]),filename
+              assert struct.unpack_from(">II",png,16)==(1200,900),filename
+              assert len(png)>10000,filename
+          print("NFR_V13_REAL_GLB_AND_EIGHT_VIEWS_VERIFIED",len(gltf.get("meshes",[])))
+          PY
+      - name: Upload independent actual Blender model + GLB + 8 inspection views
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-V13-Vision-Inspection-${{ github.run_number }}
+          path: build/hero_01_vision_v13/
+          if-no-files-found: warn
+          retention-days: 14
