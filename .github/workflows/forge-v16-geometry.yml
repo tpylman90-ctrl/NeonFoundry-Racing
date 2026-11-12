@@ -1,0 +1,75 @@
+name: NF-H01 / Reproduce FORGE V16 Geometry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/build_forge_v16_geometry.py'
+      - 'art/hero_01/experiments/V15/FORGE_V15_ReferenceRebuild.glb'
+      - 'art/hero_01/experiments/V16/**'
+      - '.github/workflows/forge-v16-geometry.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    name: Rebuild real V16 GLB from V15 and verify exact bytes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free geometry dependencies
+        run: |
+          python -m pip install --disable-pip-version-check "numpy==2.3.5" "trimesh==4.11.1"
+      - name: Rebuild actual mesh from checked-in baseline
+        env:
+          NFR_BASE_GLB: art/hero_01/experiments/V15/FORGE_V15_ReferenceRebuild.glb
+          NFR_OUTPUT_GLB: build/forge_v16_rebuilt.glb
+          NFR_OUTPUT_REPORT: build/forge_v16_rebuilt.json
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          python tools/build_forge_v16_geometry.py
+      - name: Validate checked-in GLB and deterministic rebuild
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, struct
+          import trimesh
+          expected="c35741125b41025b72d480b7a18f9404a611a907bbb988efe3249cce18119643"
+          baseline=Path("art/hero_01/experiments/V15/FORGE_V15_ReferenceRebuild.glb")
+          checked=Path("art/hero_01/experiments/V16/FORGE_V16_ReferenceFit.glb")
+          rebuilt=Path("build/forge_v16_rebuilt.glb")
+          assert baseline.is_file() and checked.is_file() and rebuilt.is_file()
+          for path in [checked,rebuilt]:
+              raw=path.read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==expected,(path,hashlib.sha256(raw).hexdigest())
+              magic,version,size=struct.unpack_from("<4sII",raw)
+              assert magic==b"glTF" and version==2 and size==len(raw)
+          s=trimesh.load(rebuilt,force="scene",process=False)
+          assert len(s.geometry)==319
+          assert sum(len(m.faces) for m in s.geometry.values())==13288
+          for side in ["PORT","STBD"]:
+              for name in [f"THRUST_{side}_HollowMainNozzle",
+                           f"V16_{side}_RealRecessedTunnel",
+                           f"V16_{side}_IntegratedRearCowlHaunch",
+                           f"V15_320_{side}_IntegratedSweptRearSideWing"]:
+                  assert name in s.geometry,name
+          report=json.loads(Path("build/forge_v16_rebuilt.json").read_text())
+          assert "Gate 02" in report["gate"]
+          print("NFR_V16_REPRODUCED_AND_VERIFIED",len(s.geometry))
+          PY
+      - name: Upload experimental review GLB (not a production craft)
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-V16-Geometry-Verification
+          path: |
+            build/forge_v16_rebuilt.glb
+            build/forge_v16_rebuilt.json
+          retention-days: 14
