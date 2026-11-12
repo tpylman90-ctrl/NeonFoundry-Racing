@@ -62,8 +62,20 @@ def compare_masks(reference, render):
             "reference_width_px": int(a[-1] - a[0] + 1) if a.size else None,
             "render_width_px": int(b[-1] - b[0] + 1) if b.size else None,
         }
+    # IoU alone can reward shrinking the craft and silently deleting required
+    # wing, canopy or intake silhouette. Report precision AND recall separately.
+    reference_area = int(reference.sum())
+    render_area = int(render.sum())
+    precision = float(intersection / max(render_area, 1))
+    recall = float(intersection / max(reference_area, 1))
+    f2 = (5 * precision * recall / max(4 * precision + recall, 1e-12))
     return {
         "silhouette_iou": round(float(intersection / union), 6) if union else 0.0,
+        "silhouette_precision": round(precision, 6),
+        "silhouette_recall": round(recall, 6),
+        "silhouette_f2_recall_weighted": round(f2, 6),
+        "missing_reference_pixels": int(reference_area - intersection),
+        "excess_render_pixels": int(render_area - intersection),
         "reference_bbox_px": rb,
         "render_bbox_px": mb,
         "bbox_width_error_pct": round(100.0 * (wmod / wref - 1), 3),
