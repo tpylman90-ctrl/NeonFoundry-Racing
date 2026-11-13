@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'tools/vision/v25-wireframe-actual-atlas.b64'
+      - 'tools/vision/v29-wireframe-real-atlas.b64'
       - 'tools/vision/run_v25_wireframe_ai.py'
       - '.github/workflows/forge-v25-wireframe-ai.yml'
   workflow_dispatch:
@@ -44,17 +45,18 @@ jobs:
           from pathlib import Path
           from PIL import Image
           p=Path('build/forge_v25_wireframe_ai')
-          r=json.loads((p/'FORGE_V25_Wireframe_DINO_Depth_Report.json').read_text())
-          assert r['pretrained_inference_completed'] is True
-          assert r['geometry_changed'] is False
-          assert r['reference_images_are_wireframe_drawings']
-          for view in ('side','top'):
-            v=r['views'][view]
-            assert v['patch_count']>0
-            for key in ('dino_cls_cosine','dino_spatial_patch_cosine','relative_depth_correlation'):
-              assert math.isfinite(v[key])
-            for suffix in ('DINO_aligned_patch_agreement','reference_wireframe_depth_anything_v2','actual_v25_glb_depth_anything_v2'):
-              assert Image.open(p/(view+'_'+suffix+'.png')).size==(200,144)
+          r=json.loads((p/'FORGE_V25_V29_REAL_WIREFRAME_AI_REPORT.json').read_text())
+          assert r['pretrained_weights_executed'] is True
+          assert r['geometry_changed_by_AI'] is False
+          assert set(r['model_versions'])=={'V25','V29'}
+          for version in ('V25','V29'):
+            for view in ('side','top'):
+              v=r['comparisons'][version][view]
+              assert v['patch_count']>0
+              for key in ('global_cls_cosine','spatial_patch_cosine','relative_depth_correlation'):
+                assert math.isfinite(v[key])
+              for suffix in ('DINO_patch_similarity','owner_relative_depth','actual_relative_depth'):
+                assert Image.open(p/(version+'_'+view+'_'+suffix+'.png')).size==(200,144)
           print('WIRE_FRAME_PRETRAINED_AI_RESULTS_VALIDATED')
           PY
       - name: Upload all inference outputs
