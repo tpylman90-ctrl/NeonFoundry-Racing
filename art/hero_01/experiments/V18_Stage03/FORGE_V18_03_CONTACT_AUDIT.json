@@ -1,0 +1,18 @@
+{
+  "frame_meshes_unmodified": 235,
+  "added_separate_components": 161,
+  "total_meshes": 396,
+  "total_triangles": 18056,
+  "all_objects_individually_manifold": true,
+  "real_ducts_open_to_air": true,
+  "verified_planar_cross_section_overlap_m2": {
+    "central_deck_to_approved_crossmember": 0.0547113,
+    "PORT_hood_to_bridge": 0.000904,
+    "PORT_bridge_to_intake_top": 0.0039745,
+    "PORT_intake_to_real_clevis": 0.0829,
+    "STBD_hood_to_bridge": 0.000904,
+    "STBD_bridge_to_intake_top": 0.0039745,
+    "STBD_intake_to_real_clevis": 0.0829
+  },
+  "approval": "pending owner visual inspection"
+}
