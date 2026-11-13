@@ -1,0 +1,299 @@
+{
+  "status": "Owner inspection / shape-fit experimental GLB; not game-approved",
+  "source": "art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb",
+  "reference": "art/hero_01/references/forge_8view_original.jpg",
+  "output": "build/forge_v20_shape_fit/FORGE_V20_ReferenceShapeFit.glb",
+  "technique": "Curvature-smoothed width taper, assembly-coherent greenhouse longitudinal shortening and height lift, forewing relocation, upper fin sweep",
+  "purpose": "Match gross reference landmarks rather than decorate the existing body",
+  "warning": "Crop masks are automatic approximations and the reference art is not certified orthographic CAD; automated IoU is diagnostic, not proof of fidelity",
+  "original_geometry_count": 330,
+  "output_geometry_count": 330,
+  "modified_meshes": 147,
+  "modified_groups": {
+    "greenhouse": {
+      "count": 66,
+      "names": [
+        "V15_215_CabinCentralCrownRail_7",
+        "V15_215_CabinCentralCrownRail_6",
+        "V15_215_CabinCentralCrownRail_5",
+        "V15_215_CabinCentralCrownRail_4",
+        "V15_215_CabinCentralCrownRail_3",
+        "V15_213_STBD_CanopyLowerFrame_7",
+        "V15_212_STBD_CanopyCrossFrame_7",
+        "V15_213_STBD_CanopyLowerFrame_5",
+        "V15_212_STBD_CanopyCrossFrame_5",
+        "V15_213_STBD_CanopyLowerFrame_2",
+        "V15_212_STBD_CanopyCrossFrame_2",
+        "V15_211_STBD_CanopyRail2_7",
+        "V15_211_STBD_CanopyRail2_6",
+        "V15_211_STBD_CanopyRail2_5",
+        "V15_211_STBD_CanopyRail2_4",
+        "V15_211_STBD_CanopyRail2_3",
+        "V15_211_STBD_CanopyRail2_2",
+        "V15_211_STBD_CanopyRail2_1",
+        "V15_211_STBD_CanopyRail2_0",
+        "V15_211_STBD_CanopyRail1_7",
+        "V15_211_STBD_CanopyRail1_6",
+        "V15_211_STBD_CanopyRail1_5",
+        "V15_211_STBD_CanopyRail1_4",
+        "V15_211_STBD_CanopyRail1_3",
+        "V15_211_STBD_CanopyRail1_2",
+        "V15_211_STBD_CanopyRail1_1",
+        "V15_211_STBD_CanopyRail1_0",
+        "V15_211_STBD_CanopyRail0_7",
+        "V15_211_STBD_CanopyRail0_6",
+        "V15_211_STBD_CanopyRail0_5",
+        "V15_211_STBD_CanopyRail0_4",
+        "V15_211_STBD_CanopyRail0_3",
+        "V15_211_STBD_CanopyRail0_2",
+        "V15_211_STBD_CanopyRail0_1",
+        "V15_211_STBD_CanopyRail0_0",
+        "V15_213_PORT_CanopyLowerFrame_7",
+        "V15_212_PORT_CanopyCrossFrame_7",
+        "V15_213_PORT_CanopyLowerFrame_5",
+        "V15_212_PORT_CanopyCrossFrame_5",
+        "V15_213_PORT_CanopyLowerFrame_2",
+        "V15_212_PORT_CanopyCrossFrame_2",
+        "V15_211_PORT_CanopyRail2_7",
+        "V15_211_PORT_CanopyRail2_6",
+        "V15_211_PORT_CanopyRail2_5",
+        "V15_211_PORT_CanopyRail2_4",
+        "V15_211_PORT_CanopyRail2_3",
+        "V15_211_PORT_CanopyRail2_2",
+        "V15_211_PORT_CanopyRail2_1",
+        "V15_211_PORT_CanopyRail2_0",
+        "V15_211_PORT_CanopyRail1_7",
+        "V15_211_PORT_CanopyRail1_6",
+        "V15_211_PORT_CanopyRail1_5",
+        "V15_211_PORT_CanopyRail1_4",
+        "V15_211_PORT_CanopyRail1_3",
+        "V15_211_PORT_CanopyRail1_2",
+        "V15_211_PORT_CanopyRail1_1",
+        "V15_211_PORT_CanopyRail1_0",
+        "V15_211_PORT_CanopyRail0_7",
+        "V15_211_PORT_CanopyRail0_6",
+        "V15_211_PORT_CanopyRail0_5",
+        "V15_211_PORT_CanopyRail0_4",
+        "V15_211_PORT_CanopyRail0_3",
+        "V15_211_PORT_CanopyRail0_2",
+        "V15_211_PORT_CanopyRail0_1",
+        "V15_211_PORT_CanopyRail0_0",
+        "V15_200_ReferenceAlignedOnePieceGreenhouse"
+      ]
+    },
+    "forewing": {
+      "count": 2,
+      "names": [
+        "V15_326_STBD_ForeWingSculptedRoot",
+        "V15_326_PORT_ForeWingSculptedRoot"
+      ]
+    },
+    "rearfin": {
+      "count": 2,
+      "names": [
+        "V15_322_STBD_SweepbackFin",
+        "V15_322_PORT_SweepbackFin"
+      ]
+    },
+    "forebody_taper": {
+      "count": 77,
+      "names": [
+        "V15_500_STBD_IntegratedChineRail_0",
+        "V15_500_PORT_IntegratedChineRail_0",
+        "V15_110_STBD_RaisedIntakeShoulderArmor",
+        "V15_110_PORT_RaisedIntakeShoulderArmor",
+        "V15_002_NoseHoodContinuousFoldedShell",
+        "V15_001_ReferenceDerivedLowerArmoredHull",
+        "LIFT_PORT_FRONT_Housing",
+        "LIFT_PORT_FRONT_UpperMount",
+        "LIFT_PORT_FRONT_LowerPlate",
+        "LIFT_PORT_FRONT_MagneticCell_00",
+        "LIFT_PORT_FRONT_MagneticCell_01",
+        "LIFT_PORT_FRONT_MagneticCell_02",
+        "LIFT_PORT_FRONT_RibPort",
+        "LIFT_PORT_FRONT_RibStbd",
+        "LIFT_STBD_FRONT_Housing",
+        "LIFT_STBD_FRONT_UpperMount",
+        "LIFT_STBD_FRONT_LowerPlate",
+        "LIFT_STBD_FRONT_MagneticCell_00",
+        "LIFT_STBD_FRONT_MagneticCell_01",
+        "LIFT_STBD_FRONT_MagneticCell_02",
+        "LIFT_STBD_FRONT_RibPort",
+        "LIFT_STBD_FRONT_RibStbd",
+        "V16_PORT_PhysicalIntakeOuterHousing",
+        "V16_PORT_MetalMouthFace",
+        "V16_PORT_RealRecessedTunnel",
+        "V16_PORT_CavityBackFace",
+        "V16_PORT_IntakeVane_00",
+        "V16_PORT_IntakeVaneLip_00",
+        "V16_PORT_IntakeVane_01",
+        "V16_PORT_IntakeVaneLip_01",
+        "V16_PORT_IntakeVane_02",
+        "V16_PORT_IntakeVaneLip_02",
+        "V16_PORT_MouthFastener_00",
+        "V16_PORT_MouthFastener_01",
+        "V16_PORT_PressedIntakeShoulderSkin",
+        "V16_PORT_IntakeShoulderTrim_00",
+        "V16_PORT_IntakeShoulderTrim_01",
+        "V16_PORT_IntakeShoulderTrim_02",
+        "V16_STBD_PhysicalIntakeOuterHousing",
+        "V16_STBD_MetalMouthFace",
+        "V16_STBD_RealRecessedTunnel",
+        "V16_STBD_CavityBackFace",
+        "V16_STBD_IntakeVane_00",
+        "V16_STBD_IntakeVaneLip_00",
+        "V16_STBD_IntakeVane_01",
+        "V16_STBD_IntakeVaneLip_01",
+        "V16_STBD_IntakeVane_02",
+        "V16_STBD_IntakeVaneLip_02",
+        "V16_STBD_MouthFastener_00",
+        "V16_STBD_MouthFastener_01",
+        "V16_STBD_PressedIntakeShoulderSkin",
+        "V16_STBD_IntakeShoulderTrim_00",
+        "V16_STBD_IntakeShoulderTrim_01",
+        "V16_STBD_IntakeShoulderTrim_02",
+        "V16_NoseCenterSpineForgedSection",
+        "V16_PORT_NoseCheekArmoredExtrusion",
+        "V16_PORT_NoseCornerHighlight_00",
+        "V16_PORT_NoseCornerHighlight_01",
+        "V16_PORT_NoseCornerHighlight_02",
+        "V16_STBD_NoseCheekArmoredExtrusion",
+        "V16_STBD_NoseCornerHighlight_00",
+        "V16_STBD_NoseCornerHighlight_01",
+        "V16_STBD_NoseCornerHighlight_02",
+        "V16_NoseCoolingRecess_0",
+        "V16_NoseCoolingVane_0",
+        "V16_NoseCoolingRecess_1",
+        "V16_NoseCoolingVane_1",
+        "V16_NoseCoolingRecess_2",
+        "V16_NoseCoolingVane_2",
+        "V17_PORT_HoodShoulderIntegratedWeb",
+        "V17_STBD_HoodShoulderIntegratedWeb",
+        "V17_PORT_HoodStructuralRib_0",
+        "V17_PORT_HoodStructuralRib_1",
+        "V17_PORT_HoodStructuralRib_2",
+        "V17_STBD_HoodStructuralRib_0",
+        "V17_STBD_HoodStructuralRib_1",
+        "V17_STBD_HoodStructuralRib_2"
+      ]
+    }
+  },
+  "main_greenhouse_before_bounds_m": [
+    [
+      -0.64,
+      1.0417,
+      -2.67
+    ],
+    [
+      0.64,
+      1.7018,
+      0.45
+    ]
+  ],
+  "main_greenhouse_after_bounds_m": [
+    [
+      -0.6538,
+      1.0417,
+      -1.8432
+    ],
+    [
+      0.6538,
+      1.8484,
+      0.45
+    ]
+  ],
+  "rear_wings_unchanged": true,
+  "main_thrusters_unchanged": true,
+  "reference_metrics": {
+    "side": {
+      "V19": {
+        "reference_area_px": 33761,
+        "model_area_px": 64130,
+        "intersection_over_union": 0.44159,
+        "recall": 0.88818,
+        "precision": 0.46758,
+        "missing_reference_px": 3775,
+        "excess_model_px": 34144
+      },
+      "V20": {
+        "reference_area_px": 33761,
+        "model_area_px": 65791,
+        "intersection_over_union": 0.45984,
+        "recall": 0.92882,
+        "precision": 0.47663,
+        "missing_reference_px": 2403,
+        "excess_model_px": 34433
+      },
+      "delta_iou": 0.01825,
+      "delta_recall": 0.04064
+    },
+    "top": {
+      "V19": {
+        "reference_area_px": 84833,
+        "model_area_px": 95698,
+        "intersection_over_union": 0.77718,
+        "recall": 0.93063,
+        "precision": 0.82497,
+        "missing_reference_px": 5885,
+        "excess_model_px": 16750
+      },
+      "V20": {
+        "reference_area_px": 84833,
+        "model_area_px": 93485,
+        "intersection_over_union": 0.80214,
+        "recall": 0.9356,
+        "precision": 0.84901,
+        "missing_reference_px": 5463,
+        "excess_model_px": 14115
+      },
+      "delta_iou": 0.02496,
+      "delta_recall": 0.00497
+    },
+    "front": {
+      "V19": {
+        "reference_area_px": 13624,
+        "model_area_px": 25310,
+        "intersection_over_union": 0.37396,
+        "recall": 0.77782,
+        "precision": 0.41869,
+        "missing_reference_px": 3027,
+        "excess_model_px": 14713
+      },
+      "V20": {
+        "reference_area_px": 13624,
+        "model_area_px": 25413,
+        "intersection_over_union": 0.37261,
+        "recall": 0.77782,
+        "precision": 0.41699,
+        "missing_reference_px": 3027,
+        "excess_model_px": 14816
+      },
+      "delta_iou": -0.00135,
+      "delta_recall": 0.0
+    },
+    "rear": {
+      "V19": {
+        "reference_area_px": 4431,
+        "model_area_px": 25310,
+        "intersection_over_union": 0.10095,
+        "recall": 0.61544,
+        "precision": 0.10774,
+        "missing_reference_px": 1704,
+        "excess_model_px": 22583
+      },
+      "V20": {
+        "reference_area_px": 4431,
+        "model_area_px": 25413,
+        "intersection_over_union": 0.10056,
+        "recall": 0.61544,
+        "precision": 0.10731,
+        "missing_reference_px": 1704,
+        "excess_model_px": 22686
+      },
+      "delta_iou": -0.00039,
+      "delta_recall": 0.0
+    }
+  },
+  "automated_owner_approval": false,
+  "production_asset_replaced": false
+}
