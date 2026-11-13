@@ -1,0 +1,44 @@
+{
+  "source": "art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb",
+  "reference": "art/hero_01/references/forge_8view_original.jpg",
+  "method": "Original owner's reference, approximate GrabCut, fixed V16 camera",
+  "warning": "Reference sheet can have perspective differences, dark parts omitted, and inconsistent artwork proportions. Scoring is diagnostic, not automatic approval.",
+  "views": {
+    "side": {
+      "reference_area_px": 34019,
+      "model_area_px": 64130,
+      "intersection_over_union": 0.44528,
+      "recall": 0.88889,
+      "precision": 0.47153,
+      "missing_reference_px": 3780,
+      "excess_model_px": 33891
+    },
+    "top": {
+      "reference_area_px": 84827,
+      "model_area_px": 95698,
+      "intersection_over_union": 0.77721,
+      "recall": 0.93068,
+      "precision": 0.82496,
+      "missing_reference_px": 5880,
+      "excess_model_px": 16751
+    },
+    "front": {
+      "reference_area_px": 13624,
+      "model_area_px": 25310,
+      "intersection_over_union": 0.37396,
+      "recall": 0.77782,
+      "precision": 0.41869,
+      "missing_reference_px": 3027,
+      "excess_model_px": 14713
+    },
+    "rear": {
+      "reference_area_px": 4436,
+      "model_area_px": 25310,
+      "intersection_over_union": 0.10109,
+      "recall": 0.61564,
+      "precision": 0.1079,
+      "missing_reference_px": 1705,
+      "excess_model_px": 22579
+    }
+  }
+}
