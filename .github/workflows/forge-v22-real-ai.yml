@@ -1,0 +1,99 @@
+name: NF-H01 / Run Real DINOv2 and Depth Anything on V22
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/vision/v22-side-top-atlas.b64'
+      - 'tools/vision/run_v22_dino_depth.py'
+      - '.github/workflows/forge-v22-real-ai.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nfr-v22-real-ai-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pretrained-ai:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check and decode user-reference-and-real-V22-render input
+        run: |
+          python - <<'PY'
+          import base64,io
+          from pathlib import Path
+          from PIL import Image
+          data=Path('tools/vision/v22-side-top-atlas.b64').read_text().strip()
+          print('Encoded input length:',len(data))
+          raw=base64.b64decode(data,validate=True)
+          im=Image.open(io.BytesIO(raw)).convert('RGB')
+          print('ACTUAL_V22_REFERENCE_ATLAS_DECODE_OK',im.size)
+          assert im.size==(400,288)
+          PY
+      - name: Install free CPU PyTorch and reference AI packages
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --index-url \
+            https://download.pytorch.org/whl/cpu 'torch==2.6.0'
+          python -m pip install --disable-pip-version-check \
+            'transformers==4.46.3' 'Pillow>=10,<13' 'numpy>=1.26,<2'
+      - name: Run actual DINOv2 and Depth Anything V2 pretrained models
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DISABLE_XET: '1'
+          OMP_NUM_THREADS: '2'
+          OPENBLAS_NUM_THREADS: '2'
+        run: |
+          set -euo pipefail
+          mkdir -p build/forge_v22_actual_ai
+          python tools/vision/run_v22_dino_depth.py \
+            2>&1 | tee build/forge_v22_actual_ai/RUN_LOG.txt
+          grep -q NFR_V22_TWO_PRETRAINED_MODELS_COMPLETE build/forge_v22_actual_ai/RUN_LOG.txt
+      - name: Verify model report and save owner-review diagnostics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image
+          out=Path('build/forge_v22_actual_ai')
+          report=json.loads((out/'V22_PRETRAINED_AI_REPORT.json').read_text())
+          assert report['complete'] is True
+          assert report['weights_downloaded'] is True
+          assert report['geometry_modified'] is False
+          assert set(report['comparison'])=={'side','top'}
+          for view in ('side','top'):
+            a=report['comparison'][view]
+            assert a['patch_count']>0
+            for tag in ('owner_reference','v22_render'):
+              assert Image.open(out/(view+'_'+tag+'_relative_depth.png')).size==(200,144)
+          print('NFR_AI_MODEL_RESULTS_INDEPENDENTLY_VERIFIED')
+          PY
+      - name: Upload proof of actual pretrained inference
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-V22-Actual-DINOv2-DepthAnything
+          path: build/forge_v22_actual_ai/
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Publish AI report without replacing experimental GLBs
+        if: success()
+        run: |
+          set -euo pipefail
+          mkdir -p art/hero_01/experiments/V22_AI
+          cp build/forge_v22_actual_ai/* art/hero_01/experiments/V22_AI/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add art/hero_01/experiments/V22_AI/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record verified pretrained DINO and Depth Anything V22 analysis'
+            git push
+          fi
