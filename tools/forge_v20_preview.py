@@ -12,7 +12,7 @@ import cv2
 import trimesh
 
 ROOT=Path(__file__).resolve().parents[1]
-FILE=Path(os.environ.get("NFR_PREVIEW_SOURCE",str(ROOT/"art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb")))
+FILE=Path(os.environ.get("NFR_PREVIEW_SOURCE",str(ROOT/"art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb"))).resolve()
 OUT=Path(os.environ.get("NFR_PREVIEW_OUTPUT",str(ROOT/"build/forge_v20_preview")))
 OUT.mkdir(parents=True,exist_ok=True)
 scene=trimesh.load(FILE,force="scene",process=False)
