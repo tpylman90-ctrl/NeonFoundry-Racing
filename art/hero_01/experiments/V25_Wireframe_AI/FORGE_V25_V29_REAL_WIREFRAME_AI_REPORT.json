@@ -1,0 +1,66 @@
+{
+  "source": "User-supplied 4240.jpg basic five-view wireframe; V25 and V29 true GLB wireframe renderings in same fixed-side/top camera",
+  "model_versions": [
+    "V25",
+    "V29"
+  ],
+  "camera_registered": true,
+  "pretrained_weights_executed": true,
+  "geometry_changed_by_AI": false,
+  "notes": [
+    "Exact metric camera scale from labeled drawing is approximate, not a calibrated CAD camera",
+    "Wireframe drawings create out-of-domain relative-depth maps; DINO features are texture sensitive",
+    "DINO similarity and relative depth correlation are not percentages of geometry accuracy",
+    "90 percent gate is independently measured 2D side/top silhouette IoU; no five-view 90 percent claim"
+  ],
+  "models": {
+    "dino": "facebook/dinov2-small",
+    "depth": "depth-anything/Depth-Anything-V2-Small-hf"
+  },
+  "comparisons": {
+    "V25": {
+      "side": {
+        "global_cls_cosine": 0.71953,
+        "spatial_patch_cosine": 0.74029,
+        "patch_count": 256,
+        "relative_depth_correlation": 0.85978,
+        "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
+      },
+      "top": {
+        "global_cls_cosine": 0.66193,
+        "spatial_patch_cosine": 0.58778,
+        "patch_count": 256,
+        "relative_depth_correlation": 0.82534,
+        "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
+      }
+    },
+    "V29": {
+      "side": {
+        "global_cls_cosine": 0.6166,
+        "spatial_patch_cosine": 0.71121,
+        "patch_count": 256,
+        "relative_depth_correlation": 0.87184,
+        "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
+      },
+      "top": {
+        "global_cls_cosine": 0.63318,
+        "spatial_patch_cosine": 0.57688,
+        "patch_count": 256,
+        "relative_depth_correlation": 0.90846,
+        "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
+      }
+    }
+  },
+  "comparison_deltas": {
+    "side": {
+      "dino_cls_delta": -0.10293,
+      "dino_patch_delta": -0.02908,
+      "relative_depth_corr_delta": 0.01206
+    },
+    "top": {
+      "dino_cls_delta": -0.02875,
+      "dino_patch_delta": -0.0109,
+      "relative_depth_corr_delta": 0.08312
+    }
+  }
+}

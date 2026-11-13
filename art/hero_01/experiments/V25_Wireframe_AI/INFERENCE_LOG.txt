@@ -1,5 +1,9 @@
-FORGE_WIRE_DINO_PRETRAINED side {'dino_cls_cosine': 0.55233, 'dino_spatial_patch_cosine': 0.64508, 'patch_count': 256, 'reference_vs_render': 'Wireframe drawing vs neutral gray GLB; texture/domain differences affect DINO comparison'}
-FORGE_WIRE_DINO_PRETRAINED top {'dino_cls_cosine': 0.25961, 'dino_spatial_patch_cosine': 0.27243, 'patch_count': 256, 'reference_vs_render': 'Wireframe drawing vs neutral gray GLB; texture/domain differences affect DINO comparison'}
-FORGE_WIRE_DEPTH_PRETRAINED side 0.8328309130244771
-FORGE_WIRE_DEPTH_PRETRAINED top -0.6386860153458361
+REAL_PRETRAINED_DINO V25 side {'global_cls_cosine': 0.71953, 'spatial_patch_cosine': 0.74029, 'patch_count': 256}
+REAL_PRETRAINED_DINO V25 top {'global_cls_cosine': 0.66193, 'spatial_patch_cosine': 0.58778, 'patch_count': 256}
+REAL_PRETRAINED_DINO V29 side {'global_cls_cosine': 0.6166, 'spatial_patch_cosine': 0.71121, 'patch_count': 256}
+REAL_PRETRAINED_DINO V29 top {'global_cls_cosine': 0.63318, 'spatial_patch_cosine': 0.57688, 'patch_count': 256}
+REAL_PRETRAINED_DEPTH V25 side 0.8597781272421129
+REAL_PRETRAINED_DEPTH V25 top 0.8253414316961093
+REAL_PRETRAINED_DEPTH V29 side 0.8718378132496191
+REAL_PRETRAINED_DEPTH V29 top 0.9084629645274646
 FORGE_V25_WIREFRAME_BOTH_REAL_MODELS_COMPLETED
