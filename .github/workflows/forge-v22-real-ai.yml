@@ -25,6 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install image decoder for reference verification
+        run: python -m pip install --disable-pip-version-check 'Pillow>=10,<13'
       - name: Check and decode user-reference-and-real-V22-render input
         run: |
           python - <<'PY'
