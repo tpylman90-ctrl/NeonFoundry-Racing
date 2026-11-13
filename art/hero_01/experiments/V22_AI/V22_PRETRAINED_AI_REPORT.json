@@ -1,0 +1,35 @@
+{
+  "status": "pretrained models executed on new V22 side/top comparison; NOT a reconstructed mesh",
+  "input": "tools/vision/v22-side-top-atlas.b64",
+  "atlas_sha256": "d06fced9330c5a101394886da5577e37c0cb48428b2655c0e546ce884781ad52",
+  "paired_views": [
+    "side",
+    "top"
+  ],
+  "dino_model": "facebook/dinov2-small",
+  "depth_model": "depth-anything/Depth-Anything-V2-Small-hf",
+  "warning": "Input is downscaled and compressed; feature and depth matches are coarse visual diagnostics; not calibrated geometry.",
+  "comparison": {
+    "side": {
+      "dino_global_cosine": 0.63181,
+      "dino_aligned_patch_cosine": 0.70415,
+      "dino_reciprocal_matches": 108,
+      "patch_count": 256,
+      "interpretation": "Visual agreement only; features cannot specify target 3D vertex coordinates.",
+      "relative_depth_map_correlation": 0.89228,
+      "relative_depth_note": "Monocular relative depth: normalized per image and affected by framing; correlation is NOT a surface error in meters."
+    },
+    "top": {
+      "dino_global_cosine": 0.60185,
+      "dino_aligned_patch_cosine": 0.64488,
+      "dino_reciprocal_matches": 65,
+      "patch_count": 256,
+      "interpretation": "Visual agreement only; features cannot specify target 3D vertex coordinates.",
+      "relative_depth_map_correlation": 0.77454,
+      "relative_depth_note": "Monocular relative depth: normalized per image and affected by framing; correlation is NOT a surface error in meters."
+    }
+  },
+  "weights_downloaded": true,
+  "geometry_modified": false,
+  "complete": true
+}

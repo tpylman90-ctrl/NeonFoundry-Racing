@@ -1,0 +1,5 @@
+NFR_V22_DINO_PRETRAINED_OK side {'dino_global_cosine': 0.63181, 'dino_aligned_patch_cosine': 0.70415, 'dino_reciprocal_matches': 108, 'patch_count': 256, 'interpretation': 'Visual agreement only; features cannot specify target 3D vertex coordinates.'}
+NFR_V22_DINO_PRETRAINED_OK top {'dino_global_cosine': 0.60185, 'dino_aligned_patch_cosine': 0.64488, 'dino_reciprocal_matches': 65, 'patch_count': 256, 'interpretation': 'Visual agreement only; features cannot specify target 3D vertex coordinates.'}
+NFR_V22_DEPTH_PRETRAINED_OK side 0.89228
+NFR_V22_DEPTH_PRETRAINED_OK top 0.77454
+NFR_V22_TWO_PRETRAINED_MODELS_COMPLETE
