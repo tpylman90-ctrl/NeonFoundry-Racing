@@ -1,0 +1,5287 @@
+{
+  "source": "art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb",
+  "mesh_count": 330,
+  "total_triangles": 15404,
+  "parts": [
+    {
+      "name": "LAMP_PORT_TailMarker",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.785,
+          1.025,
+          -3.75
+        ],
+        [
+          -1.725,
+          1.091,
+          -3.39
+        ]
+      ]
+    },
+    {
+      "name": "LAMP_STBD_TailMarker",
+      "faces": 12,
+      "bounds": [
+        [
+          1.725,
+          1.025,
+          -3.75
+        ],
+        [
+          1.785,
+          1.091,
+          -3.39
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_Housing",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.718,
+          0.142,
+          -3.055
+        ],
+        [
+          -0.89,
+          0.456,
+          -2.085
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_LowerPlate",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.695,
+          0.101,
+          -3.0
+        ],
+        [
+          -0.915,
+          0.2,
+          -2.14
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_MagneticCell_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.612,
+          0.064,
+          -2.88
+        ],
+        [
+          -1.005,
+          0.105,
+          -2.76
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_MagneticCell_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.612,
+          0.064,
+          -2.63
+        ],
+        [
+          -1.005,
+          0.105,
+          -2.51
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_MagneticCell_02",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.612,
+          0.064,
+          -2.38
+        ],
+        [
+          -1.005,
+          0.105,
+          -2.26
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_RibPort",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.71,
+          0.166,
+          -2.95
+        ],
+        [
+          -1.653,
+          0.218,
+          -2.19
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_RibStbd",
+      "faces": 32,
+      "bounds": [
+        [
+          -0.961,
+          0.166,
+          -2.95
+        ],
+        [
+          -0.899,
+          0.218,
+          -2.19
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_AFT_UpperMount",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.649,
+          0.398,
+          -2.96
+        ],
+        [
+          -0.965,
+          0.497,
+          -2.18
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_Housing",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.718,
+          0.142,
+          1.485
+        ],
+        [
+          -0.89,
+          0.456,
+          2.455
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_LowerPlate",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.695,
+          0.101,
+          1.54
+        ],
+        [
+          -0.915,
+          0.2,
+          2.4
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_MagneticCell_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.612,
+          0.064,
+          1.66
+        ],
+        [
+          -1.005,
+          0.105,
+          1.78
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_MagneticCell_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.612,
+          0.064,
+          1.91
+        ],
+        [
+          -1.005,
+          0.105,
+          2.03
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_MagneticCell_02",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.612,
+          0.064,
+          2.16
+        ],
+        [
+          -1.005,
+          0.105,
+          2.28
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_RibPort",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.71,
+          0.166,
+          1.59
+        ],
+        [
+          -1.653,
+          0.218,
+          2.35
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_RibStbd",
+      "faces": 32,
+      "bounds": [
+        [
+          -0.961,
+          0.166,
+          1.59
+        ],
+        [
+          -0.899,
+          0.218,
+          2.35
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_PORT_FRONT_UpperMount",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.649,
+          0.398,
+          1.58
+        ],
+        [
+          -0.965,
+          0.497,
+          2.36
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_Housing",
+      "faces": 12,
+      "bounds": [
+        [
+          0.89,
+          0.142,
+          -3.055
+        ],
+        [
+          1.718,
+          0.456,
+          -2.085
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_LowerPlate",
+      "faces": 12,
+      "bounds": [
+        [
+          0.915,
+          0.101,
+          -3.0
+        ],
+        [
+          1.695,
+          0.2,
+          -2.14
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_MagneticCell_00",
+      "faces": 12,
+      "bounds": [
+        [
+          1.005,
+          0.064,
+          -2.88
+        ],
+        [
+          1.612,
+          0.105,
+          -2.76
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_MagneticCell_01",
+      "faces": 12,
+      "bounds": [
+        [
+          1.005,
+          0.064,
+          -2.63
+        ],
+        [
+          1.612,
+          0.105,
+          -2.51
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_MagneticCell_02",
+      "faces": 12,
+      "bounds": [
+        [
+          1.005,
+          0.064,
+          -2.38
+        ],
+        [
+          1.612,
+          0.105,
+          -2.26
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_RibPort",
+      "faces": 32,
+      "bounds": [
+        [
+          0.899,
+          0.166,
+          -2.95
+        ],
+        [
+          0.961,
+          0.218,
+          -2.19
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_RibStbd",
+      "faces": 32,
+      "bounds": [
+        [
+          1.653,
+          0.166,
+          -2.95
+        ],
+        [
+          1.71,
+          0.218,
+          -2.19
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_AFT_UpperMount",
+      "faces": 12,
+      "bounds": [
+        [
+          0.965,
+          0.398,
+          -2.96
+        ],
+        [
+          1.649,
+          0.497,
+          -2.18
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_Housing",
+      "faces": 12,
+      "bounds": [
+        [
+          0.89,
+          0.142,
+          1.485
+        ],
+        [
+          1.718,
+          0.456,
+          2.455
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_LowerPlate",
+      "faces": 12,
+      "bounds": [
+        [
+          0.915,
+          0.101,
+          1.54
+        ],
+        [
+          1.695,
+          0.2,
+          2.4
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_MagneticCell_00",
+      "faces": 12,
+      "bounds": [
+        [
+          1.005,
+          0.064,
+          1.66
+        ],
+        [
+          1.612,
+          0.105,
+          1.78
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_MagneticCell_01",
+      "faces": 12,
+      "bounds": [
+        [
+          1.005,
+          0.064,
+          1.91
+        ],
+        [
+          1.612,
+          0.105,
+          2.03
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_MagneticCell_02",
+      "faces": 12,
+      "bounds": [
+        [
+          1.005,
+          0.064,
+          2.16
+        ],
+        [
+          1.612,
+          0.105,
+          2.28
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_RibPort",
+      "faces": 32,
+      "bounds": [
+        [
+          0.899,
+          0.166,
+          1.59
+        ],
+        [
+          0.961,
+          0.218,
+          2.35
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_RibStbd",
+      "faces": 32,
+      "bounds": [
+        [
+          1.653,
+          0.166,
+          1.59
+        ],
+        [
+          1.71,
+          0.218,
+          2.35
+        ]
+      ]
+    },
+    {
+      "name": "LIFT_STBD_FRONT_UpperMount",
+      "faces": 12,
+      "bounds": [
+        [
+          0.965,
+          0.398,
+          1.58
+        ],
+        [
+          1.649,
+          0.497,
+          2.36
+        ]
+      ]
+    },
+    {
+      "name": "LIVERY_PORT_FORGE_OriginalPanelArtwork",
+      "faces": 2,
+      "bounds": [
+        [
+          -1.934,
+          0.926,
+          -3.18
+        ],
+        [
+          -1.934,
+          1.211,
+          -0.97
+        ]
+      ]
+    },
+    {
+      "name": "LIVERY_STBD_FORGE_OriginalPanelArtwork",
+      "faces": 2,
+      "bounds": [
+        [
+          1.934,
+          0.926,
+          -3.18
+        ],
+        [
+          1.934,
+          1.211,
+          -0.97
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_BottomFrameLip",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.982,
+          0.575,
+          -2.62
+        ],
+        [
+          -1.942,
+          0.611,
+          -0.92
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_UpperFrameLip",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.983,
+          0.804,
+          -2.67
+        ],
+        [
+          -1.941,
+          0.842,
+          -0.9
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_VerticalCoolingTube_00",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.986,
+          0.625,
+          -1.175
+        ],
+        [
+          -1.873,
+          0.794,
+          -1.045
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_VerticalCoolingTube_01",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.986,
+          0.625,
+          -1.38
+        ],
+        [
+          -1.873,
+          0.794,
+          -1.25
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_VerticalCoolingTube_02",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.986,
+          0.625,
+          -1.585
+        ],
+        [
+          -1.873,
+          0.794,
+          -1.455
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_VerticalCoolingTube_03",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.986,
+          0.625,
+          -1.79
+        ],
+        [
+          -1.873,
+          0.794,
+          -1.66
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_VerticalCoolingTube_04",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.986,
+          0.625,
+          -1.995
+        ],
+        [
+          -1.873,
+          0.794,
+          -1.865
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_VerticalCoolingTube_05",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.986,
+          0.625,
+          -2.2
+        ],
+        [
+          -1.873,
+          0.794,
+          -2.07
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_PORT_VerticalCoolingTube_06",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.986,
+          0.625,
+          -2.405
+        ],
+        [
+          -1.873,
+          0.794,
+          -2.275
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_BottomFrameLip",
+      "faces": 32,
+      "bounds": [
+        [
+          1.942,
+          0.575,
+          -2.62
+        ],
+        [
+          1.982,
+          0.611,
+          -0.92
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_UpperFrameLip",
+      "faces": 32,
+      "bounds": [
+        [
+          1.941,
+          0.804,
+          -2.67
+        ],
+        [
+          1.983,
+          0.842,
+          -0.9
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_VerticalCoolingTube_00",
+      "faces": 40,
+      "bounds": [
+        [
+          1.873,
+          0.625,
+          -1.175
+        ],
+        [
+          1.986,
+          0.794,
+          -1.045
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_VerticalCoolingTube_01",
+      "faces": 40,
+      "bounds": [
+        [
+          1.873,
+          0.625,
+          -1.38
+        ],
+        [
+          1.986,
+          0.794,
+          -1.25
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_VerticalCoolingTube_02",
+      "faces": 40,
+      "bounds": [
+        [
+          1.873,
+          0.625,
+          -1.585
+        ],
+        [
+          1.986,
+          0.794,
+          -1.455
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_VerticalCoolingTube_03",
+      "faces": 40,
+      "bounds": [
+        [
+          1.873,
+          0.625,
+          -1.79
+        ],
+        [
+          1.986,
+          0.794,
+          -1.66
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_VerticalCoolingTube_04",
+      "faces": 40,
+      "bounds": [
+        [
+          1.873,
+          0.625,
+          -1.995
+        ],
+        [
+          1.986,
+          0.794,
+          -1.865
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_VerticalCoolingTube_05",
+      "faces": 40,
+      "bounds": [
+        [
+          1.873,
+          0.625,
+          -2.2
+        ],
+        [
+          1.986,
+          0.794,
+          -2.07
+        ]
+      ]
+    },
+    {
+      "name": "MACHINERY_STBD_VerticalCoolingTube_06",
+      "faces": 40,
+      "bounds": [
+        [
+          1.873,
+          0.625,
+          -2.405
+        ],
+        [
+          1.986,
+          0.794,
+          -2.275
+        ]
+      ]
+    },
+    {
+      "name": "REAR_CenterExhaustSlot_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.17,
+          0.602,
+          -4.166
+        ],
+        [
+          0.17,
+          0.673,
+          -4.13
+        ]
+      ]
+    },
+    {
+      "name": "REAR_CenterExhaustSlot_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.17,
+          0.767,
+          -4.166
+        ],
+        [
+          0.17,
+          0.838,
+          -4.13
+        ]
+      ]
+    },
+    {
+      "name": "REAR_CenterExhaustSlot_02",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.17,
+          0.932,
+          -4.166
+        ],
+        [
+          0.17,
+          1.003,
+          -4.13
+        ]
+      ]
+    },
+    {
+      "name": "REAR_CenterLatchPlate",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.295,
+          0.699,
+          -4.142
+        ],
+        [
+          0.295,
+          1.12,
+          -4.077
+        ]
+      ]
+    },
+    {
+      "name": "REAR_CentralMachineryBox",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.38,
+          0.588,
+          -4.075
+        ],
+        [
+          0.38,
+          1.199,
+          -3.385
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_CradleBrace",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.414,
+          0.431,
+          -3.475
+        ],
+        [
+          -0.86,
+          0.547,
+          -2.345
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_DeepShadow",
+      "faces": 128,
+      "bounds": [
+        [
+          -1.552,
+          0.53,
+          -3.943
+        ],
+        [
+          -0.71,
+          1.256,
+          -3.918
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_HollowMainNozzle",
+      "faces": 960,
+      "bounds": [
+        [
+          -1.792,
+          0.316,
+          -4.35
+        ],
+        [
+          -0.45,
+          1.471,
+          -2.33
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_00",
+      "faces": 32,
+      "bounds": [
+        [
+          -0.688,
+          0.878,
+          -4.13
+        ],
+        [
+          -0.652,
+          0.908,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_01",
+      "faces": 32,
+      "bounds": [
+        [
+          -0.829,
+          1.158,
+          -4.13
+        ],
+        [
+          -0.793,
+          1.188,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_02",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.164,
+          1.274,
+          -4.13
+        ],
+        [
+          -1.131,
+          1.304,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_03",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.476,
+          1.158,
+          -4.13
+        ],
+        [
+          -1.443,
+          1.188,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_04",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.606,
+          0.878,
+          -4.13
+        ],
+        [
+          -1.573,
+          0.908,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_05",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.476,
+          0.598,
+          -4.13
+        ],
+        [
+          -1.443,
+          0.628,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_06",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.164,
+          0.482,
+          -4.13
+        ],
+        [
+          -1.131,
+          0.512,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_InternalAxialVane_07",
+      "faces": 32,
+      "bounds": [
+        [
+          -0.829,
+          0.598,
+          -4.13
+        ],
+        [
+          -0.793,
+          0.628,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_MetalRetainingRing_00",
+      "faces": 320,
+      "bounds": [
+        [
+          -1.7,
+          0.398,
+          -3.305
+        ],
+        [
+          -0.55,
+          1.388,
+          -3.195
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_MetalRetainingRing_01",
+      "faces": 320,
+      "bounds": [
+        [
+          -1.819,
+          0.291,
+          -4.075
+        ],
+        [
+          -0.42,
+          1.495,
+          -3.965
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_MetalRetainingRing_02",
+      "faces": 320,
+      "bounds": [
+        [
+          -1.828,
+          0.283,
+          -4.375
+        ],
+        [
+          -0.41,
+          1.504,
+          -4.265
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_UpperGrilleVane_00",
+      "faces": 24,
+      "bounds": [
+        [
+          -0.65,
+          1.365,
+          -4.361
+        ],
+        [
+          -0.23,
+          1.395,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_UpperGrilleVane_01",
+      "faces": 24,
+      "bounds": [
+        [
+          -0.65,
+          1.456,
+          -4.361
+        ],
+        [
+          -0.23,
+          1.486,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_UpperGrilleVane_02",
+      "faces": 24,
+      "bounds": [
+        [
+          -0.65,
+          1.546,
+          -4.361
+        ],
+        [
+          -0.23,
+          1.577,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_UpperGrilleVane_03",
+      "faces": 24,
+      "bounds": [
+        [
+          -0.65,
+          1.637,
+          -4.361
+        ],
+        [
+          -0.23,
+          1.667,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_UpperTwinBlackCavity",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.68,
+          1.396,
+          -4.052
+        ],
+        [
+          -0.2,
+          1.644,
+          -4.028
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_PORT_UpperTwinExhaustHousing",
+      "faces": 64,
+      "bounds": [
+        [
+          -0.79,
+          1.306,
+          -4.33
+        ],
+        [
+          -0.09,
+          1.735,
+          -3.418
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_CradleBrace",
+      "faces": 12,
+      "bounds": [
+        [
+          0.86,
+          0.431,
+          -3.475
+        ],
+        [
+          1.414,
+          0.547,
+          -2.345
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_DeepShadow",
+      "faces": 128,
+      "bounds": [
+        [
+          0.71,
+          0.53,
+          -3.943
+        ],
+        [
+          1.552,
+          1.256,
+          -3.918
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_HollowMainNozzle",
+      "faces": 960,
+      "bounds": [
+        [
+          0.45,
+          0.316,
+          -4.35
+        ],
+        [
+          1.792,
+          1.471,
+          -2.33
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_00",
+      "faces": 32,
+      "bounds": [
+        [
+          1.573,
+          0.878,
+          -4.13
+        ],
+        [
+          1.606,
+          0.908,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_01",
+      "faces": 32,
+      "bounds": [
+        [
+          1.443,
+          1.158,
+          -4.13
+        ],
+        [
+          1.476,
+          1.188,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_02",
+      "faces": 32,
+      "bounds": [
+        [
+          1.131,
+          1.274,
+          -4.13
+        ],
+        [
+          1.164,
+          1.304,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_03",
+      "faces": 32,
+      "bounds": [
+        [
+          0.793,
+          1.158,
+          -4.13
+        ],
+        [
+          0.829,
+          1.188,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_04",
+      "faces": 32,
+      "bounds": [
+        [
+          0.652,
+          0.878,
+          -4.13
+        ],
+        [
+          0.688,
+          0.908,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_05",
+      "faces": 32,
+      "bounds": [
+        [
+          0.793,
+          0.598,
+          -4.13
+        ],
+        [
+          0.829,
+          0.628,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_06",
+      "faces": 32,
+      "bounds": [
+        [
+          1.131,
+          0.482,
+          -4.13
+        ],
+        [
+          1.164,
+          0.512,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_InternalAxialVane_07",
+      "faces": 32,
+      "bounds": [
+        [
+          1.443,
+          0.598,
+          -4.13
+        ],
+        [
+          1.476,
+          0.628,
+          -3.94
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_MetalRetainingRing_00",
+      "faces": 320,
+      "bounds": [
+        [
+          0.55,
+          0.398,
+          -3.305
+        ],
+        [
+          1.7,
+          1.388,
+          -3.195
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_MetalRetainingRing_01",
+      "faces": 320,
+      "bounds": [
+        [
+          0.42,
+          0.291,
+          -4.075
+        ],
+        [
+          1.819,
+          1.495,
+          -3.965
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_MetalRetainingRing_02",
+      "faces": 320,
+      "bounds": [
+        [
+          0.41,
+          0.283,
+          -4.375
+        ],
+        [
+          1.828,
+          1.504,
+          -4.265
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_UpperGrilleVane_00",
+      "faces": 24,
+      "bounds": [
+        [
+          0.23,
+          1.365,
+          -4.361
+        ],
+        [
+          0.65,
+          1.395,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_UpperGrilleVane_01",
+      "faces": 24,
+      "bounds": [
+        [
+          0.23,
+          1.456,
+          -4.361
+        ],
+        [
+          0.65,
+          1.486,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_UpperGrilleVane_02",
+      "faces": 24,
+      "bounds": [
+        [
+          0.23,
+          1.546,
+          -4.361
+        ],
+        [
+          0.65,
+          1.577,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_UpperGrilleVane_03",
+      "faces": 24,
+      "bounds": [
+        [
+          0.23,
+          1.637,
+          -4.361
+        ],
+        [
+          0.65,
+          1.667,
+          -4.319
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_UpperTwinBlackCavity",
+      "faces": 12,
+      "bounds": [
+        [
+          0.2,
+          1.396,
+          -4.052
+        ],
+        [
+          0.68,
+          1.644,
+          -4.028
+        ]
+      ]
+    },
+    {
+      "name": "THRUST_STBD_UpperTwinExhaustHousing",
+      "faces": 64,
+      "bounds": [
+        [
+          0.09,
+          1.306,
+          -4.33
+        ],
+        [
+          0.79,
+          1.735,
+          -3.418
+        ]
+      ]
+    },
+    {
+      "name": "V15_001_ReferenceDerivedLowerArmoredHull",
+      "faces": 256,
+      "bounds": [
+        [
+          -1.502,
+          0.373,
+          -3.87
+        ],
+        [
+          1.502,
+          1.289,
+          3.88
+        ]
+      ]
+    },
+    {
+      "name": "V15_002_NoseHoodContinuousFoldedShell",
+      "faces": 116,
+      "bounds": [
+        [
+          -0.68,
+          0.91,
+          0.17
+        ],
+        [
+          0.68,
+          1.182,
+          3.76
+        ]
+      ]
+    },
+    {
+      "name": "V15_110_PORT_RaisedIntakeShoulderArmor",
+      "faces": 76,
+      "bounds": [
+        [
+          -1.693,
+          1.0,
+          1.51
+        ],
+        [
+          -0.99,
+          1.248,
+          3.34
+        ]
+      ]
+    },
+    {
+      "name": "V15_110_STBD_RaisedIntakeShoulderArmor",
+      "faces": 76,
+      "bounds": [
+        [
+          0.99,
+          1.0,
+          1.51
+        ],
+        [
+          1.693,
+          1.248,
+          3.34
+        ]
+      ]
+    },
+    {
+      "name": "V15_200_ReferenceAlignedOnePieceGreenhouse",
+      "faces": 212,
+      "bounds": [
+        [
+          -0.64,
+          1.042,
+          -2.67
+        ],
+        [
+          0.64,
+          1.702,
+          0.45
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_0",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.119,
+          1.06,
+          0.158
+        ],
+        [
+          -0.026,
+          1.205,
+          0.462
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_1",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.197,
+          1.162,
+          -0.287
+        ],
+        [
+          -0.06,
+          1.458,
+          0.187
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_2",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.248,
+          1.416,
+          -0.684
+        ],
+        [
+          -0.138,
+          1.633,
+          -0.256
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_3",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.271,
+          1.587,
+          -1.146
+        ],
+        [
+          -0.189,
+          1.718,
+          -0.664
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_4",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.28,
+          1.67,
+          -1.641
+        ],
+        [
+          -0.212,
+          1.725,
+          -1.139
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_5",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.279,
+          1.661,
+          -2.023
+        ],
+        [
+          -0.192,
+          1.726,
+          -1.637
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_6",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.252,
+          1.499,
+          -2.405
+        ],
+        [
+          -0.13,
+          1.707,
+          -2.005
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail0_7",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.189,
+          1.272,
+          -2.692
+        ],
+        [
+          -0.041,
+          1.538,
+          -2.368
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_0",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.236,
+          1.052,
+          0.162
+        ],
+        [
+          -0.112,
+          1.151,
+          0.458
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_1",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.423,
+          1.118,
+          -0.281
+        ],
+        [
+          -0.197,
+          1.319,
+          0.181
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_2",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.546,
+          1.287,
+          -0.679
+        ],
+        [
+          -0.385,
+          1.437,
+          -0.261
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_3",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.603,
+          1.403,
+          -1.144
+        ],
+        [
+          -0.506,
+          1.497,
+          -0.666
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_4",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.623,
+          1.464,
+          -1.641
+        ],
+        [
+          -0.562,
+          1.505,
+          -1.139
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_5",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.622,
+          1.464,
+          -2.024
+        ],
+        [
+          -0.515,
+          1.505,
+          -1.636
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_6",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.554,
+          1.369,
+          -2.399
+        ],
+        [
+          -0.367,
+          1.497,
+          -2.011
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail1_7",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.403,
+          1.234,
+          -2.684
+        ],
+        [
+          -0.152,
+          1.401,
+          -2.376
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_0",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.216,
+          1.032,
+          0.164
+        ],
+        [
+          -0.099,
+          1.081,
+          0.456
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_1",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.385,
+          1.047,
+          -0.278
+        ],
+        [
+          -0.176,
+          1.122,
+          0.178
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_2",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.496,
+          1.088,
+          -0.676
+        ],
+        [
+          -0.345,
+          1.157,
+          -0.264
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_3",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.548,
+          1.123,
+          -1.143
+        ],
+        [
+          -0.455,
+          1.184,
+          -0.667
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_4",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.565,
+          1.15,
+          -1.641
+        ],
+        [
+          -0.506,
+          1.192,
+          -1.139
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_5",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.565,
+          1.159,
+          -2.023
+        ],
+        [
+          -0.464,
+          1.196,
+          -1.637
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_6",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.504,
+          1.163,
+          -2.397
+        ],
+        [
+          -0.329,
+          1.204,
+          -2.013
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_PORT_CanopyRail2_7",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.366,
+          1.171,
+          -2.682
+        ],
+        [
+          -0.136,
+          1.209,
+          -2.378
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_0",
+      "faces": 40,
+      "bounds": [
+        [
+          0.026,
+          1.06,
+          0.158
+        ],
+        [
+          0.119,
+          1.205,
+          0.462
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_1",
+      "faces": 40,
+      "bounds": [
+        [
+          0.06,
+          1.162,
+          -0.287
+        ],
+        [
+          0.197,
+          1.458,
+          0.187
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_2",
+      "faces": 40,
+      "bounds": [
+        [
+          0.138,
+          1.416,
+          -0.684
+        ],
+        [
+          0.248,
+          1.633,
+          -0.256
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_3",
+      "faces": 40,
+      "bounds": [
+        [
+          0.189,
+          1.587,
+          -1.146
+        ],
+        [
+          0.271,
+          1.718,
+          -0.664
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_4",
+      "faces": 40,
+      "bounds": [
+        [
+          0.212,
+          1.67,
+          -1.641
+        ],
+        [
+          0.28,
+          1.725,
+          -1.139
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_5",
+      "faces": 40,
+      "bounds": [
+        [
+          0.192,
+          1.661,
+          -2.023
+        ],
+        [
+          0.279,
+          1.726,
+          -1.637
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_6",
+      "faces": 40,
+      "bounds": [
+        [
+          0.13,
+          1.499,
+          -2.405
+        ],
+        [
+          0.252,
+          1.707,
+          -2.005
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail0_7",
+      "faces": 40,
+      "bounds": [
+        [
+          0.041,
+          1.272,
+          -2.692
+        ],
+        [
+          0.189,
+          1.538,
+          -2.368
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_0",
+      "faces": 40,
+      "bounds": [
+        [
+          0.112,
+          1.052,
+          0.162
+        ],
+        [
+          0.236,
+          1.151,
+          0.458
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_1",
+      "faces": 40,
+      "bounds": [
+        [
+          0.197,
+          1.118,
+          -0.281
+        ],
+        [
+          0.423,
+          1.319,
+          0.181
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_2",
+      "faces": 40,
+      "bounds": [
+        [
+          0.385,
+          1.287,
+          -0.679
+        ],
+        [
+          0.546,
+          1.437,
+          -0.261
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_3",
+      "faces": 40,
+      "bounds": [
+        [
+          0.506,
+          1.403,
+          -1.144
+        ],
+        [
+          0.603,
+          1.497,
+          -0.666
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_4",
+      "faces": 40,
+      "bounds": [
+        [
+          0.562,
+          1.464,
+          -1.641
+        ],
+        [
+          0.623,
+          1.505,
+          -1.139
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_5",
+      "faces": 40,
+      "bounds": [
+        [
+          0.515,
+          1.464,
+          -2.024
+        ],
+        [
+          0.622,
+          1.505,
+          -1.636
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_6",
+      "faces": 40,
+      "bounds": [
+        [
+          0.367,
+          1.369,
+          -2.399
+        ],
+        [
+          0.554,
+          1.497,
+          -2.011
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail1_7",
+      "faces": 40,
+      "bounds": [
+        [
+          0.152,
+          1.234,
+          -2.684
+        ],
+        [
+          0.403,
+          1.401,
+          -2.376
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_0",
+      "faces": 40,
+      "bounds": [
+        [
+          0.099,
+          1.032,
+          0.164
+        ],
+        [
+          0.216,
+          1.081,
+          0.456
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_1",
+      "faces": 40,
+      "bounds": [
+        [
+          0.176,
+          1.047,
+          -0.278
+        ],
+        [
+          0.385,
+          1.122,
+          0.178
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_2",
+      "faces": 40,
+      "bounds": [
+        [
+          0.345,
+          1.088,
+          -0.676
+        ],
+        [
+          0.496,
+          1.157,
+          -0.264
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_3",
+      "faces": 40,
+      "bounds": [
+        [
+          0.455,
+          1.123,
+          -1.143
+        ],
+        [
+          0.548,
+          1.184,
+          -0.667
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_4",
+      "faces": 40,
+      "bounds": [
+        [
+          0.506,
+          1.15,
+          -1.641
+        ],
+        [
+          0.565,
+          1.192,
+          -1.139
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_5",
+      "faces": 40,
+      "bounds": [
+        [
+          0.464,
+          1.159,
+          -2.023
+        ],
+        [
+          0.565,
+          1.196,
+          -1.637
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_6",
+      "faces": 40,
+      "bounds": [
+        [
+          0.329,
+          1.163,
+          -2.397
+        ],
+        [
+          0.504,
+          1.204,
+          -2.013
+        ]
+      ]
+    },
+    {
+      "name": "V15_211_STBD_CanopyRail2_7",
+      "faces": 40,
+      "bounds": [
+        [
+          0.136,
+          1.171,
+          -2.682
+        ],
+        [
+          0.366,
+          1.209,
+          -2.378
+        ]
+      ]
+    },
+    {
+      "name": "V15_212_PORT_CanopyCrossFrame_2",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.419,
+          1.285,
+          -0.298
+        ],
+        [
+          -0.153,
+          1.456,
+          -0.242
+        ]
+      ]
+    },
+    {
+      "name": "V15_212_PORT_CanopyCrossFrame_5",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.617,
+          1.471,
+          -1.668
+        ],
+        [
+          -0.234,
+          1.719,
+          -1.612
+        ]
+      ]
+    },
+    {
+      "name": "V15_212_PORT_CanopyCrossFrame_7",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.401,
+          1.368,
+          -2.418
+        ],
+        [
+          -0.144,
+          1.538,
+          -2.362
+        ]
+      ]
+    },
+    {
+      "name": "V15_212_STBD_CanopyCrossFrame_2",
+      "faces": 40,
+      "bounds": [
+        [
+          0.153,
+          1.285,
+          -0.298
+        ],
+        [
+          0.419,
+          1.456,
+          -0.242
+        ]
+      ]
+    },
+    {
+      "name": "V15_212_STBD_CanopyCrossFrame_5",
+      "faces": 40,
+      "bounds": [
+        [
+          0.234,
+          1.471,
+          -1.668
+        ],
+        [
+          0.617,
+          1.719,
+          -1.612
+        ]
+      ]
+    },
+    {
+      "name": "V15_212_STBD_CanopyCrossFrame_7",
+      "faces": 40,
+      "bounds": [
+        [
+          0.144,
+          1.368,
+          -2.418
+        ],
+        [
+          0.401,
+          1.538,
+          -2.362
+        ]
+      ]
+    },
+    {
+      "name": "V15_213_PORT_CanopyLowerFrame_2",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.428,
+          1.102,
+          -0.295
+        ],
+        [
+          -0.342,
+          1.306,
+          -0.245
+        ]
+      ]
+    },
+    {
+      "name": "V15_213_PORT_CanopyLowerFrame_5",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.625,
+          1.172,
+          -1.665
+        ],
+        [
+          -0.52,
+          1.492,
+          -1.615
+        ]
+      ]
+    },
+    {
+      "name": "V15_213_PORT_CanopyLowerFrame_7",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.409,
+          1.185,
+          -2.415
+        ],
+        [
+          -0.325,
+          1.389,
+          -2.365
+        ]
+      ]
+    },
+    {
+      "name": "V15_213_STBD_CanopyLowerFrame_2",
+      "faces": 40,
+      "bounds": [
+        [
+          0.342,
+          1.102,
+          -0.295
+        ],
+        [
+          0.428,
+          1.306,
+          -0.245
+        ]
+      ]
+    },
+    {
+      "name": "V15_213_STBD_CanopyLowerFrame_5",
+      "faces": 40,
+      "bounds": [
+        [
+          0.52,
+          1.172,
+          -1.665
+        ],
+        [
+          0.625,
+          1.492,
+          -1.615
+        ]
+      ]
+    },
+    {
+      "name": "V15_213_STBD_CanopyLowerFrame_7",
+      "faces": 40,
+      "bounds": [
+        [
+          0.325,
+          1.185,
+          -2.415
+        ],
+        [
+          0.409,
+          1.389,
+          -2.365
+        ]
+      ]
+    },
+    {
+      "name": "V15_215_CabinCentralCrownRail_3",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.022,
+          1.61,
+          -1.145
+        ],
+        [
+          0.022,
+          1.728,
+          -0.665
+        ]
+      ]
+    },
+    {
+      "name": "V15_215_CabinCentralCrownRail_4",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.022,
+          1.693,
+          -1.64
+        ],
+        [
+          0.022,
+          1.736,
+          -1.14
+        ]
+      ]
+    },
+    {
+      "name": "V15_215_CabinCentralCrownRail_5",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.022,
+          1.684,
+          -2.021
+        ],
+        [
+          0.022,
+          1.736,
+          -1.639
+        ]
+      ]
+    },
+    {
+      "name": "V15_215_CabinCentralCrownRail_6",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.022,
+          1.521,
+          -2.4
+        ],
+        [
+          0.022,
+          1.717,
+          -2.01
+        ]
+      ]
+    },
+    {
+      "name": "V15_215_CabinCentralCrownRail_7",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.022,
+          1.293,
+          -2.685
+        ],
+        [
+          0.022,
+          1.549,
+          -2.375
+        ]
+      ]
+    },
+    {
+      "name": "V15_300_PORT_FormedBronzeFuselageArmor",
+      "faces": 76,
+      "bounds": [
+        [
+          -1.721,
+          0.778,
+          -3.57
+        ],
+        [
+          -1.452,
+          1.281,
+          -0.6
+        ]
+      ]
+    },
+    {
+      "name": "V15_300_STBD_FormedBronzeFuselageArmor",
+      "faces": 76,
+      "bounds": [
+        [
+          1.452,
+          0.778,
+          -3.57
+        ],
+        [
+          1.721,
+          1.281,
+          -0.6
+        ]
+      ]
+    },
+    {
+      "name": "V15_305_PORT_DeepSideMachineryFrame",
+      "faces": 60,
+      "bounds": [
+        [
+          -1.748,
+          0.572,
+          -2.75
+        ],
+        [
+          -1.484,
+          0.827,
+          -0.82
+        ]
+      ]
+    },
+    {
+      "name": "V15_305_STBD_DeepSideMachineryFrame",
+      "faces": 60,
+      "bounds": [
+        [
+          1.484,
+          0.572,
+          -2.75
+        ],
+        [
+          1.748,
+          0.827,
+          -0.82
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -1.053
+        ],
+        [
+          -1.718,
+          0.827,
+          -0.947
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -1.246
+        ],
+        [
+          -1.718,
+          0.827,
+          -1.141
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_02",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -1.44
+        ],
+        [
+          -1.718,
+          0.827,
+          -1.335
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_03",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -1.634
+        ],
+        [
+          -1.718,
+          0.827,
+          -1.529
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_04",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -1.827
+        ],
+        [
+          -1.718,
+          0.827,
+          -1.722
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_05",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -2.021
+        ],
+        [
+          -1.718,
+          0.827,
+          -1.916
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_06",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -2.215
+        ],
+        [
+          -1.718,
+          0.827,
+          -2.11
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_07",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -2.409
+        ],
+        [
+          -1.718,
+          0.827,
+          -2.304
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_PORT_CoolingRib_08",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.777,
+          0.53,
+          -2.602
+        ],
+        [
+          -1.718,
+          0.827,
+          -2.497
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_00",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -1.053
+        ],
+        [
+          1.777,
+          0.827,
+          -0.947
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_01",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -1.246
+        ],
+        [
+          1.777,
+          0.827,
+          -1.141
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_02",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -1.44
+        ],
+        [
+          1.777,
+          0.827,
+          -1.335
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_03",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -1.634
+        ],
+        [
+          1.777,
+          0.827,
+          -1.529
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_04",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -1.827
+        ],
+        [
+          1.777,
+          0.827,
+          -1.722
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_05",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -2.021
+        ],
+        [
+          1.777,
+          0.827,
+          -1.916
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_06",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -2.215
+        ],
+        [
+          1.777,
+          0.827,
+          -2.11
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_07",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -2.409
+        ],
+        [
+          1.777,
+          0.827,
+          -2.304
+        ]
+      ]
+    },
+    {
+      "name": "V15_307_STBD_CoolingRib_08",
+      "faces": 12,
+      "bounds": [
+        [
+          1.718,
+          0.53,
+          -2.602
+        ],
+        [
+          1.777,
+          0.827,
+          -2.497
+        ]
+      ]
+    },
+    {
+      "name": "V15_320_PORT_IntegratedSweptRearSideWing",
+      "faces": 20,
+      "bounds": [
+        [
+          -2.312,
+          0.737,
+          -3.36
+        ],
+        [
+          -1.484,
+          0.943,
+          -2.28
+        ]
+      ]
+    },
+    {
+      "name": "V15_320_STBD_IntegratedSweptRearSideWing",
+      "faces": 20,
+      "bounds": [
+        [
+          1.484,
+          0.737,
+          -3.36
+        ],
+        [
+          2.312,
+          0.943,
+          -2.28
+        ]
+      ]
+    },
+    {
+      "name": "V15_322_PORT_SweepbackFin",
+      "faces": 16,
+      "bounds": [
+        [
+          -1.502,
+          1.207,
+          -3.48
+        ],
+        [
+          -1.32,
+          2.015,
+          -1.96
+        ]
+      ]
+    },
+    {
+      "name": "V15_322_STBD_SweepbackFin",
+      "faces": 16,
+      "bounds": [
+        [
+          1.32,
+          1.207,
+          -3.48
+        ],
+        [
+          1.502,
+          2.015,
+          -1.96
+        ]
+      ]
+    },
+    {
+      "name": "V15_326_PORT_ForeWingSculptedRoot",
+      "faces": 16,
+      "bounds": [
+        [
+          -2.076,
+          0.532,
+          0.51
+        ],
+        [
+          -1.502,
+          0.677,
+          1.3
+        ]
+      ]
+    },
+    {
+      "name": "V15_326_STBD_ForeWingSculptedRoot",
+      "faces": 16,
+      "bounds": [
+        [
+          1.502,
+          0.532,
+          0.51
+        ],
+        [
+          2.076,
+          0.677,
+          1.3
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_PORT_IntegratedChineRail_0",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.331,
+          1.114,
+          0.328
+        ],
+        [
+          -1.058,
+          1.267,
+          1.012
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_PORT_IntegratedChineRail_1",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.442,
+          1.213,
+          -0.586
+        ],
+        [
+          -1.271,
+          1.349,
+          0.346
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_PORT_IntegratedChineRail_2",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.578,
+          1.295,
+          -1.555
+        ],
+        [
+          -1.381,
+          1.374,
+          -0.575
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_PORT_IntegratedChineRail_3",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.642,
+          1.312,
+          -2.483
+        ],
+        [
+          -1.517,
+          1.374,
+          -1.547
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_PORT_IntegratedChineRail_4",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.642,
+          1.237,
+          -3.364
+        ],
+        [
+          -1.553,
+          1.366,
+          -2.476
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_STBD_IntegratedChineRail_0",
+      "faces": 40,
+      "bounds": [
+        [
+          1.058,
+          1.114,
+          0.328
+        ],
+        [
+          1.331,
+          1.267,
+          1.012
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_STBD_IntegratedChineRail_1",
+      "faces": 40,
+      "bounds": [
+        [
+          1.271,
+          1.213,
+          -0.586
+        ],
+        [
+          1.442,
+          1.349,
+          0.346
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_STBD_IntegratedChineRail_2",
+      "faces": 40,
+      "bounds": [
+        [
+          1.381,
+          1.295,
+          -1.555
+        ],
+        [
+          1.578,
+          1.374,
+          -0.575
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_STBD_IntegratedChineRail_3",
+      "faces": 40,
+      "bounds": [
+        [
+          1.517,
+          1.312,
+          -2.483
+        ],
+        [
+          1.642,
+          1.374,
+          -1.547
+        ]
+      ]
+    },
+    {
+      "name": "V15_500_STBD_IntegratedChineRail_4",
+      "faces": 40,
+      "bounds": [
+        [
+          1.553,
+          1.237,
+          -3.364
+        ],
+        [
+          1.642,
+          1.366,
+          -2.476
+        ]
+      ]
+    },
+    {
+      "name": "V16_AftDorsalCoolerLip_0",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.19,
+          1.898,
+          -3.211
+        ],
+        [
+          0.19,
+          1.921,
+          -3.195
+        ]
+      ]
+    },
+    {
+      "name": "V16_AftDorsalCoolerLip_1",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.19,
+          1.898,
+          -3.411
+        ],
+        [
+          0.19,
+          1.921,
+          -3.395
+        ]
+      ]
+    },
+    {
+      "name": "V16_AftDorsalCoolerLip_2",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.19,
+          1.898,
+          -3.591
+        ],
+        [
+          0.19,
+          1.921,
+          -3.575
+        ]
+      ]
+    },
+    {
+      "name": "V16_AftDorsalCoolingCutout_0",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.215,
+          1.885,
+          -3.22
+        ],
+        [
+          0.215,
+          1.908,
+          -3.121
+        ]
+      ]
+    },
+    {
+      "name": "V16_AftDorsalCoolingCutout_1",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.215,
+          1.885,
+          -3.42
+        ],
+        [
+          0.215,
+          1.908,
+          -3.32
+        ]
+      ]
+    },
+    {
+      "name": "V16_AftDorsalCoolingCutout_2",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.215,
+          1.885,
+          -3.599
+        ],
+        [
+          0.215,
+          1.908,
+          -3.5
+        ]
+      ]
+    },
+    {
+      "name": "V16_FabricatedDorsalCowlHollowUSection",
+      "faces": 988,
+      "bounds": [
+        [
+          -0.772,
+          1.315,
+          -3.84
+        ],
+        [
+          0.772,
+          1.872,
+          -1.79
+        ]
+      ]
+    },
+    {
+      "name": "V16_NoseCenterSpineForgedSection",
+      "faces": 68,
+      "bounds": [
+        [
+          -0.39,
+          1.105,
+          1.95
+        ],
+        [
+          0.39,
+          1.435,
+          3.85
+        ]
+      ]
+    },
+    {
+      "name": "V16_NoseCoolingRecess_0",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.24,
+          1.431,
+          2.394
+        ],
+        [
+          0.24,
+          1.455,
+          2.526
+        ]
+      ]
+    },
+    {
+      "name": "V16_NoseCoolingRecess_1",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.24,
+          1.431,
+          2.164
+        ],
+        [
+          0.24,
+          1.455,
+          2.296
+        ]
+      ]
+    },
+    {
+      "name": "V16_NoseCoolingRecess_2",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.24,
+          1.431,
+          1.934
+        ],
+        [
+          0.24,
+          1.455,
+          2.066
+        ]
+      ]
+    },
+    {
+      "name": "V16_NoseCoolingVane_0",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.22,
+          1.441,
+          2.417
+        ],
+        [
+          0.22,
+          1.472,
+          2.439
+        ]
+      ]
+    },
+    {
+      "name": "V16_NoseCoolingVane_1",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.22,
+          1.441,
+          2.187
+        ],
+        [
+          0.22,
+          1.472,
+          2.209
+        ]
+      ]
+    },
+    {
+      "name": "V16_NoseCoolingVane_2",
+      "faces": 12,
+      "bounds": [
+        [
+          -0.22,
+          1.441,
+          1.957
+        ],
+        [
+          0.22,
+          1.472,
+          1.979
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_AftCowlRidge_00",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.712,
+          1.747,
+          -2.34
+        ],
+        [
+          -0.458,
+          1.893,
+          -1.83
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_AftCowlRidge_01",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.784,
+          1.847,
+          -2.923
+        ],
+        [
+          -0.666,
+          1.903,
+          -2.327
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_AftCowlRidge_02",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.784,
+          1.837,
+          -3.621
+        ],
+        [
+          -0.706,
+          1.903,
+          -2.919
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CavityBackFace",
+      "faces": 6,
+      "bounds": [
+        [
+          -1.506,
+          0.785,
+          2.76
+        ],
+        [
+          -1.134,
+          1.125,
+          2.76
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CoolingPipeHollowBracket_0",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.852,
+          0.605,
+          -1.132
+        ],
+        [
+          -1.814,
+          0.835,
+          -1.069
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CoolingPipeHollowBracket_1",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.852,
+          0.605,
+          -1.37
+        ],
+        [
+          -1.814,
+          0.835,
+          -1.307
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CoolingPipeHollowBracket_2",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.852,
+          0.605,
+          -1.608
+        ],
+        [
+          -1.814,
+          0.835,
+          -1.545
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CoolingPipeHollowBracket_3",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.852,
+          0.605,
+          -1.847
+        ],
+        [
+          -1.814,
+          0.835,
+          -1.783
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CoolingPipeHollowBracket_4",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.852,
+          0.605,
+          -2.085
+        ],
+        [
+          -1.814,
+          0.835,
+          -2.022
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CoolingPipeHollowBracket_5",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.852,
+          0.605,
+          -2.323
+        ],
+        [
+          -1.814,
+          0.835,
+          -2.26
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CoolingPipeHollowBracket_6",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.852,
+          0.605,
+          -2.562
+        ],
+        [
+          -1.814,
+          0.835,
+          -2.499
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_CowlShoulderBlendSkin",
+      "faces": 20,
+      "bounds": [
+        [
+          -1.439,
+          1.376,
+          -3.559
+        ],
+        [
+          -0.621,
+          1.714,
+          -1.861
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeShoulderTrim_00",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.474,
+          1.252,
+          2.848
+        ],
+        [
+          -1.176,
+          1.373,
+          3.192
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeShoulderTrim_01",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.569,
+          1.337,
+          2.277
+        ],
+        [
+          -1.441,
+          1.408,
+          2.863
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeShoulderTrim_02",
+      "faces": 40,
+      "bounds": [
+        [
+          -1.569,
+          1.332,
+          1.738
+        ],
+        [
+          -1.481,
+          1.408,
+          2.282
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeVaneLip_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.48,
+          0.842,
+          3.172
+        ],
+        [
+          -1.12,
+          0.854,
+          3.207
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeVaneLip_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.48,
+          0.977,
+          3.139
+        ],
+        [
+          -1.12,
+          0.989,
+          3.174
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeVaneLip_02",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.48,
+          1.107,
+          3.106
+        ],
+        [
+          -1.12,
+          1.119,
+          3.141
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeVane_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.485,
+          0.814,
+          2.94
+        ],
+        [
+          -1.115,
+          0.845,
+          3.18
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeVane_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.485,
+          0.95,
+          2.907
+        ],
+        [
+          -1.115,
+          0.98,
+          3.147
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntakeVane_02",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.485,
+          1.079,
+          2.874
+        ],
+        [
+          -1.115,
+          1.11,
+          3.114
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_IntegratedRearCowlHaunch",
+      "faces": 492,
+      "bounds": [
+        [
+          -1.641,
+          1.13,
+          -3.72
+        ],
+        [
+          -0.84,
+          1.771,
+          -1.72
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_LowerArmoredSkirt",
+      "faces": 20,
+      "bounds": [
+        [
+          -1.724,
+          0.555,
+          -3.021
+        ],
+        [
+          -1.466,
+          0.705,
+          -0.819
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_LowerMachineryBayOuterRim",
+      "faces": 20,
+      "bounds": [
+        [
+          -1.794,
+          0.623,
+          -2.77
+        ],
+        [
+          -1.701,
+          0.877,
+          -0.88
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_MetalMouthFace",
+      "faces": 16,
+      "bounds": [
+        [
+          -1.61,
+          0.67,
+          3.36
+        ],
+        [
+          -0.99,
+          1.25,
+          3.371
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_MouthFastener_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.606,
+          0.714,
+          3.361
+        ],
+        [
+          -1.554,
+          0.766,
+          3.395
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_MouthFastener_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.606,
+          1.149,
+          3.361
+        ],
+        [
+          -1.554,
+          1.201,
+          3.395
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_NoseCheekArmoredExtrusion",
+      "faces": 20,
+      "bounds": [
+        [
+          -0.728,
+          1.11,
+          1.888
+        ],
+        [
+          -0.392,
+          1.37,
+          3.722
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_NoseCornerHighlight_00",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.59,
+          1.119,
+          3.266
+        ],
+        [
+          -0.39,
+          1.251,
+          3.724
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_NoseCornerHighlight_01",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.731,
+          1.229,
+          2.637
+        ],
+        [
+          -0.569,
+          1.361,
+          3.273
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_NoseCornerHighlight_02",
+      "faces": 40,
+      "bounds": [
+        [
+          -0.731,
+          1.34,
+          1.92
+        ],
+        [
+          -0.689,
+          1.36,
+          2.64
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_PhysicalIntakeOuterHousing",
+      "faces": 86,
+      "bounds": [
+        [
+          -1.9,
+          0.43,
+          0.87
+        ],
+        [
+          -0.92,
+          1.48,
+          3.36
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_PressedIntakeShoulderSkin",
+      "faces": 20,
+      "bounds": [
+        [
+          -1.641,
+          1.228,
+          1.749
+        ],
+        [
+          -1.009,
+          1.352,
+          3.191
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_RealRecessedTunnel",
+      "faces": 16,
+      "bounds": [
+        [
+          -1.516,
+          0.764,
+          2.76
+        ],
+        [
+          -1.084,
+          1.156,
+          3.35
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_RearWingAnchor_0_00",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.758,
+          0.98,
+          -2.417
+        ],
+        [
+          -1.462,
+          1.13,
+          -2.223
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_RearWingAnchor_0_01",
+      "faces": 32,
+      "bounds": [
+        [
+          -2.057,
+          0.854,
+          -2.591
+        ],
+        [
+          -1.703,
+          1.096,
+          -2.309
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_RearWingAnchor_1_00",
+      "faces": 32,
+      "bounds": [
+        [
+          -1.758,
+          0.98,
+          -2.927
+        ],
+        [
+          -1.462,
+          1.13,
+          -2.733
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_RearWingAnchor_1_01",
+      "faces": 32,
+      "bounds": [
+        [
+          -2.057,
+          0.854,
+          -3.101
+        ],
+        [
+          -1.703,
+          1.096,
+          -2.819
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideArmorRivet_00",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.76,
+          1.085,
+          -0.767
+        ],
+        [
+          -1.728,
+          1.115,
+          -0.733
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideArmorRivet_01",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.76,
+          1.085,
+          -1.247
+        ],
+        [
+          -1.728,
+          1.115,
+          -1.212
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideArmorRivet_02",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.76,
+          1.085,
+          -2.797
+        ],
+        [
+          -1.728,
+          1.115,
+          -2.763
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideArmorRivet_03",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.76,
+          1.085,
+          -3.287
+        ],
+        [
+          -1.728,
+          1.115,
+          -3.253
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideCylinderShadow_0",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.821,
+          0.621,
+          -1.154
+        ],
+        [
+          -1.785,
+          0.831,
+          -1.046
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideCylinderShadow_1",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.821,
+          0.621,
+          -1.392
+        ],
+        [
+          -1.785,
+          0.831,
+          -1.284
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideCylinderShadow_2",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.821,
+          0.621,
+          -1.631
+        ],
+        [
+          -1.785,
+          0.831,
+          -1.523
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideCylinderShadow_3",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.821,
+          0.621,
+          -1.869
+        ],
+        [
+          -1.785,
+          0.831,
+          -1.761
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideCylinderShadow_4",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.821,
+          0.621,
+          -2.107
+        ],
+        [
+          -1.785,
+          0.831,
+          -1.999
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideCylinderShadow_5",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.821,
+          0.621,
+          -2.346
+        ],
+        [
+          -1.785,
+          0.831,
+          -2.238
+        ]
+      ]
+    },
+    {
+      "name": "V16_PORT_SideCylinderShadow_6",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.821,
+          0.621,
+          -2.584
+        ],
+        [
+          -1.785,
+          0.831,
+          -2.476
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_AftCowlRidge_00",
+      "faces": 40,
+      "bounds": [
+        [
+          0.458,
+          1.747,
+          -2.34
+        ],
+        [
+          0.712,
+          1.893,
+          -1.83
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_AftCowlRidge_01",
+      "faces": 40,
+      "bounds": [
+        [
+          0.666,
+          1.847,
+          -2.923
+        ],
+        [
+          0.784,
+          1.903,
+          -2.327
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_AftCowlRidge_02",
+      "faces": 40,
+      "bounds": [
+        [
+          0.706,
+          1.837,
+          -3.621
+        ],
+        [
+          0.784,
+          1.903,
+          -2.919
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CavityBackFace",
+      "faces": 6,
+      "bounds": [
+        [
+          1.134,
+          0.785,
+          2.76
+        ],
+        [
+          1.506,
+          1.125,
+          2.76
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CoolingPipeHollowBracket_0",
+      "faces": 12,
+      "bounds": [
+        [
+          1.814,
+          0.605,
+          -1.132
+        ],
+        [
+          1.852,
+          0.835,
+          -1.069
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CoolingPipeHollowBracket_1",
+      "faces": 12,
+      "bounds": [
+        [
+          1.814,
+          0.605,
+          -1.37
+        ],
+        [
+          1.852,
+          0.835,
+          -1.307
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CoolingPipeHollowBracket_2",
+      "faces": 12,
+      "bounds": [
+        [
+          1.814,
+          0.605,
+          -1.608
+        ],
+        [
+          1.852,
+          0.835,
+          -1.545
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CoolingPipeHollowBracket_3",
+      "faces": 12,
+      "bounds": [
+        [
+          1.814,
+          0.605,
+          -1.847
+        ],
+        [
+          1.852,
+          0.835,
+          -1.783
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CoolingPipeHollowBracket_4",
+      "faces": 12,
+      "bounds": [
+        [
+          1.814,
+          0.605,
+          -2.085
+        ],
+        [
+          1.852,
+          0.835,
+          -2.022
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CoolingPipeHollowBracket_5",
+      "faces": 12,
+      "bounds": [
+        [
+          1.814,
+          0.605,
+          -2.323
+        ],
+        [
+          1.852,
+          0.835,
+          -2.26
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CoolingPipeHollowBracket_6",
+      "faces": 12,
+      "bounds": [
+        [
+          1.814,
+          0.605,
+          -2.562
+        ],
+        [
+          1.852,
+          0.835,
+          -2.499
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_CowlShoulderBlendSkin",
+      "faces": 20,
+      "bounds": [
+        [
+          0.621,
+          1.376,
+          -3.559
+        ],
+        [
+          1.439,
+          1.714,
+          -1.861
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeShoulderTrim_00",
+      "faces": 40,
+      "bounds": [
+        [
+          1.176,
+          1.252,
+          2.848
+        ],
+        [
+          1.474,
+          1.373,
+          3.192
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeShoulderTrim_01",
+      "faces": 40,
+      "bounds": [
+        [
+          1.441,
+          1.337,
+          2.277
+        ],
+        [
+          1.569,
+          1.408,
+          2.863
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeShoulderTrim_02",
+      "faces": 40,
+      "bounds": [
+        [
+          1.481,
+          1.332,
+          1.738
+        ],
+        [
+          1.569,
+          1.408,
+          2.282
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeVaneLip_00",
+      "faces": 12,
+      "bounds": [
+        [
+          1.12,
+          0.842,
+          3.172
+        ],
+        [
+          1.48,
+          0.854,
+          3.207
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeVaneLip_01",
+      "faces": 12,
+      "bounds": [
+        [
+          1.12,
+          0.977,
+          3.139
+        ],
+        [
+          1.48,
+          0.989,
+          3.174
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeVaneLip_02",
+      "faces": 12,
+      "bounds": [
+        [
+          1.12,
+          1.107,
+          3.106
+        ],
+        [
+          1.48,
+          1.119,
+          3.141
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeVane_00",
+      "faces": 12,
+      "bounds": [
+        [
+          1.115,
+          0.814,
+          2.94
+        ],
+        [
+          1.485,
+          0.845,
+          3.18
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeVane_01",
+      "faces": 12,
+      "bounds": [
+        [
+          1.115,
+          0.95,
+          2.907
+        ],
+        [
+          1.485,
+          0.98,
+          3.147
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntakeVane_02",
+      "faces": 12,
+      "bounds": [
+        [
+          1.115,
+          1.079,
+          2.874
+        ],
+        [
+          1.485,
+          1.11,
+          3.114
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_IntegratedRearCowlHaunch",
+      "faces": 492,
+      "bounds": [
+        [
+          0.84,
+          1.13,
+          -3.72
+        ],
+        [
+          1.641,
+          1.771,
+          -1.72
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_LowerArmoredSkirt",
+      "faces": 20,
+      "bounds": [
+        [
+          1.466,
+          0.555,
+          -3.021
+        ],
+        [
+          1.724,
+          0.705,
+          -0.819
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_LowerMachineryBayOuterRim",
+      "faces": 20,
+      "bounds": [
+        [
+          1.701,
+          0.623,
+          -2.77
+        ],
+        [
+          1.794,
+          0.877,
+          -0.88
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_MetalMouthFace",
+      "faces": 16,
+      "bounds": [
+        [
+          0.99,
+          0.67,
+          3.36
+        ],
+        [
+          1.61,
+          1.25,
+          3.371
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_MouthFastener_00",
+      "faces": 12,
+      "bounds": [
+        [
+          1.554,
+          0.714,
+          3.361
+        ],
+        [
+          1.606,
+          0.766,
+          3.395
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_MouthFastener_01",
+      "faces": 12,
+      "bounds": [
+        [
+          1.554,
+          1.149,
+          3.361
+        ],
+        [
+          1.606,
+          1.201,
+          3.395
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_NoseCheekArmoredExtrusion",
+      "faces": 20,
+      "bounds": [
+        [
+          0.392,
+          1.11,
+          1.888
+        ],
+        [
+          0.728,
+          1.37,
+          3.722
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_NoseCornerHighlight_00",
+      "faces": 40,
+      "bounds": [
+        [
+          0.39,
+          1.119,
+          3.266
+        ],
+        [
+          0.59,
+          1.251,
+          3.724
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_NoseCornerHighlight_01",
+      "faces": 40,
+      "bounds": [
+        [
+          0.569,
+          1.229,
+          2.637
+        ],
+        [
+          0.731,
+          1.361,
+          3.273
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_NoseCornerHighlight_02",
+      "faces": 40,
+      "bounds": [
+        [
+          0.689,
+          1.34,
+          1.92
+        ],
+        [
+          0.731,
+          1.36,
+          2.64
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_PhysicalIntakeOuterHousing",
+      "faces": 86,
+      "bounds": [
+        [
+          0.92,
+          0.43,
+          0.87
+        ],
+        [
+          1.9,
+          1.48,
+          3.36
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_PressedIntakeShoulderSkin",
+      "faces": 20,
+      "bounds": [
+        [
+          1.009,
+          1.228,
+          1.749
+        ],
+        [
+          1.641,
+          1.352,
+          3.191
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_RealRecessedTunnel",
+      "faces": 16,
+      "bounds": [
+        [
+          1.084,
+          0.764,
+          2.76
+        ],
+        [
+          1.516,
+          1.156,
+          3.35
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_RearWingAnchor_0_00",
+      "faces": 32,
+      "bounds": [
+        [
+          1.462,
+          0.98,
+          -2.417
+        ],
+        [
+          1.758,
+          1.13,
+          -2.223
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_RearWingAnchor_0_01",
+      "faces": 32,
+      "bounds": [
+        [
+          1.703,
+          0.854,
+          -2.591
+        ],
+        [
+          2.057,
+          1.096,
+          -2.309
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_RearWingAnchor_1_00",
+      "faces": 32,
+      "bounds": [
+        [
+          1.462,
+          0.98,
+          -2.927
+        ],
+        [
+          1.758,
+          1.13,
+          -2.733
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_RearWingAnchor_1_01",
+      "faces": 32,
+      "bounds": [
+        [
+          1.703,
+          0.854,
+          -3.101
+        ],
+        [
+          2.057,
+          1.096,
+          -2.819
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideArmorRivet_00",
+      "faces": 12,
+      "bounds": [
+        [
+          1.728,
+          1.085,
+          -0.767
+        ],
+        [
+          1.76,
+          1.115,
+          -0.733
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideArmorRivet_01",
+      "faces": 12,
+      "bounds": [
+        [
+          1.728,
+          1.085,
+          -1.247
+        ],
+        [
+          1.76,
+          1.115,
+          -1.212
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideArmorRivet_02",
+      "faces": 12,
+      "bounds": [
+        [
+          1.728,
+          1.085,
+          -2.797
+        ],
+        [
+          1.76,
+          1.115,
+          -2.763
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideArmorRivet_03",
+      "faces": 12,
+      "bounds": [
+        [
+          1.728,
+          1.085,
+          -3.287
+        ],
+        [
+          1.76,
+          1.115,
+          -3.253
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideCylinderShadow_0",
+      "faces": 12,
+      "bounds": [
+        [
+          1.785,
+          0.621,
+          -1.154
+        ],
+        [
+          1.821,
+          0.831,
+          -1.046
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideCylinderShadow_1",
+      "faces": 12,
+      "bounds": [
+        [
+          1.785,
+          0.621,
+          -1.392
+        ],
+        [
+          1.821,
+          0.831,
+          -1.284
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideCylinderShadow_2",
+      "faces": 12,
+      "bounds": [
+        [
+          1.785,
+          0.621,
+          -1.631
+        ],
+        [
+          1.821,
+          0.831,
+          -1.523
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideCylinderShadow_3",
+      "faces": 12,
+      "bounds": [
+        [
+          1.785,
+          0.621,
+          -1.869
+        ],
+        [
+          1.821,
+          0.831,
+          -1.761
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideCylinderShadow_4",
+      "faces": 12,
+      "bounds": [
+        [
+          1.785,
+          0.621,
+          -2.107
+        ],
+        [
+          1.821,
+          0.831,
+          -1.999
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideCylinderShadow_5",
+      "faces": 12,
+      "bounds": [
+        [
+          1.785,
+          0.621,
+          -2.346
+        ],
+        [
+          1.821,
+          0.831,
+          -2.238
+        ]
+      ]
+    },
+    {
+      "name": "V16_STBD_SideCylinderShadow_6",
+      "faces": 12,
+      "bounds": [
+        [
+          1.785,
+          0.621,
+          -2.584
+        ],
+        [
+          1.821,
+          0.831,
+          -2.476
+        ]
+      ]
+    },
+    {
+      "name": "V17_ForgedHoodToWindshieldLoadBridge",
+      "faces": 76,
+      "bounds": [
+        [
+          -0.64,
+          0.88,
+          -0.28
+        ],
+        [
+          0.64,
+          1.16,
+          0.57
+        ]
+      ]
+    },
+    {
+      "name": "V17_PORT_HoodShoulderIntegratedWeb",
+      "faces": 124,
+      "bounds": [
+        [
+          -1.12,
+          0.74,
+          0.42
+        ],
+        [
+          -0.29,
+          1.35,
+          3.19
+        ]
+      ]
+    },
+    {
+      "name": "V17_PORT_HoodStructuralRib_0",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.08,
+          0.77,
+          0.73
+        ],
+        [
+          -0.64,
+          1.125,
+          1.32
+        ]
+      ]
+    },
+    {
+      "name": "V17_PORT_HoodStructuralRib_1",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.08,
+          0.77,
+          1.72
+        ],
+        [
+          -0.64,
+          1.125,
+          2.22
+        ]
+      ]
+    },
+    {
+      "name": "V17_PORT_HoodStructuralRib_2",
+      "faces": 12,
+      "bounds": [
+        [
+          -1.08,
+          0.77,
+          2.65
+        ],
+        [
+          -0.64,
+          1.125,
+          2.98
+        ]
+      ]
+    },
+    {
+      "name": "V17_PORT_RearCowlStructuralSaddle",
+      "faces": 76,
+      "bounds": [
+        [
+          -1.48,
+          1.06,
+          -3.64
+        ],
+        [
+          -0.77,
+          1.525,
+          -2.04
+        ]
+      ]
+    },
+    {
+      "name": "V17_STBD_HoodShoulderIntegratedWeb",
+      "faces": 124,
+      "bounds": [
+        [
+          0.29,
+          0.74,
+          0.42
+        ],
+        [
+          1.12,
+          1.35,
+          3.19
+        ]
+      ]
+    },
+    {
+      "name": "V17_STBD_HoodStructuralRib_0",
+      "faces": 12,
+      "bounds": [
+        [
+          0.64,
+          0.77,
+          0.73
+        ],
+        [
+          1.08,
+          1.125,
+          1.32
+        ]
+      ]
+    },
+    {
+      "name": "V17_STBD_HoodStructuralRib_1",
+      "faces": 12,
+      "bounds": [
+        [
+          0.64,
+          0.77,
+          1.72
+        ],
+        [
+          1.08,
+          1.125,
+          2.22
+        ]
+      ]
+    },
+    {
+      "name": "V17_STBD_HoodStructuralRib_2",
+      "faces": 12,
+      "bounds": [
+        [
+          0.64,
+          0.77,
+          2.65
+        ],
+        [
+          1.08,
+          1.125,
+          2.98
+        ]
+      ]
+    },
+    {
+      "name": "V17_STBD_RearCowlStructuralSaddle",
+      "faces": 76,
+      "bounds": [
+        [
+          0.77,
+          1.06,
+          -3.64
+        ],
+        [
+          1.48,
+          1.525,
+          -2.04
+        ]
+      ]
+    }
+  ]
+}
