@@ -5,6 +5,7 @@ on:
     paths:
       - 'tools/vision/v25-wireframe-actual-atlas.b64'
       - 'tools/vision/v29-wireframe-real-atlas.b64'
+      - 'tools/vision/v33-wireframe-real-atlas.b64'
       - 'tools/vision/run_v25_wireframe_ai.py'
       - '.github/workflows/forge-v25-wireframe-ai.yml'
   workflow_dispatch:
@@ -48,8 +49,8 @@ jobs:
           r=json.loads((p/'FORGE_V25_V29_REAL_WIREFRAME_AI_REPORT.json').read_text())
           assert r['pretrained_weights_executed'] is True
           assert r['geometry_changed_by_AI'] is False
-          assert set(r['model_versions'])=={'V25','V29'}
-          for version in ('V25','V29'):
+          assert set(r['model_versions'])=={'V25','V29','V33'}
+          for version in ('V25','V29','V33'):
             for view in ('side','top'):
               v=r['comparisons'][version][view]
               assert v['patch_count']>0
