@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run genuine pretrained DINOv2 and Depth Anything V2 on owner's wireframe.
 
-Paired inputs use IDENTICAL fixed camera positions/scale for V25 and V29.
+Paired inputs use IDENTICAL fixed camera positions/scale for V25, V29, V33.
 Wireframe reference and model render both from actual GLB triangle edges.
 Image compression, wire topology differences and 2D depth ambiguity remain.
 """
@@ -18,7 +18,8 @@ OUT=ROOT/"build/forge_v25_wireframe_ai"
 OUT.mkdir(parents=True,exist_ok=True)
 sources={
  "V25":("tools/vision/v25-wireframe-actual-atlas.b64","f197b18d8a962b1361d525aa37da329ef099886ae1e9b3f8a2d0c86dedc08318"),
- "V29":("tools/vision/v29-wireframe-real-atlas.b64","e9ddbc828c9abb0c552d0f6f6ace88a43ffa4afc5293280f23fb03cc0830128e")
+ "V29":("tools/vision/v29-wireframe-real-atlas.b64","e9ddbc828c9abb0c552d0f6f6ace88a43ffa4afc5293280f23fb03cc0830128e"),
+ "V33":("tools/vision/v33-wireframe-real-atlas.b64","9565c261c27656b3a3de27a784fceb71b0d328e5b90b78ca6f52de869157f8a2")
 }
 pairs={}
 for version,(path,digest) in sources.items():
@@ -35,7 +36,7 @@ for version,(path,digest) in sources.items():
   pairs[(version,view)]=(reference,candidate)
 torch.set_num_threads(2)
 report={
- "source":"User-supplied 4240.jpg basic five-view wireframe; V25 and V29 true GLB wireframe renderings in same fixed-side/top camera",
+ "source":"User-supplied 4240.jpg basic five-view wireframe; V25 V29 V33 actual GLB wireframes from fixed side/top camera",
  "model_versions":list(sources),
  "camera_registered":True,
  "pretrained_weights_executed":False,
@@ -94,6 +95,9 @@ for v in ("side","top"):
   "dino_cls_delta":round(report["comparisons"]["V29"][v]["global_cls_cosine"]-report["comparisons"]["V25"][v]["global_cls_cosine"],5),
   "dino_patch_delta":round(report["comparisons"]["V29"][v]["spatial_patch_cosine"]-report["comparisons"]["V25"][v]["spatial_patch_cosine"],5),
   "relative_depth_corr_delta":round(report["comparisons"]["V29"][v]["relative_depth_correlation"]-report["comparisons"]["V25"][v]["relative_depth_correlation"],5),
+  "v33_dino_vs_v25":round(report["comparisons"]["V33"][v]["global_cls_cosine"]-report["comparisons"]["V25"][v]["global_cls_cosine"],5),
+  "v33_dino_vs_v29":round(report["comparisons"]["V33"][v]["global_cls_cosine"]-report["comparisons"]["V29"][v]["global_cls_cosine"],5),
+  "v33_depth_vs_v25":round(report["comparisons"]["V33"][v]["relative_depth_correlation"]-report["comparisons"]["V25"][v]["relative_depth_correlation"],5),
  }
 (OUT/"FORGE_V25_V29_REAL_WIREFRAME_AI_REPORT.json").write_text(json.dumps(report,indent=2)+"\n")
 print("FORGE_V25_WIREFRAME_BOTH_REAL_MODELS_COMPLETED",flush=True)
