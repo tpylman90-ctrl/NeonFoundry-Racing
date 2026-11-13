@@ -6,13 +6,14 @@ comparison; only visual engineering inspection of the SOURCE GLB.
 """
 from pathlib import Path
 import json
+import os
 import numpy as np
 import cv2
 import trimesh
 
 ROOT=Path(__file__).resolve().parents[1]
-FILE=ROOT/"art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb"
-OUT=ROOT/"build/forge_v20_preview"
+FILE=Path(os.environ.get("NFR_PREVIEW_SOURCE",str(ROOT/"art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb")))
+OUT=Path(os.environ.get("NFR_PREVIEW_OUTPUT",str(ROOT/"build/forge_v20_preview")))
 OUT.mkdir(parents=True,exist_ok=True)
 scene=trimesh.load(FILE,force="scene",process=False)
 reported=[]
@@ -86,6 +87,6 @@ for name,(eye,center,scale) in views.items():
     im=Image.fromarray(canvas,"RGB")
     dr=ImageDraw.Draw(im)
     dr.rectangle((18,18,410,52),fill=(20,23,30))
-    dr.text((28,27),"FORGE V19 / actual GLB mesh / "+name,fill=(240,240,240))
+    dr.text((28,27),FILE.stem+" / actual GLB mesh / "+name,fill=(240,240,240))
     im.save(OUT/("FORGE_V20_GLB_"+name+".png"))
 print("NFR_V20_PREVIEW_OK",len(reported),len(tris),flush=True)
