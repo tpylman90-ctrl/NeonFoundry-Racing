@@ -1,0 +1,80 @@
+name: FORGE V25 Wireframe - REAL DINOv2 + Depth Anything V2
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/vision/v25-wireframe-actual-atlas.b64'
+      - 'tools/vision/run_v25_wireframe_ai.py'
+      - '.github/workflows/forge-v25-wireframe-ai.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: forge-v25-wireframe-ai-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pretrained:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free CPU inference dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --index-url https://download.pytorch.org/whl/cpu 'torch==2.6.0'
+          python -m pip install --disable-pip-version-check 'transformers==4.46.3' 'numpy>=1.26,<2' 'Pillow>=10,<13'
+      - name: Inference on actual basic wireframe artwork against V25 GLB
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DISABLE_XET: '1'
+          OMP_NUM_THREADS: '2'
+          OPENBLAS_NUM_THREADS: '2'
+        run: |
+          set -euo pipefail
+          mkdir -p build/forge_v25_wireframe_ai
+          python tools/vision/run_v25_wireframe_ai.py 2>&1 | tee build/forge_v25_wireframe_ai/INFERENCE_LOG.txt
+          grep -q FORGE_V25_WIREFRAME_BOTH_REAL_MODELS_COMPLETED build/forge_v25_wireframe_ai/INFERENCE_LOG.txt
+      - name: Independently audit results
+        run: |
+          python - <<'PY'
+          import json,math
+          from pathlib import Path
+          from PIL import Image
+          p=Path('build/forge_v25_wireframe_ai')
+          r=json.loads((p/'FORGE_V25_Wireframe_DINO_Depth_Report.json').read_text())
+          assert r['pretrained_inference_completed'] is True
+          assert r['geometry_changed'] is False
+          assert r['reference_images_are_wireframe_drawings']
+          for view in ('side','top'):
+            v=r['views'][view]
+            assert v['patch_count']>0
+            for key in ('dino_cls_cosine','dino_spatial_patch_cosine','relative_depth_correlation'):
+              assert math.isfinite(v[key])
+            for suffix in ('DINO_aligned_patch_agreement','reference_wireframe_depth_anything_v2','actual_v25_glb_depth_anything_v2'):
+              assert Image.open(p/(view+'_'+suffix+'.png')).size==(200,144)
+          print('WIRE_FRAME_PRETRAINED_AI_RESULTS_VALIDATED')
+          PY
+      - name: Upload all inference outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-FORGE-V25-Wireframe-Real-Dino-Depth
+          path: build/forge_v25_wireframe_ai/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Publish analysis only, without claiming mesh geometry change
+        if: success()
+        run: |
+          set -euo pipefail
+          mkdir -p art/hero_01/experiments/V25_Wireframe_AI
+          cp build/forge_v25_wireframe_ai/* art/hero_01/experiments/V25_Wireframe_AI/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add art/hero_01/experiments/V25_Wireframe_AI/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish verified DINOv2 and Depth Anything wireframe assessment'
+            git push
+          fi
