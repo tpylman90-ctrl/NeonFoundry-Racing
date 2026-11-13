@@ -1,8 +1,9 @@
 {
-  "source": "User-supplied 4240.jpg basic five-view wireframe; V25 and V29 true GLB wireframe renderings in same fixed-side/top camera",
+  "source": "User-supplied 4240.jpg basic five-view wireframe; V25 V29 V33 actual GLB wireframes from fixed side/top camera",
   "model_versions": [
     "V25",
-    "V29"
+    "V29",
+    "V33"
   ],
   "camera_registered": true,
   "pretrained_weights_executed": true,
@@ -37,7 +38,7 @@
     "V29": {
       "side": {
         "global_cls_cosine": 0.6166,
-        "spatial_patch_cosine": 0.71121,
+        "spatial_patch_cosine": 0.7112,
         "patch_count": 256,
         "relative_depth_correlation": 0.87184,
         "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
@@ -49,18 +50,40 @@
         "relative_depth_correlation": 0.90846,
         "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
       }
+    },
+    "V33": {
+      "side": {
+        "global_cls_cosine": 0.57509,
+        "spatial_patch_cosine": 0.69462,
+        "patch_count": 256,
+        "relative_depth_correlation": 0.88269,
+        "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
+      },
+      "top": {
+        "global_cls_cosine": 0.6229,
+        "spatial_patch_cosine": 0.56868,
+        "patch_count": 256,
+        "relative_depth_correlation": 0.89487,
+        "depth_interpretation": "Uncalibrated monocular estimate on line art; correlation is diagnostic only"
+      }
     }
   },
   "comparison_deltas": {
     "side": {
       "dino_cls_delta": -0.10293,
-      "dino_patch_delta": -0.02908,
-      "relative_depth_corr_delta": 0.01206
+      "dino_patch_delta": -0.02909,
+      "relative_depth_corr_delta": 0.01206,
+      "v33_dino_vs_v25": -0.14444,
+      "v33_dino_vs_v29": -0.04151,
+      "v33_depth_vs_v25": 0.02291
     },
     "top": {
       "dino_cls_delta": -0.02875,
       "dino_patch_delta": -0.0109,
-      "relative_depth_corr_delta": 0.08312
+      "relative_depth_corr_delta": 0.08312,
+      "v33_dino_vs_v25": -0.03903,
+      "v33_dino_vs_v29": -0.01028,
+      "v33_depth_vs_v25": 0.06953
     }
   }
 }
