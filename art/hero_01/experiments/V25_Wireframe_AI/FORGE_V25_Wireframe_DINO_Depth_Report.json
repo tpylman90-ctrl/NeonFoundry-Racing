@@ -1,0 +1,31 @@
+{
+  "source": "User's 4240.jpg basic 5-view wireframe sheet, paired with actual FORGE_V25_side.png and FORGE_V25_top.png rendered from V25 GLB",
+  "atlas_sha256": "1bf9559649ba4c23412acefc296c72d93069b19982903f0be8eaa115b989d137",
+  "models": {
+    "dino": "facebook/dinov2-small",
+    "depth": "depth-anything/Depth-Anything-V2-Small-hf"
+  },
+  "pretrained_inference_completed": true,
+  "reference_images_are_wireframe_drawings": true,
+  "camera_calibrated": false,
+  "geometry_changed": false,
+  "limitations": "2D grayscale wireframe plus compressed art is out-of-domain for monocular depth; relative depth maps are not metric or ground truth. DINO cosine is not an accuracy percentage; not a pass/fail geometry metric.",
+  "views": {
+    "side": {
+      "dino_cls_cosine": 0.55233,
+      "dino_spatial_patch_cosine": 0.64508,
+      "patch_count": 256,
+      "reference_vs_render": "Wireframe drawing vs neutral gray GLB; texture/domain differences affect DINO comparison",
+      "relative_depth_correlation": 0.83283,
+      "depth_warning": "Monocular estimates on wireframe art can be inaccurate and are independently normalized; correlation is not shape accuracy."
+    },
+    "top": {
+      "dino_cls_cosine": 0.25961,
+      "dino_spatial_patch_cosine": 0.27243,
+      "patch_count": 256,
+      "reference_vs_render": "Wireframe drawing vs neutral gray GLB; texture/domain differences affect DINO comparison",
+      "relative_depth_correlation": -0.63869,
+      "depth_warning": "Monocular estimates on wireframe art can be inaccurate and are independently normalized; correlation is not shape accuracy."
+    }
+  }
+}

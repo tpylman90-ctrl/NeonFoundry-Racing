@@ -1,0 +1,5 @@
+FORGE_WIRE_DINO_PRETRAINED side {'dino_cls_cosine': 0.55233, 'dino_spatial_patch_cosine': 0.64508, 'patch_count': 256, 'reference_vs_render': 'Wireframe drawing vs neutral gray GLB; texture/domain differences affect DINO comparison'}
+FORGE_WIRE_DINO_PRETRAINED top {'dino_cls_cosine': 0.25961, 'dino_spatial_patch_cosine': 0.27243, 'patch_count': 256, 'reference_vs_render': 'Wireframe drawing vs neutral gray GLB; texture/domain differences affect DINO comparison'}
+FORGE_WIRE_DEPTH_PRETRAINED side 0.8328309130244771
+FORGE_WIRE_DEPTH_PRETRAINED top -0.6386860153458361
+FORGE_V25_WIREFRAME_BOTH_REAL_MODELS_COMPLETED
