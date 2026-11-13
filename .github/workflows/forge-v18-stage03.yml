@@ -1,0 +1,74 @@
+name: NF-H01 / V18.03 Physical Hood and Duct Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-v18-stage03.yml'
+      - 'tools/build_forge_v18_stage03.py'
+      - 'tools/check_forge_v18_stage03.py'
+      - 'art/hero_01/experiments/V18_Stage03/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actual-mesh-build:
+    name: Rebuild modular hood/intakes and verify physical mount contact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free CPU geometry tools
+        run: |
+          python -m pip install --disable-pip-version-check "numpy==2.3.5" "trimesh==4.11.1" "networkx==3.6.1" "scipy==1.17.0" "shapely==2.1.2"
+      - name: Generate real modular GLB from approved V18.02 frame
+        env:
+          NFR_STAGE03_OUT: build/forge_v18_stage03
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_forge_v18_stage03.py tools/check_forge_v18_stage03.py
+          python tools/build_forge_v18_stage03.py | tee /tmp/forge-v18-03-output.txt
+          grep -q V18_03_REAL_MODEL_OK /tmp/forge-v18-03-output.txt
+      - name: Independently verify closed parts and real section intersection areas
+        run: |
+          set -euo pipefail
+          python tools/check_forge_v18_stage03.py \
+            --frame art/hero_01/experiments/V18_Stage02/FORGE_V18_02_WideDeep_Chassis.glb \
+            --model build/forge_v18_stage03/FORGE_V18_03_Hood_Intakes_Modular.glb \
+            --out build/forge_v18_stage03/FORGE_V18_03_CONTACT_AUDIT.json | tee /tmp/forge-v18-03-qa.txt
+          grep -q NFR_V18_03_INTAKE_HOOD_PHYSICAL_CONTACTS_VERIFIED /tmp/forge-v18-03-qa.txt
+      - name: Compare generated assembly geometry to committed review asset
+        run: |
+          python - <<'PY'
+          import trimesh, numpy as np
+          from pathlib import Path
+          checked=Path('art/hero_01/experiments/V18_Stage03/FORGE_V18_03_Hood_Intakes_Modular.glb')
+          rebuilt=Path('build/forge_v18_stage03/FORGE_V18_03_Hood_Intakes_Modular.glb')
+          assert checked.is_file() and rebuilt.is_file()
+          a=trimesh.load(checked,force='scene',process=False)
+          b=trimesh.load(rebuilt,force='scene',process=False)
+          assert set(a.geometry)==set(b.geometry)
+          assert len(a.geometry)==396
+          assert sum(len(v.faces) for v in b.geometry.values())==18056
+          for name in a.geometry:
+              x,y=a.geometry[name],b.geometry[name]
+              assert x.vertices.shape==y.vertices.shape,name
+              assert x.faces.shape==y.faces.shape,name
+              assert np.array_equal(x.faces,y.faces),name
+              assert np.allclose(x.vertices,y.vertices,atol=1e-5,rtol=0),name
+              assert y.is_watertight and y.is_winding_consistent,name
+          print('NFR_V18_03_REPRODUCIBLE_INSPECTION_GLB_OK')
+          PY
+      - name: Export single inspectable GLB and contact audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-V18-03-Hood-Intakes-Inspection
+          path: |
+            build/forge_v18_stage03/FORGE_V18_03_Hood_Intakes_Modular.glb
+            build/forge_v18_stage03/FORGE_V18_03_CONTACT_AUDIT.json
+          retention-days: 14
