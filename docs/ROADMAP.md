@@ -4,6 +4,7 @@
 | --- | --- | --- |
 | 0 | Professional repository, docs, Vulkan shell, CI, Android signing workflow | **Done — CI and signed Android build #1 verified** |
 | 0.5 | Cinematic title, main menu, functional settings, navigation previews | **Implemented — CI and Android build #4 passed; phone review pending** |
+| 0.6 | Interactive navigation skeleton for 11-stage game loop | **Implemented in source; Godot CI and Android device verification required** |
 | 1 | NF-H01 flagship hovercraft built through 12 strict visual-approval gates | **Gate 01 active; no model approved** |
 | 2 | Walkable garage + craft inspection using the approved NF-H01 model | Planned — after gate 12 |
 | 3 | Hover and real free-flight physics on a small proving ground | Planned |
@@ -30,3 +31,6 @@ Menu milestone verification: [Android build #4](https://github.com/tpylman90-ctr
 Menu V2 visual milestone: Blender-produced hero/deck/airway/city, native Godot motorsport UI, and automated Vulkan screenshots. The Android build and device review must confirm quality/performance before final approval.
 
 **Hero craft source of truth:** [NF-H01 locked build order](HERO_CRAFT_BUILD_ORDER.md). Stage status is maintained in art/hero_01/progress.json and validated during CI. User approval is required for every gate. New ideas belong in art/hero_01/DEFERRED.md until their numbered stage.
+
+
+Menu skeleton contract and route coverage: [MENU_FLOW.md](MENU_FLOW.md). Craft creation remains approval-gated, and the UI prototype cannot grant real rewards or run an actual race.

@@ -6,6 +6,7 @@ signal page_changed(next_page: String)
 
 const BackdropScript = preload("res://scripts/menu_backdrop.gd")
 const ChromeScript = preload("res://scripts/menu_chrome.gd")
+const FlowScript = preload("res://scripts/flow_screen.gd")
 const MENU_ART: String = "res://assets/menu/launch_scene.png"
 const SETTINGS_FILE: String = "user://neon_foundry_settings.cfg"
 const CYAN: Color = Color("4dd5db")
@@ -25,6 +26,7 @@ var _title_page: Control
 var _menu_page: Control
 var _detail_page: Control
 var _settings_page: Control
+var _flow_page: Control
 var _detail_title: Label
 var _detail_subtitle: Label
 var _fps_label: Label
@@ -123,6 +125,14 @@ func _build_interface() -> void:
 	add_child(_settings_page)
 	_build_settings()
 
+	_flow_page = Control.new()
+	_flow_page.name = "FlowScreen"
+	_flow_page.set_script(FlowScript)
+	_flow_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_flow_page.connect("request_main_menu", Callable(self, "show_main_menu"))
+	_flow_page.connect("request_device_settings", Callable(self, "open_settings"))
+	add_child(_flow_page)
+
 	var footer: Label = _label("NEON FOUNDRY  //  PROTOTYPE 0.2     •     ANDROID / MOBILE / VULKAN", 14, Color("98b1bd"), true)
 	footer.anchor_left = 0.068
 	footer.anchor_right = 0.89
@@ -164,66 +174,44 @@ func _build_title() -> void:
 	col.add_child(_label("TAP TO INITIALIZE     /     PRESS ENTER", 12, CYAN, true))
 
 func _build_menu() -> void:
-	var col := _column(0.075, 0.158, 0.434, 0.916, 4)
+	var col := _column(0.075, 0.158, 0.434, 0.916, 5)
 	_menu_page.add_child(col)
 	col.add_child(_label("SEASON ZERO  /  PLAYER TERMINAL", 16, AMBER, true))
 	col.add_child(_label("NEON FOUNDRY", 46, PALE, true))
 	col.add_child(_label("R A C I N G", 32, CYAN, true))
 	col.add_child(_label("SELECT YOUR DESTINATION", 14, MUTED, true))
 	var spacer := Control.new()
-	spacer.custom_minimum_size.y = 12
+	spacer.custom_minimum_size.y = 8
 	col.add_child(spacer)
-
-	var enter: Button = _button("01   ENTER THE FOUNDRY", true)
-	enter.custom_minimum_size.y = 54
-	enter.pressed.connect(func() -> void: _open_section("garage"))
-	enter.mouse_entered.connect(func() -> void: _set_menu_preview("garage"))
-	enter.focus_entered.connect(func() -> void: _set_menu_preview("garage"))
-	col.add_child(enter)
-
-	var races: Button = _button("02   RACE CONTROL")
-	races.custom_minimum_size.y = 54
-	races.pressed.connect(func() -> void: _open_section("races"))
-	races.mouse_entered.connect(func() -> void: _set_menu_preview("races"))
-	races.focus_entered.connect(func() -> void: _set_menu_preview("races"))
-	col.add_child(races)
-
-	var fleet: Button = _button("03   THE FLEET")
-	fleet.custom_minimum_size.y = 54
-	fleet.pressed.connect(func() -> void: _open_section("fleet"))
-	fleet.mouse_entered.connect(func() -> void: _set_menu_preview("fleet"))
-	fleet.focus_entered.connect(func() -> void: _set_menu_preview("fleet"))
-	col.add_child(fleet)
-
-	var options: Button = _button("04   OPTIONS")
-	options.custom_minimum_size.y = 54
-	options.pressed.connect(open_settings)
-	options.mouse_entered.connect(func() -> void: _set_menu_preview("settings"))
-	options.focus_entered.connect(func() -> void: _set_menu_preview("settings"))
-	col.add_child(options)
-
-	var about: Button = _button("05   ABOUT")
-	about.custom_minimum_size.y = 54
-	about.pressed.connect(func() -> void: _open_section("about"))
-	about.mouse_entered.connect(func() -> void: _set_menu_preview("about"))
-	about.focus_entered.connect(func() -> void: _set_menu_preview("about"))
-	col.add_child(about)
-
-	var quit: Button = _button("06   QUIT")
-	quit.custom_minimum_size.y = 54
-	quit.pressed.connect(func() -> void: get_tree().quit())
-	quit.mouse_entered.connect(func() -> void: _set_menu_preview("quit"))
-	quit.focus_entered.connect(func() -> void: _set_menu_preview("quit"))
-	col.add_child(quit)
-
-	var title: Button = _button("‹    RETURN TO TITLE")
+	var sections: Array[Dictionary] = [
+		{"text": "01   GARAGE  /  CRAFT SELECT", "key": "garage"},
+		{"text": "02   RACE  /  MODE SELECT", "key": "races"},
+		{"text": "03   STORE  /  DEALERSHIP", "key": "store"},
+		{"text": "04   DRIVER  /  PROFILE", "key": "profile"},
+		{"text": "05   SETTINGS  /  DEVICE", "key": "settings"}
+	]
+	for entry in sections:
+		var section: String = str(entry["key"])
+		var button: Button = _button(str(entry["text"]), section == "garage")
+		button.custom_minimum_size.y = 50
+		if section == "settings":
+			button.pressed.connect(open_settings)
+		else:
+			button.pressed.connect(_open_section.bind(section))
+		button.mouse_entered.connect(_set_menu_preview.bind(section))
+		button.focus_entered.connect(_set_menu_preview.bind(section))
+		col.add_child(button)
+	var exit_button: Button = _button("06   QUIT TO DEVICE")
+	exit_button.custom_minimum_size.y = 48
+	exit_button.pressed.connect(func() -> void: get_tree().quit())
+	col.add_child(exit_button)
+	var title: Button = _button("‹   RETURN TO TITLE")
 	title.custom_minimum_size.y = 36
 	title.add_theme_font_size_override("font_size", 15)
 	title.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	title.pressed.connect(show_title)
 	col.add_child(title)
 
-	# Contextual diagnostics along the top edge. The hero craft stays visible.
 	var card := PanelContainer.new()
 	card.name = "SelectionTelemetry"
 	card.anchor_left = 0.691
@@ -242,9 +230,9 @@ func _build_menu() -> void:
 	var info := VBoxContainer.new()
 	info.add_theme_constant_override("separation", 2)
 	card.add_child(info)
-	_preview_title = _label("01   ENTER THE FOUNDRY", 18, CYAN, true)
+	_preview_title = _label("", 18, CYAN, true)
 	info.add_child(_preview_title)
-	_preview_detail = _label("GARAGE ACCESS / IN DEVELOPMENT", 14, MUTED, true)
+	_preview_detail = _label("", 14, MUTED, true)
 	info.add_child(_preview_detail)
 	_set_menu_preview("garage")
 
@@ -253,23 +241,20 @@ func _set_menu_preview(section: String) -> void:
 		return
 	match section:
 		"garage":
-			_preview_title.text = "01   ENTER THE FOUNDRY"
-			_preview_detail.text = "INSPECT  /  UPGRADE  /  PREPARE"
+			_preview_title.text = "01   GARAGE"
+			_preview_detail.text = "SELECT  /  TUNE  /  CUSTOMIZE"
 		"races":
 			_preview_title.text = "02   RACE CONTROL"
-			_preview_detail.text = "SURFACE  /  HYBRID  /  FLIGHT"
-		"fleet":
-			_preview_title.text = "03   THE FLEET"
-			_preview_detail.text = "COLLECT  /  CUSTOMIZE  /  SELECT"
+			_preview_detail.text = "MODE  /  TRACK  /  PRE-RACE"
+		"store":
+			_preview_title.text = "03   DEALERSHIP"
+			_preview_detail.text = "VEHICLES  /  PARTS  /  DEALS"
+		"profile":
+			_preview_title.text = "04   DRIVER PROFILE"
+			_preview_detail.text = "STATS  /  CONTROLS  /  ASSISTS"
 		"settings":
-			_preview_title.text = "04   OPTIONS"
-			_preview_detail.text = "AUDIO  /  MOTION  /  DISPLAY"
-		"about":
-			_preview_title.text = "05   ABOUT"
-			_preview_detail.text = "ORIGINAL HOVER MOTORSPORT"
-		"quit":
-			_preview_title.text = "06   QUIT"
-			_preview_detail.text = "RETURN TO DEVICE"
+			_preview_title.text = "05   DEVICE SETTINGS"
+			_preview_detail.text = "AUDIO  /  DISPLAY  /  FPS"
 
 func _build_detail() -> void:
 	var col: VBoxContainer = _column(0.078, 0.27, 0.56, 0.83, 19)
@@ -409,6 +394,7 @@ func _show_page(next_page: String) -> void:
 	_menu_page.visible = next_page == "menu"
 	_detail_page.visible = next_page == "detail"
 	_settings_page.visible = next_page == "settings"
+	_flow_page.visible = next_page == "flow"
 	page_changed.emit(current_page)
 
 func show_title() -> void:
@@ -421,22 +407,21 @@ func open_settings() -> void:
 	_show_page("settings")
 
 func _open_section(section: String) -> void:
-	match section:
-		"garage":
-			_detail_title.text = "THE FOUNDRY GARAGE"
-			_detail_subtitle.text = "The garage will let you walk between your owned craft, inspect bodywork and cockpits, and configure upgrades. This module has not been built yet."
-		"fleet":
-			_detail_title.text = "THE FLEET"
-			_detail_subtitle.text = "Owned, earned and purchased craft will be displayed here when the fleet and progression systems are built. This is a preview, not a finished vehicle catalog."
-		"races":
-			_detail_title.text = "RACE CONTROL"
-			_detail_subtitle.text = "Surface circuits, hybrid events and real three-dimensional aerial races are planned. No playable events are available in this menu milestone."
-		"about":
-			_detail_title.text = "NEON FOUNDRY RACING"
-			_detail_subtitle.text = "An original Android hovercraft racing project created in Godot 4.5.1, Blender, and Mobile/Vulkan. The title and main menu are our first interactive milestone."
-		_:
-			return
-	_show_page("detail")
+	var routes: Dictionary = {
+		"garage": "garage",
+		"fleet": "garage",
+		"races": "mode",
+		"store": "store",
+		"profile": "profile"
+	}
+	if routes.has(section):
+		_flow_page.call("open_page", str(routes[section]))
+		_show_page("flow")
+		return
+	if section == "about":
+		_detail_title.text = "NEON FOUNDRY RACING"
+		_detail_subtitle.text = "An original Android hovercraft racing project using Godot Mobile/Vulkan and Blender."
+		_show_page("detail")
 
 func _on_volume_changed(value: float) -> void:
 	_master_volume = value
@@ -499,6 +484,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_tree().quit()
 		elif current_page == "menu":
 			show_title()
+		elif current_page == "flow":
+			_flow_page.call("navigate_back")
 		else:
 			show_main_menu()
 		get_viewport().set_input_as_handled()
