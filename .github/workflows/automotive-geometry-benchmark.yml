@@ -1,0 +1,53 @@
+name: Automotive Geometry Study - CC0 Spectral GT RS
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/automotive-geometry-benchmark.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reference-geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch independently licensed CC0 source assets
+        run: |
+          set -euo pipefail
+          mkdir -p study_source
+          base=https://raw.githubusercontent.com/JaronKBragg7337/spectral-gt-rs/main
+          curl --fail --location --retry 3 -o study_source/spectral_gt_rs_game_ready.glb "$base/spectral_gt_rs_game_ready.glb"
+          curl --fail --location --retry 3 -o study_source/spectral_gt_rs_master.blend "$base/spectral_gt_rs_master.blend"
+          curl --fail --location --retry 3 -o study_source/spectral_gt_car.py "$base/spectral_gt_car.py"
+          curl --fail --location --retry 3 -o study_source/README.md "$base/README.md"
+          curl --fail --location --retry 3 -o study_source/LICENSE "$base/LICENSE"
+          grep -iq 'CC0' study_source/README.md || exit 1
+          python - <<'PY'
+          from pathlib import Path
+          import struct
+          p=Path('study_source/spectral_gt_rs_game_ready.glb')
+          b=p.read_bytes()
+          assert b[:4]==b'glTF' and struct.unpack_from('<I',b,8)[0]==len(b), 'Invalid GLB'
+          assert len(b)>500_000,'Unexpectedly small mesh'
+          print('REFERENCE_GLB_VALID:',len(b), 'bytes')
+          s=Path('study_source/spectral_gt_car.py').read_text()
+          assert 'def add_loft' in s and 'stations' in s
+          print('SOURCE_CONSTRUCTION_AVAILABLE')
+          PY
+          (cd study_source && sha256sum *.glb *.blend *.py > SHA256SUMS.txt)
+          cat > study_source/SOURCE.txt <<'EOF'
+          Author: JaronKBragg7337
+          Project: Spectral GT RS
+          URL: https://github.com/JaronKBragg7337/spectral-gt-rs
+          License: CC0 1.0 Universal per upstream LICENSE and README
+          Download: upstream unmodified; for geometry analysis, not incorporation into game.
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CC0-Spectral-GT-RS-Reference-Geometry
+          path: study_source/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
