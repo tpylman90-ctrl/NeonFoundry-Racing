@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | 0 | Professional repository, docs, Vulkan shell, CI, Android signing workflow | **Done — CI and signed Android build #1 verified** |
 | 0.5 | Cinematic title, main menu, functional settings, navigation previews | **Implemented — CI and Android build #4 passed; phone review pending** |
-| 0.6 | Interactive navigation skeleton for 11-stage game loop | **Implemented in source; Godot CI and Android device verification required** |
+| 0.6 | Independent full-screen destinations, 3D Foundry Lot showroom, experimental Forge preview, 11-stage race UI flow | **Implemented in source; Android device review required** |
 | 1 | NF-H01 flagship hovercraft built through 12 strict visual-approval gates | **Gate 01 active; no model approved** |
 | 2 | Walkable garage + craft inspection using the approved NF-H01 model | Planned — after gate 12 |
 | 3 | Hover and real free-flight physics on a small proving ground | Planned |

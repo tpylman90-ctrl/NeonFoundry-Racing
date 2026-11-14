@@ -1,30 +1,23 @@
-# Neon Foundry Racing — menu navigation framework
+# Full-screen destination architecture — Neon Foundry Racing
 
-This is an **interactive UI skeleton**, not a production racing gameplay loop. Existing Blender title art, menu art fallback, and offline device settings are retained.
+The initial shared left-panel/tab-like navigation has been replaced by distinct Godot scenes:
 
-## Route map
+- `game/scenes/garage.tscn` — **3D Foundry Lot**. Dedicated viewport, modeled hangar, illuminated turntable, camera orbit/zoom and front/side/top presets. An experimental original Forge GLB is staged into `game/assets/garage/forge_preview.glb` at build time from `art/hero_01/experiments/V18_Stage04/`. It is **not** the production-approved craft.
+- `game/scenes/dealership.tscn` — full-screen showroom layout and disabled transaction/catalog placeholders.
+- `game/scenes/driver_profile.tscn` — full-screen driver terminal, control configuration/planned achievements.
+- `game/scenes/race_control.tscn` — mode -> track -> lobby -> loading -> HUD demo -> pause -> results. Stylized course display, not gameplay.
+- `game/scenes/title_menu.tscn` — cinematic splash/hub/settings shell, routes between independent destinations and releases prior scene on exit.
 
-- Title / splash -> Main Hub.
-- Hub -> Garage -> Craft Select, Tuning, Appearance. Garage -> Race Mode quick jump.
-- Hub -> Dealership -> Vehicles, Parts, Currency Bundles, Featured. All checkout disabled.
-- Hub -> Driver Profile -> Controls/Assists, Audio/Graphics (existing device settings), Stats/Achievements.
-- Hub -> Race Control -> Mode (Surface / Hybrid / Aerial) -> compatible Track -> Pre-race Lobby -> Loading -> In-Race HUD Demo -> Results -> Restart/Next Event/Hub.
-- Lobby -> Garage quick jump, Track select back navigation.
-- Race demo -> Pause (Resume, Restart Demo, Quit).
-- Android hardware Back and Escape traverse navigation history; menus are touch-sized.
+All destination scenes use full-screen camera/backdrops rather than translucent tabs superimposed on the title art. The three 2D destinations reuse a renderer/controller in `flow_screen.gd` but are independently instantiated scenes with different stage graphics from `page_backdrop.gd`.
 
-## Prototype vs. actual game data
+## Garage controls
+- Drag across the **unobstructed 3D viewport** to rotate the camera on Android or mouse desktop.
+- Use dedicated **3/4**, **SIDE**, and **TOP** camera presets and **ZOOM** controls.
+- Inspector, craft select, performance/tuning and cosmetic buttons display state-specific diagnostics in the hangar. Functional vehicle physics, upgrade parameters, purchases, cosmetics and official fleet selection remain future milestones.
+- **MAIN HUB**, **RESET VIEW** and **RACE CONTROL** are accessible without exiting the 3D scene via small tabs.
 
-- The NF-H01 test mule is **only a UI placeholder**; it does not import or substitute for the still-pending approved 3D craft.
-- Neon Cross, Crimson Serpent, and Skyfall Run are **named track entries**, not loaded racing levels. Mode compatibility tags are planning metadata.
-- Eligibility text is not a class validator until real craft specs and event rules exist. Lobby launch is labeled UI FLOW DEMO.
-- Loading is a short **interface transition**, not asset preloading.
-- Speed/Lap/Boost/HUD values and results are intentionally nonfunctional; XP and credits remain +0 and **never mutate a save**.
-- No purchases, network calls, analytics, or payment integrations.
-- Shared section screen is in `game/scripts/flow_screen.gd`, kept separate from `title_menu.gd`.
+## Source-to-runtime vehicle staging
+Run `python3 tools/stage_garage_preview.py` before first Godot import if developing locally. CI and Android build workflows perform the staging automatically. The source asset is original to this repository, without a new paid dependency. If staging is absent, the 3D garage still opens, displaying an empty turntable labeled awaiting craft.
 
 ## Acceptance
-
-`game/tests/menu_smoke_test.gd` exercises the title, hub, device settings, garage, store, profile, mode, tracks, lobby, loading, race-demo, pause, results, and return-to-menu sequence. Godot 4.5.1 headless import/startup and this smoke script run in CI. The actual Android Vulkan device review remains required.
-
-Automated Android workflow screenshots now include garage, store, mode selection, lobby, and results alongside the title, hub, and settings. They are generated through Godot Mobile/Vulkan under software Vulkan CI, not concept-art mockups.
+Godot 4.5.1 import/startup and smoke validation cover each destination, garage viewport/camera controls, device settings, race UI sequence, and return to hub. Android build captures title, hub, settings, garage, dealership, mode, lobby and results for Vulkan device review.

@@ -35,6 +35,7 @@ jobs:
       - name: Godot import and startup smoke
         run: |
           set -euo pipefail
+          python3 tools/stage_garage_preview.py
           godot --headless --path game --editor --import --quit 2>&1 | tee import.log
           if grep -E 'SCRIPT ERROR:|ERROR:' import.log; then exit 1; fi
           timeout 60 godot --headless --path game --quit-after 5 2>&1 | tee launch.log

@@ -103,6 +103,7 @@ jobs:
       - name: Import and smoke-test project
         run: |
           set -euo pipefail
+          python3 tools/stage_garage_preview.py
           godot --headless --path game --editor --import --quit 2>&1 | tee build/import.log
           if grep -E 'SCRIPT ERROR:|ERROR:' build/import.log; then exit 1; fi
           godot --headless --path game --quit-after 5 2>&1 | tee build/smoke.log

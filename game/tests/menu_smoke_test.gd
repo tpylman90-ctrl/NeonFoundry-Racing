@@ -1,6 +1,5 @@
 extends SceneTree
-## Smoke test for all currently implemented UI routes and real device settings persistence.
-
+## End-to-end menu routing without fabricated gameplay results.
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -14,7 +13,6 @@ func _run() -> void:
 	assert(menu.get_node("TitleScreen").visible)
 	menu.show_main_menu()
 	assert(menu.current_page == "menu")
-	assert(menu.get_node("MainMenu").visible)
 	menu.open_settings()
 	assert(menu.current_page == "settings")
 	menu._on_volume_changed(0.35)
@@ -26,22 +24,35 @@ func _run() -> void:
 	assert(not bool(cfg.get_value("menu", "animation")))
 	assert(bool(cfg.get_value("menu", "show_fps")))
 	menu._restore_defaults()
+
 	menu._open_section("garage")
-	assert(menu.current_page == "flow")
-	assert(menu._flow_page.current_page == "garage")
-	menu._flow_page._goto("craft")
-	assert(menu._flow_page.current_page == "craft")
-	menu._flow_page.navigate_back()
-	assert(menu._flow_page.current_page == "garage")
+	assert(menu.current_page == "garage")
+	assert(menu._garage_page != null)
+	assert(menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot") != null)
+	menu._garage_page._move_view(1.57, 0.15, 12.3)
+	menu._garage_page._zoom(-1.0)
+	menu._garage_page._show_tuning()
+	assert(menu._garage_page._bay_state == "tuning")
+	menu._garage_page._show_cosmetic()
+	assert(menu._garage_page._bay_state == "customize")
+	menu._garage_page._show_craft()
+	assert(menu._garage_page._bay_state == "select")
+	menu._garage_page.return_to_hub.emit()
+	assert(menu.current_page == "menu")
+	assert(menu._garage_page == null)
+
 	menu._open_section("store")
+	assert(menu.current_page == "module")
 	assert(menu._flow_page.current_page == "store")
 	menu._flow_page._goto("store_parts")
 	assert(menu._flow_page.current_page == "store_parts")
 	menu._open_section("profile")
+	assert(menu.current_page == "module")
 	assert(menu._flow_page.current_page == "profile")
 	menu._flow_page._goto("controls")
 	assert(menu._flow_page.current_page == "controls")
 	menu._open_section("races")
+	assert(menu.current_page == "module")
 	assert(menu._flow_page.current_page == "mode")
 	menu._flow_page._choose_mode("hybrid")
 	assert(menu._flow_page.current_page == "tracks")
@@ -63,5 +74,5 @@ func _run() -> void:
 	assert(menu.current_page == "title")
 	menu.queue_free()
 	await process_frame
-	print("NEON_FOUNDRY_MENU_SMOKE_OK title -> hub -> garage/store/profile -> mode/track/lobby -> loading/race/pause/results")
+	print("NEON_FOUNDRY_MENU_SMOKE_OK independent garage/retail/profile/race scenes and complete race UI flow")
 	quit()

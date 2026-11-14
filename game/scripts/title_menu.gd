@@ -6,7 +6,10 @@ signal page_changed(next_page: String)
 
 const BackdropScript = preload("res://scripts/menu_backdrop.gd")
 const ChromeScript = preload("res://scripts/menu_chrome.gd")
-const FlowScript = preload("res://scripts/flow_screen.gd")
+const GarageScene = preload("res://scenes/garage.tscn")
+const DealershipScene = preload("res://scenes/dealership.tscn")
+const DriverProfileScene = preload("res://scenes/driver_profile.tscn")
+const RaceControlScene = preload("res://scenes/race_control.tscn")
 const MENU_ART: String = "res://assets/menu/launch_scene.png"
 const SETTINGS_FILE: String = "user://neon_foundry_settings.cfg"
 const CYAN: Color = Color("4dd5db")
@@ -27,6 +30,8 @@ var _menu_page: Control
 var _detail_page: Control
 var _settings_page: Control
 var _flow_page: Control
+var _garage_page: Control
+var _hero_backdrop: TextureRect
 var _detail_title: Label
 var _detail_subtitle: Label
 var _fps_label: Label
@@ -47,24 +52,24 @@ func _ready() -> void:
 		_capture_screen("NeonFoundry-Settings.png", "settings")
 	elif "--capture-garage" in OS.get_cmdline_user_args():
 		_open_section("garage")
-		_capture_screen("NeonFoundry-Garage.png", "flow")
+		_capture_screen("NeonFoundry-Garage.png", "garage")
 	elif "--capture-store" in OS.get_cmdline_user_args():
 		_open_section("store")
-		_capture_screen("NeonFoundry-Store.png", "flow")
+		_capture_screen("NeonFoundry-Store.png", "module")
 	elif "--capture-mode" in OS.get_cmdline_user_args():
 		_open_section("races")
-		_capture_screen("NeonFoundry-RaceMode.png", "flow")
+		_capture_screen("NeonFoundry-RaceMode.png", "module")
 	elif "--capture-lobby" in OS.get_cmdline_user_args():
 		_open_section("races")
 		_flow_page.call("_choose_mode", "hybrid")
 		_flow_page.call("_choose_track", "neon_cross")
-		_capture_screen("NeonFoundry-RaceLobby.png", "flow")
+		_capture_screen("NeonFoundry-RaceLobby.png", "module")
 	elif "--capture-results" in OS.get_cmdline_user_args():
 		_open_section("races")
 		_flow_page.call("_choose_mode", "hybrid")
 		_flow_page.call("_choose_track", "neon_cross")
 		_flow_page.call("_goto", "results")
-		_capture_screen("NeonFoundry-RaceResults.png", "flow")
+		_capture_screen("NeonFoundry-RaceResults.png", "module")
 
 func _process(_delta: float) -> void:
 	if _fps_label != null and _fps_label.visible:
@@ -81,6 +86,7 @@ func _build_interface() -> void:
 
 	if ResourceLoader.exists(MENU_ART):
 		var hero_image := TextureRect.new()
+		_hero_backdrop = hero_image
 		hero_image.name = "BlenderCinematicBackdrop"
 		hero_image.texture = load(MENU_ART)
 		hero_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -145,13 +151,6 @@ func _build_interface() -> void:
 	add_child(_settings_page)
 	_build_settings()
 
-	_flow_page = Control.new()
-	_flow_page.name = "FlowScreen"
-	_flow_page.set_script(FlowScript)
-	_flow_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_flow_page.connect("request_main_menu", Callable(self, "show_main_menu"))
-	_flow_page.connect("request_device_settings", Callable(self, "open_settings"))
-	add_child(_flow_page)
 
 	var footer: Label = _label("NEON FOUNDRY  //  PROTOTYPE 0.2     •     ANDROID / MOBILE / VULKAN", 14, Color("98b1bd"), true)
 	footer.anchor_left = 0.068
@@ -410,38 +409,77 @@ func _panel_style() -> StyleBoxFlat:
 
 func _show_page(next_page: String) -> void:
 	current_page = next_page
+	var is_cinematic: bool = next_page in ["title", "menu", "settings", "detail"]
+	_backdrop.visible = is_cinematic
+	_chrome.visible = is_cinematic
+	if _hero_backdrop != null:
+		_hero_backdrop.visible = is_cinematic
 	_title_page.visible = next_page == "title"
 	_menu_page.visible = next_page == "menu"
 	_detail_page.visible = next_page == "detail"
 	_settings_page.visible = next_page == "settings"
-	_flow_page.visible = next_page == "flow"
+	if _flow_page != null:
+		_flow_page.visible = next_page == "module"
+	if _garage_page != null:
+		_garage_page.visible = next_page == "garage"
+	if _fps_label != null:
+		_fps_label.visible = _show_fps and is_cinematic
 	page_changed.emit(current_page)
 
+func _clear_destination() -> void:
+	if _flow_page != null:
+		remove_child(_flow_page)
+		_flow_page.queue_free()
+		_flow_page = null
+	if _garage_page != null:
+		remove_child(_garage_page)
+		_garage_page.queue_free()
+		_garage_page = null
+
 func show_title() -> void:
+	_clear_destination()
 	_show_page("title")
 
 func show_main_menu() -> void:
+	_clear_destination()
 	_show_page("menu")
 
 func open_settings() -> void:
+	_clear_destination()
 	_show_page("settings")
 
 func _open_section(section: String) -> void:
-	var routes: Dictionary = {
-		"garage": "garage",
-		"fleet": "garage",
-		"races": "mode",
-		"store": "store",
-		"profile": "profile"
-	}
-	if routes.has(section):
-		_flow_page.call("open_page", str(routes[section]))
-		_show_page("flow")
+	if section == "garage" or section == "fleet":
+		_clear_destination()
+		_garage_page = GarageScene.instantiate()
+		_garage_page.name = "ImmersiveGarage"
+		_garage_page.connect("return_to_hub", Callable(self, "show_main_menu"))
+		_garage_page.connect("request_race_control", Callable(self, "_open_section").bind("races"))
+		add_child(_garage_page)
+		_show_page("garage")
 		return
-	if section == "about":
-		_detail_title.text = "NEON FOUNDRY RACING"
-		_detail_subtitle.text = "An original Android hovercraft racing project using Godot Mobile/Vulkan and Blender."
-		_show_page("detail")
+	var scene: PackedScene
+	var first_page: String = ""
+	match section:
+		"store":
+			scene = DealershipScene
+			first_page = "store"
+		"profile":
+			scene = DriverProfileScene
+			first_page = "profile"
+		"races":
+			scene = RaceControlScene
+			first_page = "mode"
+		_:
+			return
+	_clear_destination()
+	_flow_page = scene.instantiate()
+	_flow_page.name = "Destination_%s" % section
+	_flow_page.connect("request_main_menu", Callable(self, "show_main_menu"))
+	_flow_page.connect("request_device_settings", Callable(self, "open_settings"))
+	add_child(_flow_page)
+	_flow_page.call("open_page", first_page)
+	_show_page("module")
 
 func _on_volume_changed(value: float) -> void:
 	_master_volume = value
@@ -504,8 +542,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_tree().quit()
 		elif current_page == "menu":
 			show_title()
-		elif current_page == "flow":
+		elif current_page == "module" and _flow_page != null:
 			_flow_page.call("navigate_back")
+		elif current_page == "garage" and _garage_page != null:
+			_garage_page.call("navigate_back")
 		else:
 			show_main_menu()
 		get_viewport().set_input_as_handled()
