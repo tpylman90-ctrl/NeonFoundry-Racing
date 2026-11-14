@@ -14,11 +14,11 @@ var _world: Node3D
 var _camera: Camera3D
 var _vehicle_holder: Node3D
 var _yaw: float = 0.68
-var _pitch: float = 0.27
-var _distance: float = 12.8
+var _pitch: float = 0.21
+var _distance: float = 14.5
 var _target_yaw: float = 0.68
-var _target_pitch: float = 0.27
-var _target_distance: float = 12.8
+var _target_pitch: float = 0.21
+var _target_distance: float = 14.5
 var _dragging: bool = false
 var _vehicle_loaded: bool = false
 var _detail: Label
@@ -129,16 +129,16 @@ func _build_3d_stage() -> void:
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = Color("0a1622")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("829caf")
-	environment.ambient_light_energy = 0.62
+	environment.ambient_light_color = Color("a8c3d1")
+	environment.ambient_light_energy = 0.84
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_BG
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment_node.environment = environment
 	_world.add_child(environment_node)
 
-	var graphite := _material(Color("1b2835"), 0.72, 0.34)
-	var tile := _material(Color("253a4a"), 0.64, 0.37)
-	var beams := _material(Color("394757"), 0.74, 0.3)
+	var graphite := _material(Color("304354"), 0.37, 0.44)
+	var tile := _material(Color("384e5e"), 0.44, 0.43)
+	var beams := _material(Color("516675"), 0.55, 0.34)
 	var cyan := _material(Color("2b97b3"), 0.15, 0.27, true)
 	var orange := _material(Color("c14f30"), 0.15, 0.34, true)
 	var black := _material(Color("0b141e"), 0.3, 0.6)
@@ -193,7 +193,7 @@ func _build_3d_stage() -> void:
 
 	_camera = Camera3D.new()
 	_camera.name = "InspectionCamera"
-	_camera.fov = 52.0
+	_camera.fov = 60.0
 	_camera.near = 0.08
 	_camera.far = 175.0
 	_camera.current = true
@@ -201,13 +201,13 @@ func _build_3d_stage() -> void:
 
 	var sunlight := DirectionalLight3D.new()
 	sunlight.rotation_degrees = Vector3(-58, -22, 0)
-	sunlight.light_energy = 1.1
+	sunlight.light_energy = 1.43
 	sunlight.light_color = Color("d2e6ff")
 	_world.add_child(sunlight)
 	for light_spec in [
-		{"pos": Vector3(-5, 9, 6), "color": Color("77d8ff"), "energy": 5.0},
-		{"pos": Vector3(6, 11, -4), "color": Color("ffd5ad"), "energy": 4.2},
-		{"pos": Vector3(1, 10, 8), "color": Color("a5def4"), "energy": 2.9}
+		{"pos": Vector3(-5, 9, 6), "color": Color("e3f1ff"), "energy": 4.0},
+		{"pos": Vector3(6, 11, -4), "color": Color("ffd5ad"), "energy": 3.4},
+		{"pos": Vector3(1, 10, 8), "color": Color("a5def4"), "energy": 3.3}
 	]:
 		var omni := OmniLight3D.new()
 		omni.position = light_spec["pos"]
@@ -269,7 +269,7 @@ func _refresh_camera(delta: float) -> void:
 	_yaw = lerp_angle(_yaw, _target_yaw, blend)
 	_pitch = lerpf(_pitch, _target_pitch, blend)
 	_distance = lerpf(_distance, _target_distance, blend)
-	var aim := Vector3(0, 1.4, 0)
+	var aim := Vector3(0, 2.45, 0)
 	_camera.position = aim + Vector3(sin(_yaw) * cos(_pitch), sin(_pitch), cos(_yaw) * cos(_pitch)) * _distance
 	_camera.look_at(aim, Vector3.UP)
 
@@ -385,7 +385,7 @@ func _build_overlay() -> void:
 	angle_row.add_theme_constant_override("separation", 6)
 	views.add_child(angle_row)
 	for spec in [
-		{"text": "3/4", "a": 0.68, "p": 0.27, "d": 12.8},
+		{"text": "3/4", "a": 0.68, "p": 0.21, "d": 14.5},
 		{"text": "SIDE", "a": 1.57, "p": 0.15, "d": 12.3},
 		{"text": "TOP", "a": 0.0, "p": 1.22, "d": 15.4}
 	]:
@@ -456,7 +456,7 @@ func _build_overlay() -> void:
 	action_row.add_theme_constant_override("separation", 12)
 	bottom.add_child(action_row)
 	var back := _button("‹   MAIN HUB", func() -> void: return_to_hub.emit())
-	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(0.68, 0.27, 12.8))
+	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(0.68, 0.21, 14.5))
 	var race := _button("RACE CONTROL   ›", func() -> void: request_race_control.emit())
 	for b in [back, spin, race]:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -493,7 +493,7 @@ func _toggle_walk() -> void:
 	_walk_pad.visible = _walk_mode
 	_equipment_panel.visible = not _walk_mode
 	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
-	_detail.text = "WALKAROUND MODE\\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\\nTouch-drag to orbit around the model. Use the camera presets for detail study."
+	_detail.text = "WALKAROUND MODE\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
 
 func _refresh_equipment_status() -> void:
 	if _workshop != null and _equipment_status != null:

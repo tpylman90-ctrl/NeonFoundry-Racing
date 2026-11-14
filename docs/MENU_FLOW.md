@@ -39,3 +39,5 @@ The approved workshop direction is implemented in `game/scripts/garage_workshop.
 All static props are authored as triangles consolidated into material-specific `ArrayMesh` batches, keeping draw calls comparatively low despite rich geometry. Only the actuated service lift arms and robotic scanner are independent animated meshes. PBR materials have controlled metallic and roughness values; geometry uses emission strips but avoids expensive per-object shadowed lights. The menu is still subject to real Android visual and FPS verification.
 
 In the garage's **SERVICE BAY / EQUIPMENT** panel, **OPERATE LIFT ARMS** toggles an unloaded lift carriage movement, while **ROBOT SCANNER / TOGGLE** powers the animated inspection head. Garage UI remains separate from other destinations.
+
+Visual QA pass: lift/service metallic surfaces now carry deterministic, locally generated brushed PBR microtextures; the camera opens wider for a larger view of the room; workshop light balance is more neutral and the robotic arm is repositioned near the back of the turntable to keep it visible despite mobile UI overlays. This does not substitute a path-traced showroom for the live scene.

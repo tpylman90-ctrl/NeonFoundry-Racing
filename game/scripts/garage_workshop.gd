@@ -89,19 +89,43 @@ func _material(color: Color, metal: float, rough: float, glow: float = 0.0) -> S
 
 func _create_materials() -> void:
 	_materials = {
-		STEEL: _material(Color("3b5260"), 0.80, 0.29),
-		FLOOR: _material(Color("263946"), 0.65, 0.27),
-		GRAPHITE: _material(Color("182734"), 0.55, 0.40),
-		DARK: _material(Color("0c1824"), 0.18, 0.72),
-		TRIM: _material(Color("607784"), 0.80, 0.27),
-		CYAN: _material(Color("2bd9f0"), 0.18, 0.25, 2.6),
-		AMBER: _material(Color("fa7a33"), 0.23, 0.26, 2.3),
-		YELLOW: _material(Color("e5a537"), 0.45, 0.33),
-		BLACK: _material(Color("111a21"), 0.10, 0.8),
-		SCREEN: _material(Color("087c99"), 0.03, 0.25, 1.8),
-		SILVER: _material(Color("a5bac3"), 0.84, 0.26),
-		GLASS: _material(Color("143347"), 0.63, 0.23)
+		STEEL: _material(Color("566c7b"), 0.53, 0.37),
+		FLOOR: _material(Color("425a67"), 0.30, 0.31),
+		GRAPHITE: _material(Color("2a3d4b"), 0.35, 0.46),
+		DARK: _material(Color("16212e"), 0.14, 0.73),
+		TRIM: _material(Color("91a8b4"), 0.63, 0.29),
+		CYAN: _material(Color("23a9c2"), 0.16, 0.31, 1.4),
+		AMBER: _material(Color("d76534"), 0.21, 0.31, 1.5),
+		YELLOW: _material(Color("ebad4b"), 0.42, 0.40),
+		BLACK: _material(Color("1c262e"), 0.12, 0.79),
+		SCREEN: _material(Color("087991"), 0.03, 0.25, 1.4),
+		SILVER: _material(Color("becbd1"), 0.73, 0.29),
+		GLASS: _material(Color("244657"), 0.54, 0.28)
 	}
+
+	# Physically textured-looking surfaces without runtime texture downloads.
+	# Deterministic local brushed-metal and stippled floor microtextures.
+	for material_id in [STEEL, FLOOR, GRAPHITE, TRIM, SILVER]:
+		var mat: StandardMaterial3D = _materials[material_id]
+		mat.albedo_texture = _create_microtexture(17 if material_id == FLOOR else 53,
+			material_id == FLOOR)
+
+func _create_microtexture(seed: int, floor_texture: bool) -> ImageTexture:
+	var img := Image.create(128, 128, false, Image.FORMAT_RGBA8)
+	for yy in range(128):
+		for xx in range(128):
+			var a: float = sin(float(xx * 23 + yy * 51 + seed * 7) * 0.145)
+			var b: float = sin(float(xx * 5 - yy * 31 + seed * 11) * 0.36)
+			var brushed: float = sin(float(xx) * 0.12) * 0.024
+			var value: float = 0.92 + a * 0.065 + b * 0.035 + brushed
+			if floor_texture:
+				value *= 0.94 if (xx % 37 <= 1 or yy % 37 <= 1) else 1.0
+				value += 0.02 * sin(float(xx + yy) * 0.37)
+			else:
+				value *= 0.96 if xx % 47 == 0 else 1.0
+			value = clampf(value, 0.73, 1.0)
+			img.set_pixel(xx, yy, Color(value, value, value, 1.0))
+	return ImageTexture.create_from_image(img)
 
 func _start_batches() -> void:
 	for id in _materials:
@@ -238,7 +262,7 @@ func _build_architecture() -> void:
 		for i in range(11):
 			var z := -16.5 + float(i) * 1.55
 			_rod(TRIM, Vector3(side * 10.45, 6.1, z), Vector3(side * 10.45, 7.5, z), 0.045, 8)
-		_rod(STEEL, Vector3(side * 10.45, 7.55, -16.8), Vector3(side * 10.45, 7.55, -0.5), 0.07, 9)
+		_rod(STEEL, Vector3(side * 10.45, -1.8, -16.8), Vector3(side * 10.45, -1.8, -0.5), 0.07, 9)
 		_box(CYAN, Vector3(side * 10.48, 6.06, -8.7), Vector3(0.09, 0.10, 16.0))
 	# Back wall armor segmented around work stations.
 	for i in range(11):
@@ -485,17 +509,17 @@ func _build_service_bays() -> void:
 
 func _build_robot_base() -> void:
 	# Rails, articulated service anchor and tool charging pedestal.
-	_disc(BLACK, Vector3(7.55, 0.27, -3.85), 1.23, 0.42, 42)
-	_disc(STEEL, Vector3(7.55, 0.51, -3.85), 1.07, 0.16, 42)
-	_arc(AMBER, Vector3(7.55, 0, -3.85), 1.09, 0.065, 0.59, 0, TAU, 42)
-	_box(STEEL, Vector3(7.55, 1.15, -3.85), Vector3(1.2, 1.23, 1.2))
-	_box(YELLOW, Vector3(7.55, 1.77, -3.85), Vector3(1.35, 0.20, 1.3))
+	_disc(BLACK, Vector3(-1.8, 0.27, -8.35), 1.23, 0.42, 42)
+	_disc(STEEL, Vector3(-1.8, 0.51, -8.35), 1.07, 0.16, 42)
+	_arc(AMBER, Vector3(-1.8, 0, -8.35), 1.09, 0.065, 0.59, 0, TAU, 42)
+	_box(STEEL, Vector3(-1.8, 1.15, -8.35), Vector3(1.2, 1.23, 1.2))
+	_box(YELLOW, Vector3(-1.8, 1.77, -8.35), Vector3(1.35, 0.20, 1.3))
 	for i in range(6):
 		var a := TAU * float(i) / 6.0
-		_box(CYAN, Vector3(7.55 + cos(a) * 1.07, 0.42, -3.85 + sin(a) * 1.07),
+		_box(CYAN, Vector3(-1.8 + cos(a) * 1.07, 0.42, -8.35 + sin(a) * 1.07),
 			Vector3(0.17, 0.08, 0.15))
 	for i in range(5):
-		var x: float = 8.6 + float(i) * 0.44
+		var x: float = -0.8 + float(i) * 0.44
 		_box(YELLOW, Vector3(x, 0.025, -4.9), Vector3(0.28, 0.026, 0.15), -0.52)
 
 func _mesh_between(parent: Node3D, a: Vector3, b: Vector3,
@@ -533,7 +557,7 @@ func _robot_joint(parent: Node3D, position: Vector3, radius: float) -> void:
 func _build_robot() -> void:
 	_robot = Node3D.new()
 	_robot.name = "ArticulatedServiceRobot"
-	_robot.position = Vector3(7.55, 1.85, -3.85)
+	_robot.position = Vector3(-1.8, 1.85, -8.35)
 	add_child(_robot)
 	_robot_joint(_robot, Vector3.ZERO, 0.52)
 	_mesh_between(_robot, Vector3(0, 0, 0), Vector3(-1.0, 2.18, 0),
@@ -586,7 +610,7 @@ func _build_robot() -> void:
 func _build_task_lights() -> void:
 	# Shadow-free local highlights; avoid per-tool and per-bay real-time lights.
 	for spec in [
-		{"p": Vector3(0, 7.55, 1.2), "c": Color("a9eeff"), "power": 1.25, "range": 14.0},
+		{"p": Vector3(0, -1.8, 1.2), "c": Color("a9eeff"), "power": 1.25, "range": 14.0},
 		{"p": Vector3(-11.0, 5.4, -11.0), "c": Color("60cfff"), "power": 0.7, "range": 9.0},
 		{"p": Vector3(11.0, 5.4, -12.0), "c": Color("ffb076"), "power": 0.55, "range": 9.0}
 	]:
