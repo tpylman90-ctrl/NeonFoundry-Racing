@@ -538,6 +538,18 @@ func _mesh_between(parent: Node3D, a: Vector3, b: Vector3,
 	parent.add_child(node)
 	return node
 
+func _arm_shell(parent: Node3D, a: Vector3, b: Vector3,
+		width: float, depth: float, id: String) -> void:
+	var shell := MeshInstance3D.new()
+	var block := BoxMesh.new()
+	block.size = Vector3(width, a.distance_to(b) * 0.75, depth)
+	shell.mesh = block
+	shell.position = (a + b) * 0.5
+	shell.quaternion = Quaternion(Vector3.UP, (b - a).normalized())
+	shell.material_override = _materials[id]
+	shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(shell)
+
 func _robot_joint(parent: Node3D, position: Vector3, radius: float) -> void:
 	var joint := SphereMesh.new()
 	joint.radius = radius
@@ -562,11 +574,19 @@ func _build_robot() -> void:
 	_robot_joint(_robot, Vector3.ZERO, 0.52)
 	_mesh_between(_robot, Vector3(0, 0, 0), Vector3(-1.0, 2.18, 0),
 		0.33, YELLOW, 14)
+	_arm_shell(_robot, Vector3(-0.10, 0.28, 0), Vector3(-0.91, 1.93, 0),
+		0.72, 0.62, YELLOW)
+	_arm_shell(_robot, Vector3(-0.10, 0.28, 0.34), Vector3(-0.88, 1.90, 0.34),
+		0.09, 0.11, BLACK)
 	_mesh_between(_robot, Vector3(-0.08, 0.15, 0.37), Vector3(-1.05, 1.91, 0.37),
 		0.095, SILVER)
 	_robot_joint(_robot, Vector3(-1.0, 2.18, 0), 0.44)
 	_mesh_between(_robot, Vector3(-1.0, 2.18, 0), Vector3(-2.95, 1.72, 0.14),
 		0.28, STEEL, 14)
+	_arm_shell(_robot, Vector3(-1.2, 2.14, 0.14), Vector3(-2.68, 1.78, 0.14),
+		0.61, 0.51, STEEL)
+	_arm_shell(_robot, Vector3(-1.30, 2.13, 0.43), Vector3(-2.64, 1.78, 0.43),
+		0.09, 0.09, CYAN)
 	_mesh_between(_robot, Vector3(-1.25, 2.37, -0.18), Vector3(-2.75, 1.9, -0.13),
 		0.065, BLACK)
 	_robot_joint(_robot, Vector3(-2.95, 1.72, 0.14), 0.38)
@@ -606,6 +626,12 @@ func _build_robot() -> void:
 	lens.material_override = _materials[CYAN]
 	lens.position = Vector3(-0.78, -0.58, 0)
 	_robot_wrist.add_child(lens)
+	# Ring scanner cradle, tool guards and mechanical end-effector prongs.
+	for side in [-1.0, 1.0]:
+		_mesh_between(_robot_wrist, Vector3(-0.52, -0.34, side * 0.27),
+			Vector3(-0.92, -0.66, side * 0.27), 0.045, SILVER, 9)
+		_mesh_between(_robot_wrist, Vector3(-0.79, -0.46, side * 0.20),
+			Vector3(-0.79, -0.64, side * 0.20), 0.09, YELLOW, 12)
 
 func _build_task_lights() -> void:
 	# Shadow-free local highlights; avoid per-tool and per-bay real-time lights.

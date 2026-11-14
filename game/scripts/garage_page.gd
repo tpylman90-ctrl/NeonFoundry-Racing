@@ -35,6 +35,8 @@ var _walk_toggle: Button
 var _workshop: Node3D
 var _equipment_panel: PanelContainer
 var _equipment_status: Label
+var _title_panel: PanelContainer
+var _tools_panel: PanelContainer
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -349,6 +351,7 @@ func _panel(left: float, top: float, right: float, bottom: float) -> PanelContai
 
 func _build_overlay() -> void:
 	var title_panel := _panel(0.025, 0.028, 0.53, 0.16)
+	_title_panel = title_panel
 	var head := VBoxContainer.new()
 	head.add_theme_constant_override("separation", 2)
 	title_panel.add_child(head)
@@ -357,6 +360,7 @@ func _build_overlay() -> void:
 	head.add_child(_label("FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT", 14, MUTED))
 
 	var tools_panel := _panel(0.025, 0.19, 0.305, 0.89)
+	_tools_panel = tools_panel
 	var tools := VBoxContainer.new()
 	tools.add_theme_constant_override("separation", 9)
 	tools_panel.add_child(tools)
@@ -492,6 +496,8 @@ func _toggle_walk() -> void:
 	_walk_turn = 0.0
 	_walk_pad.visible = _walk_mode
 	_equipment_panel.visible = not _walk_mode
+	_title_panel.visible = not _walk_mode
+	_tools_panel.visible = not _walk_mode
 	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
 	_detail.text = "WALKAROUND MODE\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
 
