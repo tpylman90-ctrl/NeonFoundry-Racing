@@ -275,8 +275,13 @@ func _build_floor() -> void:
 			var cz := float(z) * 2.42 - 3.0
 			if Vector2(cx, cz).length() < 6.72:
 				continue
-			_box(FLOOR if (x + z) % 3 == 0 else GRAPHITE,
-				Vector3(cx, -0.073, cz), Vector3(2.325, 0.018, 2.395))
+			_box(FLOOR, Vector3(cx, -0.073, cz),
+				Vector3(2.325, 0.018, 2.395))
+			# The scratched painted-metal shader belongs on localized hardware,
+			# not on two thirds of the main glossy epoxy floor tiles.
+			if (x + z) % 11 == 0:
+				_box(TRIM, Vector3(cx, -0.048, cz - 0.90),
+					Vector3(1.65, 0.018, 0.035))
 			if x % 3 == 0:
 				_box(TRIM, Vector3(cx - 1.16, -0.056, cz), Vector3(0.014, 0.009, 2.38))
 			if z % 3 == 0:
