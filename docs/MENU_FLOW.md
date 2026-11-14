@@ -24,3 +24,18 @@ Godot 4.5.1 import/startup and smoke validation cover each destination, garage v
 
 ## Walkaround milestone (initial implementation)
 Switch **WALK THE GARAGE** from the 3D inspection toolbar. On-screen hold-to-move and turn buttons provide first-person camera walking in the rendered hangar; touch-drag rotates the view. Position is clamped to the workshop bounds and inspection platform perimeter as an interim collision barrier. This is not a player character or final physics/navmesh system. **RETURN TO INSPECTION** restores the orbiting inspection camera.
+
+## Workshop fidelity pass: true 3D service garage
+
+The approved workshop direction is implemented in `game/scripts/garage_workshop.gd` as runtime 3D geometry, **not an image**. The old stage and original experimental Forge GLB remain usable. The new room includes:
+
+- Multi-ring overhead inspection gantry; warm/cool service light strips, cable rails and mechanical ceiling supports.
+- Three-dimensional segmented turntable rim with vents, clamps, clamps' illuminated status strips and warning markers.
+- Two instrumented servo lift towers with movable **unloaded** service support arms; separate rear service bays with spare hover-cell displays, no substitute fleet cars.
+- A multi-jointed robot scanner with metallic piston links, cable, wrist scanner aperture and working light. Animated idle sweep can be toggled from the UI.
+- Workshop workbenches with labeled, individually shaped tools, cabinets and drawers, diagnostic workstations, spare turbine props, shelves, rolling tool trolleys and industrial floor drains.
+- Neon Foundry illuminated wall-branding, diagnostic screens, machine stations and directional workshop markings.
+
+All static props are authored as triangles consolidated into material-specific `ArrayMesh` batches, keeping draw calls comparatively low despite rich geometry. Only the actuated service lift arms and robotic scanner are independent animated meshes. PBR materials have controlled metallic and roughness values; geometry uses emission strips but avoids expensive per-object shadowed lights. The menu is still subject to real Android visual and FPS verification.
+
+In the garage's **SERVICE BAY / EQUIPMENT** panel, **OPERATE LIFT ARMS** toggles an unloaded lift carriage movement, while **ROBOT SCANNER / TOGGLE** powers the animated inspection head. Garage UI remains separate from other destinations.

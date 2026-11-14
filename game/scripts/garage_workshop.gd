@@ -264,14 +264,15 @@ func _build_architecture() -> void:
 
 func _build_ceiling() -> void:
 	# Suspended segmented engineering halo and articulated ceiling rail system.
-	for y, radius, kind, width in [
-		[9.2, 6.2, GRAPHITE, 0.33],
-		[9.0, 5.75, CYAN, 0.085],
-		[8.74, 5.1, STEEL, 0.28],
-		[8.52, 4.79, AMBER, 0.075],
-		[8.34, 4.30, TRIM, 0.12]
+	for spec in [
+		{"y": 9.2, "r": 6.2, "id": GRAPHITE, "w": 0.33},
+		{"y": 9.0, "r": 5.75, "id": CYAN, "w": 0.085},
+		{"y": 8.74, "r": 5.1, "id": STEEL, "w": 0.28},
+		{"y": 8.52, "r": 4.79, "id": AMBER, "w": 0.075},
+		{"y": 8.34, "r": 4.30, "id": TRIM, "w": 0.12}
 	]:
-		_arc(kind, Vector3(0, 0, -0.8), radius, width, y, 0, TAU, 84)
+		_arc(str(spec["id"]), Vector3(0, 0, -0.8),
+			float(spec["r"]), float(spec["w"]), float(spec["y"]), 0, TAU, 84)
 	for i in range(18):
 		var a := TAU * float(i) / 18.0
 		var x := cos(a) * 5.6
@@ -409,7 +410,10 @@ func _build_workstations() -> void:
 				_box(CYAN, Vector3(sx - 0.5, 1.37 + float(i) * 0.12, z - 0.49),
 					Vector3(0.12 + float((i * 7) % 5) * 0.13, 0.025, 0.008))
 	# Free-standing rolling workshop toolboxes.
-	for x, z in [[-10.4, 6.1], [10.5, 6.2], [-11.2, -11.9], [11.3, -11.9]]:
+	for location in [Vector2(-10.4, 6.1), Vector2(10.5, 6.2),
+			Vector2(-11.2, -11.9), Vector2(11.3, -11.9)]:
+		var x: float = location.x
+		var z: float = location.y
 		_box(STEEL, Vector3(x, 0.69, z), Vector3(1.85, 1.32, 1.15))
 		_box(BLACK, Vector3(x, 1.42, z), Vector3(2.0, 0.15, 1.34))
 		for i in range(5):

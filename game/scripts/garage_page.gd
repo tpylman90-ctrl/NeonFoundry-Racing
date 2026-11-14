@@ -8,6 +8,7 @@ const ORANGE: Color = Color("ff8059")
 const WHITE: Color = Color("eef4f6")
 const MUTED: Color = Color("9aafc0")
 const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
+const WorkshopScript = preload("res://scripts/garage_workshop.gd")
 
 var _world: Node3D
 var _camera: Camera3D
@@ -31,6 +32,9 @@ var _walk_forward: float = 0.0
 var _walk_turn: float = 0.0
 var _walk_pad: PanelContainer
 var _walk_toggle: Button
+var _workshop: Node3D
+var _equipment_panel: PanelContainer
+var _equipment_status: Label
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -182,6 +186,10 @@ func _build_3d_stage() -> void:
 	_vehicle_holder.position.y = 0.33
 	_world.add_child(_vehicle_holder)
 	_load_craft_preview()
+	_workshop = Node3D.new()
+	_workshop.name = "LiveWorkshopEquipment"
+	_workshop.set_script(WorkshopScript)
+	_world.add_child(_workshop)
 
 	_camera = Camera3D.new()
 	_camera.name = "InspectionCamera"
@@ -397,6 +405,18 @@ func _build_overlay() -> void:
 	_walk_toggle = _button("WALK THE GARAGE", _toggle_walk)
 	views.add_child(_walk_toggle)
 
+	_equipment_panel = _panel(0.753, 0.545, 0.974, 0.845)
+	var equipment := VBoxContainer.new()
+	equipment.add_theme_constant_override("separation", 7)
+	_equipment_panel.add_child(equipment)
+	equipment.add_child(_label("SERVICE BAY  /  EQUIPMENT", 15, ORANGE))
+	equipment.add_child(_button("OPERATE LIFT ARMS", _operate_lifts))
+	equipment.add_child(_button("ROBOT SCANNER  /  TOGGLE", _toggle_scanner))
+	_equipment_status = _label("AUTO SERVICE  /  STANDBY", 13, MUTED)
+	_equipment_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	equipment.add_child(_equipment_status)
+	_refresh_equipment_status()
+
 	_walk_pad = _panel(0.753, 0.545, 0.974, 0.855)
 	var walk_content := VBoxContainer.new()
 	walk_content.add_theme_constant_override("separation", 6)
@@ -471,8 +491,23 @@ func _toggle_walk() -> void:
 	_walk_forward = 0.0
 	_walk_turn = 0.0
 	_walk_pad.visible = _walk_mode
+	_equipment_panel.visible = not _walk_mode
 	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
 	_detail.text = "WALKAROUND MODE\\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\\nTouch-drag to orbit around the model. Use the camera presets for detail study."
+
+func _refresh_equipment_status() -> void:
+	if _workshop != null and _equipment_status != null:
+		_equipment_status.text = str(_workshop.call("get_equipment_status"))
+
+func _operate_lifts() -> void:
+	if _workshop != null:
+		_workshop.call("toggle_lifts")
+		_refresh_equipment_status()
+
+func _toggle_scanner() -> void:
+	if _workshop != null:
+		_workshop.call("set_scanner_active", not bool(_workshop.get("_scanner_enabled")))
+		_refresh_equipment_status()
 
 func _zoom(amount: float) -> void:
 	_target_distance = clampf(_target_distance + amount, 6.8, 20.0)
