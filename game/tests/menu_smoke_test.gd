@@ -33,6 +33,18 @@ func _run() -> void:
 	assert(workshop != null)
 	assert(workshop.get_node("Batched_steel") != null)
 	assert(workshop.get_node("ArticulatedServiceRobot") != null)
+	var diagnostic_labels: Array[Node] = workshop.find_children("*", "Label3D", true, false)
+	assert(diagnostic_labels.size() >= 12)
+	var steel_mesh: MeshInstance3D = workshop.get_node("Batched_steel") as MeshInstance3D
+	assert(steel_mesh.mesh.get_surface_count() >= 1)
+	var staged_cc0: String = "res://assets/garage/pbr/steel_color.jpg"
+	if ResourceLoader.exists(staged_cc0):
+		var material: StandardMaterial3D = steel_mesh.material_override as StandardMaterial3D
+		assert(material.normal_enabled)
+		assert(material.normal_texture != null)
+	var imported_cc0: String = "res://assets/garage/kenney_factory/machine-window.obj"
+	if ResourceLoader.exists(imported_cc0):
+		assert(workshop.get_node_or_null("Kenney_machine_window") != null)
 	var carriages: Array = workshop.get("_lift_carriages")
 	assert(carriages.size() == 2)
 	workshop.call("toggle_lifts")

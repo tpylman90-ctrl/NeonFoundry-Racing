@@ -47,6 +47,7 @@ func _ready() -> void:
 	_build_workshop_diagnostics()
 	_build_lift_mechanics()
 	_commit_batches()
+	_build_cc0_factory_props()
 	_build_robot()
 	_build_task_lights()
 	set_process(true)
@@ -1047,3 +1048,38 @@ func _build_lift_mechanics() -> void:
 		for i in range(3):
 			var z: float = -0.10+float(i)*1.7
 			_box(BLACK,Vector3(x,10.18,z),Vector3(0.67,0.10,0.13))
+
+# Original Kenney Factory Kit CC0 mesh models are staged separately with
+# their MTL and original colormap. Only 8 specific objects are permitted here.
+func _build_cc0_factory_props() -> void:
+	var entries: Array[Dictionary] = [
+		{"id": "machine-window", "p": Vector3(-15.35,0.07,-1.2), "s":1.70, "r":0.0},
+		{"id": "machine-fortified", "p": Vector3(15.5,0.07,-1.1), "s":1.6, "r":PI},
+		{"id": "scanner-high", "p": Vector3(-10.2,0.07,1.35), "s":1.7, "r":0.6},
+		{"id": "crane-lift", "p": Vector3(15.5,0.07,9.8), "s":1.0, "r":PI},
+		{"id": "piston-round", "p": Vector3(16.3,1.35,-14.1), "s":0.75, "r":0.0},
+		{"id": "cog-e", "p": Vector3(-15.8,1.35,-13.5), "s":0.95, "r":0.6},
+		{"id": "screen-hanging-wide", "p": Vector3(-13.0,8.25,-6.2), "s":1.6, "r":0.0},
+		{"id": "conveyor-bars-stripe-sides", "p": Vector3(-14.6,0.07,11.5), "s":1.8, "r":0.0}
+	]
+	var loaded: int = 0
+	for entry in entries:
+		var asset_id: String = str(entry["id"])
+		var obj_path: String = "res://assets/garage/kenney_factory/" + asset_id + ".obj"
+		if not ResourceLoader.exists(obj_path):
+			continue
+		var source: Resource = load(obj_path)
+		if not source is Mesh:
+			push_warning("CC0 Factory OBJ failed to import: " + asset_id)
+			continue
+		var mesh_node := MeshInstance3D.new()
+		mesh_node.name = "Kenney_" + asset_id.replace("-", "_")
+		mesh_node.mesh = source as Mesh
+		mesh_node.position = entry["p"]
+		var factor: float = float(entry["s"])
+		mesh_node.scale = Vector3.ONE * factor
+		mesh_node.rotation.y = float(entry["r"])
+		mesh_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mesh_node)
+		loaded += 1
+	print("NEON_FOUNDRY_KENNEY_CC0_PROPS_LOADED count=%d" % loaded)
