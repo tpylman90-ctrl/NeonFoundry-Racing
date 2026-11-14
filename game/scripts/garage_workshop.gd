@@ -1060,7 +1060,7 @@ func _build_cc0_factory_props() -> void:
 		{"id": "piston-round", "p": Vector3(16.3,1.35,-14.1), "s":0.75, "r":0.0},
 		{"id": "cog-e", "p": Vector3(-15.8,1.35,-13.5), "s":0.95, "r":0.6},
 		{"id": "screen-hanging-wide", "p": Vector3(-13.0,8.25,-6.2), "s":1.6, "r":0.0},
-		{"id": "conveyor-bars-stripe-sides", "p": Vector3(-14.6,0.07,11.5), "s":1.8, "r":0.0}
+		{"id": "conveyor-bars-stripe-side", "p": Vector3(-14.6,0.07,11.5), "s":1.8, "r":0.0}
 	]
 	var loaded: int = 0
 	for entry in entries:

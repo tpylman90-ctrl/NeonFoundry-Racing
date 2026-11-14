@@ -22,7 +22,7 @@ MODELS = (
     "piston-round",
     "cog-e",
     "screen-hanging-wide",
-    "conveyor-bars-stripe-sides",
+    "conveyor-bars-stripe-side",
 )
 DEST.mkdir(parents=True, exist_ok=True)
 
