@@ -2,6 +2,21 @@
 
 Status: **experimental / phone acceptance pending**. This document records a controller prototype, NOT approval of NF-H01 Gate 01 or permission to skip any of the 12 locked model gates.
 
+## Dual-stick revision — November 14, 2026
+
+SceneForge's controls experiment has advanced from discrete directional/pedal buttons to **two analog sticks plus a separate boost button**. This revision supersedes the touchscreen layout assumptions in the original baseline below, but does not supersede any vehicle-model approval gate.
+
+- **Left stick, vertical:** up = proportional forward thrust; down = proportional braking, then reverse; spring-return center = coast.
+- **Right stick, horizontal:** left/right yaw with proportional deflection; steering is independent of the throttle pointer.
+- **Right stick, vertical:** rise/fall at up to 3.25 m/s of target clearance; release holds altitude. Two axes can operate diagonally. Standard SceneForge circuit corridor is **0.80–5.50 m** relative to the authored course deck. Skyfall's designated flight envelope is **3.0–20.0 m**. These are prototype limits and must be course authored before integrating with Neon Foundry.
+- **Boost button:** tap for a 2.25-second pulse, tap again to cancel. The race controller retains its energy drain and lockout.
+- **Physical proving ground:** independent four-ray repulsor controller with commanded clearance **1.10–5.50 m**. Its blue overhead beam and amber floor fence have actual collision bodies and cannot be treated as ground by downward sensors. The track's original gap remains unsupported.
+- **Verification:** [fast hover controls smoke](https://github.com/tpylman90-ctrl/SceneForge/actions/workflows/controls-smoke.yml) and [Android pipeline](https://github.com/tpylman90-ctrl/SceneForge/actions/workflows/android.yml). Passing CI does not prove real-phone control feel.
+
+This is a code prototype in SceneForge, not Neon Foundry gameplay integration. A future production controller must move vertical bounds and low-clearance obstacle data into track/corridor resources, make them responsive to actual vehicle hull size, and support transitions to powered flight separately from surface repulsors.
+
+---
+
 ## Source of reusable prototypes
 
 The live testbed remains [SceneForge](https://github.com/tpylman90-ctrl/SceneForge), so Neon Foundry Racing keeps its independent project structure and approval gates.
