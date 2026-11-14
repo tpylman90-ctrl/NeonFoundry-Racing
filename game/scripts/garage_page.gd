@@ -37,6 +37,8 @@ var _equipment_panel: PanelContainer
 var _equipment_status: Label
 var _title_panel: PanelContainer
 var _tools_panel: PanelContainer
+var _performance_label: Label
+var _performance_samples: int = 0
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -45,6 +47,9 @@ func _ready() -> void:
 	set_process(true)
 
 func _process(delta: float) -> void:
+	_performance_samples += 1
+	if _performance_label != null and _performance_samples % 18 == 0:
+		_performance_label.text = "MOBILE VULKAN  /  FPS %d" % Engine.get_frames_per_second()
 	if _walk_mode:
 		_walk_yaw += _walk_turn * delta * 1.75
 		_walk_position += Vector3(-sin(_walk_yaw), 0, -cos(_walk_yaw)) * _walk_forward * delta * 4.6
@@ -350,6 +355,10 @@ func _panel(left: float, top: float, right: float, bottom: float) -> PanelContai
 	return panel
 
 func _build_overlay() -> void:
+	var performance_plate := _panel(0.756, 0.040, 0.975, 0.118)
+	_performance_label = _label("MOBILE VULKAN  /  FPS --", 15, CYAN)
+	_performance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	performance_plate.add_child(_performance_label)
 	var title_panel := _panel(0.025, 0.028, 0.53, 0.16)
 	_title_panel = title_panel
 	var head := VBoxContainer.new()

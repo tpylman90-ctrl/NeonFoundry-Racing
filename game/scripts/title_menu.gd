@@ -53,6 +53,12 @@ func _ready() -> void:
 	elif "--capture-garage" in OS.get_cmdline_user_args():
 		_open_section("garage")
 		_capture_screen("NeonFoundry-Garage.png", "garage")
+	elif "--capture-workshop" in OS.get_cmdline_user_args():
+		_open_section("garage")
+		_garage_page.call("_toggle_walk")
+		_garage_page.set("_walk_position", Vector3(-11.5, 1.85, 8.8))
+		_garage_page.set("_walk_yaw", -0.38)
+		_capture_screen("NeonFoundry-WorkshopWalk.png", "garage")
 	elif "--capture-store" in OS.get_cmdline_user_args():
 		_open_section("store")
 		_capture_screen("NeonFoundry-Store.png", "module")

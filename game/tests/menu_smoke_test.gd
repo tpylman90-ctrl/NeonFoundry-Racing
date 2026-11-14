@@ -28,6 +28,7 @@ func _run() -> void:
 	menu._open_section("garage")
 	assert(menu.current_page == "garage")
 	assert(menu._garage_page != null)
+	assert(menu._garage_page._performance_label != null)
 	assert(menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot") != null)
 	var workshop: Node3D = menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot/LiveWorkshopEquipment")
 	assert(workshop != null)
