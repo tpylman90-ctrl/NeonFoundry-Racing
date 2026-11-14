@@ -1,0 +1,75 @@
+name: NF-H01 / V18.04 Cockpit and Rear Cowl Mesh Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-v18-stage04.yml'
+      - 'tools/build_forge_v18_stage04.py'
+      - 'tools/check_forge_v18_stage04.py'
+      - 'art/hero_01/experiments/V18_Stage04/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-cockpit-mesh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install free pinned 3D assembly and sectioning dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check \
+            "numpy==2.3.5" "scipy==1.17.0" "trimesh==4.11.1" \
+            "networkx==3.6.1" "shapely==2.1.2"
+      - name: Build physical cockpit canopy and mounted roof onto actual V18.03
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_forge_v18_stage04.py tools/check_forge_v18_stage04.py
+          python tools/build_forge_v18_stage04.py | tee /tmp/nfr-v18-04-build.log
+          grep -q FORGE_V18_04_MESH_OK /tmp/nfr-v18-04-build.log
+      - name: Verify prior meshes intact, GLB glass, and ten real section contact areas
+        run: |
+          set -euo pipefail
+          python tools/check_forge_v18_stage04.py \
+            --base art/hero_01/experiments/V18_Stage03/FORGE_V18_03_Hood_Intakes_Modular.glb \
+            --model build/forge_v18_stage04/FORGE_V18_04_Cockpit_Assembly.glb \
+            --out build/forge_v18_stage04/V18_04_Contact_QA.json | tee /tmp/nfr-v18-04-qa.log
+          grep -q NFR_V18_04_INDEPENDENT_GEOMETRY_QA_OK /tmp/nfr-v18-04-qa.log
+      - name: Compare reconstructed named meshes with published review GLB
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import numpy as np
+          import trimesh
+          public=Path("art/hero_01/experiments/V18_Stage04/FORGE_V18_04_Cockpit_Assembly.glb")
+          rebuilt=Path("build/forge_v18_stage04/FORGE_V18_04_Cockpit_Assembly.glb")
+          assert hashlib.sha256(public.read_bytes()).hexdigest()=="a96370ece7b9a89d435bfa1f60d358fcac9140e2175544c442f99895811df3d5"
+          a=trimesh.load(public,force="scene",process=False)
+          b=trimesh.load(rebuilt,force="scene",process=False)
+          assert set(a.geometry)==set(b.geometry)
+          assert len(a.geometry)==557
+          assert sum(len(m.faces) for m in b.geometry.values())==38596
+          for name in a.geometry:
+              x,y=a.geometry[name],b.geometry[name]
+              assert x.vertices.shape==y.vertices.shape,name
+              assert x.faces.shape==y.faces.shape,name
+              assert np.array_equal(x.faces,y.faces),name
+              assert np.allclose(x.vertices,y.vertices,rtol=0,atol=1e-5),name
+          print("NFR_V18_04_REPRODUCIBLE_COCKPIT_GLB_OK",len(b.geometry))
+          PY
+      - name: Export inspection-only GLB and attachment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-V18-04-Cockpit-Assembly
+          path: |
+            build/forge_v18_stage04/FORGE_V18_04_Cockpit_Assembly.glb
+            build/forge_v18_stage04/V18_04_Contact_QA.json
+          retention-days: 14
