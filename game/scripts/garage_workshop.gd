@@ -125,7 +125,7 @@ func _add_quad(id: String, a: Vector3, b: Vector3, c: Vector3, d: Vector3, tilin
 func _box(id: String, position: Vector3, size: Vector3, angle_y: float = 0.0) -> void:
 	if size.x <= 0 or size.y <= 0 or size.z <= 0:
 		return
-	var bx: float = Vector3(cos(angle_y), 0, -sin(angle_y)) * size.x * 0.5
+	var bx: Vector3 = Vector3(cos(angle_y), 0, -sin(angle_y)) * size.x * 0.5
 	var by := Vector3.UP * size.y * 0.5
 	var bz := Vector3(sin(angle_y), 0, cos(angle_y)) * size.z * 0.5
 	var a := position - bx - by - bz
