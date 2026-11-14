@@ -211,6 +211,18 @@ func _build_3d_stage() -> void:
 	sunlight.light_energy = 1.43
 	sunlight.light_color = Color("d2e6ff")
 	_world.add_child(sunlight)
+	# One focused shadow-casting key light: real mesh-to-ground and self shadows.
+	# The many decorative emissive strips stay shadow-free for mobile.
+	var hero_key := SpotLight3D.new()
+	hero_key.name = "ForgeHeroShadowKey"
+	hero_key.position = Vector3(2.7, 10.2, 3.0)
+	hero_key.rotation_degrees = Vector3(-90, 0, 0)
+	hero_key.spot_range = 17.5
+	hero_key.spot_angle = 67.0
+	hero_key.light_energy = 2.4
+	hero_key.light_color = Color("cbeeff")
+	hero_key.shadow_enabled = true
+	_world.add_child(hero_key)
 	for light_spec in [
 		{"pos": Vector3(-5, 9, 6), "color": Color("e3f1ff"), "energy": 4.0},
 		{"pos": Vector3(6, 11, -4), "color": Color("ffd5ad"), "energy": 3.4},
