@@ -41,3 +41,7 @@ All static props are authored as triangles consolidated into material-specific `
 In the garage's **SERVICE BAY / EQUIPMENT** panel, **OPERATE LIFT ARMS** toggles an unloaded lift carriage movement, while **ROBOT SCANNER / TOGGLE** powers the animated inspection head. Garage UI remains separate from other destinations.
 
 Visual QA pass: lift/service metallic surfaces now carry deterministic, locally generated brushed PBR microtextures; the camera opens wider for a larger view of the room; workshop light balance is more neutral and the robotic arm is repositioned near the back of the turntable to keep it visible despite mobile UI overlays. This does not substitute a path-traced showroom for the live scene.
+
+## CC0 PBR materials and provenance
+
+`tools/stage_garage_cc0.py` downloads **1K true albedo, OpenGL normal, roughness, metallic and ambient-occlusion maps** from four verified CC0 ambientCG materials (Metal010, MetalPlates001, Metal050A and PaintedMetal010) into the build's `game/assets/garage/pbr/` staging directory, with a machine-readable `provenance.json`. These CC0 materials may be distributed in a commercial game, with credit optional; source: https://docs.ambientcg.com/license/ . The native Godot PBR shader uses real-world-scaled UVs, material normal mapping, roughness, metalness, and AO. When the asset host cannot be reached, the game still compiles using the original local fallback textures; logs explicitly report which maps were actually staged. This is build-time dependency only and does not access the network on user devices. 

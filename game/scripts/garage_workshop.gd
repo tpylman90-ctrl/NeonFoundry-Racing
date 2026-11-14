@@ -109,6 +109,43 @@ func _create_materials() -> void:
 		var mat: StandardMaterial3D = _materials[material_id]
 		mat.albedo_texture = _create_microtexture(17 if material_id == FLOOR else 53,
 			material_id == FLOOR)
+	_apply_cc0_pbr()
+
+func _apply_cc0_pbr() -> void:
+	# All offline 1K material sources are CC0, staged by stage_garage_cc0.py.
+	# Assign each map to its respective physical channel on Vulkan Mobile;
+	# no procedural-color substitute is used when the sourced map is present.
+	var ids: Dictionary = {
+		STEEL: "steel", FLOOR: "deck", GRAPHITE: "paint",
+		TRIM: "clean", SILVER: "clean"
+	}
+	var mapped: int = 0
+	for material_id in ids:
+		var prefix: String = str(ids[material_id])
+		var root: String = "res://assets/garage/pbr/" + prefix + "_"
+		var color_path: String = root + "color.jpg"
+		var normal_path: String = root + "normal.jpg"
+		var rough_path: String = root + "roughness.jpg"
+		if not (ResourceLoader.exists(color_path) and ResourceLoader.exists(normal_path)
+				and ResourceLoader.exists(rough_path)):
+			continue
+		var mat: StandardMaterial3D = _materials[material_id]
+		mat.albedo_texture = load(color_path)
+		mat.normal_enabled = true
+		mat.normal_texture = load(normal_path)
+		mat.normal_scale = 0.72
+		mat.roughness_texture = load(rough_path)
+		mat.uv1_scale = Vector3.ONE
+		var metal_path: String = root + "metallic.jpg"
+		if ResourceLoader.exists(metal_path):
+			mat.metallic_texture = load(metal_path)
+		var ao_path: String = root + "ao.jpg"
+		if ResourceLoader.exists(ao_path):
+			mat.ao_enabled = true
+			mat.ao_texture = load(ao_path)
+			mat.ao_light_affect = 0.45
+		mapped += 1
+	print("NEON_FOUNDRY_CC0_PBR_APPLIED surfaces=%d" % mapped)
 
 func _create_microtexture(seed: int, floor_texture: bool) -> ImageTexture:
 	var img := Image.create(128, 128, false, Image.FORMAT_RGBA8)
@@ -137,9 +174,13 @@ func _add_quad(id: String, a: Vector3, b: Vector3, c: Vector3, d: Vector3, tilin
 	var tool: SurfaceTool = _tools[id]
 	var normal: Vector3 = (b - a).cross(c - a).normalized()
 	var vertices: Array[Vector3] = [a, b, c, a, c, d]
+	# Real-world scale UVs: seams, normals and roughness stay consistent
+	# across differently-sized floor panels, lift columns and tool cabinets.
+	var u_size: float = clampf(a.distance_to(b) * 0.85 * tiling, 0.12, 28.0)
+	var v_size: float = clampf(a.distance_to(d) * 0.85 * tiling, 0.12, 28.0)
 	var uvs: Array[Vector2] = [
-		Vector2.ZERO, Vector2(tiling, 0), Vector2(tiling, tiling),
-		Vector2.ZERO, Vector2(tiling, tiling), Vector2(0, tiling)
+		Vector2.ZERO, Vector2(u_size, 0), Vector2(u_size, v_size),
+		Vector2.ZERO, Vector2(u_size, v_size), Vector2(0, v_size)
 	]
 	for i in range(6):
 		tool.set_normal(normal)
