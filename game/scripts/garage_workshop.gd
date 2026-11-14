@@ -125,7 +125,7 @@ func _add_quad(id: String, a: Vector3, b: Vector3, c: Vector3, d: Vector3, tilin
 func _box(id: String, position: Vector3, size: Vector3, angle_y: float = 0.0) -> void:
 	if size.x <= 0 or size.y <= 0 or size.z <= 0:
 		return
-	var bx := Vector3(cos(angle_y), 0, -sin(angle_y)) * size.x * 0.5
+	var bx: float = Vector3(cos(angle_y), 0, -sin(angle_y)) * size.x * 0.5
 	var by := Vector3.UP * size.y * 0.5
 	var bz := Vector3(sin(angle_y), 0, cos(angle_y)) * size.z * 0.5
 	var a := position - bx - by - bz
@@ -210,7 +210,7 @@ func _build_floor() -> void:
 				_box(TRIM, Vector3(cx, -0.055, cz - 1.18), Vector3(2.3, 0.009, 0.014))
 	for side in [-1.0, 1.0]:
 		# Recessed trench drain with steel grating, workshop access safety band.
-		var x := side * 9.0
+		var x: float = side * 9.0
 		_box(BLACK, Vector3(x, -0.035, -4.0), Vector3(0.72, 0.05, 24.0))
 		for i in range(56):
 			_box(STEEL, Vector3(x, -0.005, -15.7 + float(i) * 0.42),
@@ -225,7 +225,7 @@ func _build_floor() -> void:
 func _build_architecture() -> void:
 	# Double wall skin and exposed structural reinforced bays.
 	for side in [-1.0, 1.0]:
-		var x := 18.6 * side
+		var x: float = 18.6 * side
 		_box(STEEL, Vector3(x, 6.9, -2.0), Vector3(0.32, 13.8, 30.0))
 		for k in range(7):
 			var z := -16.0 + float(k) * 4.7
@@ -242,7 +242,7 @@ func _build_architecture() -> void:
 		_box(CYAN, Vector3(side * 10.48, 6.06, -8.7), Vector3(0.09, 0.10, 16.0))
 	# Back wall armor segmented around work stations.
 	for i in range(11):
-		var x := -18.0 + float(i) * 3.6
+		var x: float = -18.0 + float(i) * 3.6
 		_box(GRAPHITE, Vector3(x, 6.4, -17.53), Vector3(3.50, 11.75, 0.18))
 		_box(STEEL, Vector3(x - 1.72, 6.4, -17.36), Vector3(0.1, 11.3, 0.30))
 		_box(CYAN if i % 2 == 0 else AMBER, Vector3(x, 10.25, -17.38), Vector3(2.78, 0.065, 0.08))
@@ -254,7 +254,7 @@ func _build_architecture() -> void:
 	# Hazard-striped vertical door surrounds for two maintenance bays.
 	for bx in [-13.2, 13.2]:
 		for side in [-1.0, 1.0]:
-			var x := bx + side * 3.15
+			var x: float = bx + side * 3.15
 			_box(TRIM, Vector3(x, 3.5, -16.98), Vector3(0.36, 6.8, 0.20))
 			for k in range(11):
 				_box(YELLOW, Vector3(x, 0.62 + float(k) * 0.54, -16.84),
@@ -275,7 +275,7 @@ func _build_ceiling() -> void:
 			float(spec["r"]), float(spec["w"]), float(spec["y"]), 0, TAU, 84)
 	for i in range(18):
 		var a := TAU * float(i) / 18.0
-		var x := cos(a) * 5.6
+		var x: float = cos(a) * 5.6
 		var z := sin(a) * 5.6 - 0.8
 		_rod(STEEL, Vector3(x, 9.0, z), Vector3(x, 11.0, z), 0.13, 8)
 		_box(AMBER if i % 3 == 0 else TRIM, Vector3(x, 8.79, z),
@@ -318,7 +318,7 @@ func _build_platform() -> void:
 				Vector3(0.17, 0.04, 0.42), -a)
 	for i in range(16):
 		var a := TAU * float(i) / 16.0
-		var x := cos(a) * 6.75
+		var x: float = cos(a) * 6.75
 		var z := sin(a) * 6.75
 		_box(DARK, Vector3(x, 0.01, z), Vector3(0.8, 0.08, 0.52), -a)
 		for j in range(4):
@@ -334,7 +334,7 @@ func _build_platform() -> void:
 func _build_service_lifts() -> void:
 	# Two main servo lift columns with telescoping paired support arms.
 	for side in [-1.0, 1.0]:
-		var x := side * 8.2
+		var x: float = side * 8.2
 		var z := -1.75
 		_box(BLACK, Vector3(x, 0.19, z), Vector3(1.85, 0.32, 2.6))
 		_box(STEEL, Vector3(x, 3.00, z), Vector3(1.16, 5.86, 1.25))
@@ -389,7 +389,7 @@ func _build_workstations() -> void:
 		_box(STEEL, Vector3(x, 3.65, -17.03), Vector3(5.4, 3.15, 0.22))
 		_box(DARK, Vector3(x, 3.63, -16.91), Vector3(5.15, 2.9, 0.08))
 		for k in range(17):
-			var tool_x := x - 2.44 + float(k) * 0.30
+			var tool_x: float = x - 2.44 + float(k) * 0.30
 			var tool_y := 2.95 + float(k % 3) * 0.52
 			# Wrenches, probes, socket drivers, scribe tools and clamps.
 			_rod(SILVER, Vector3(tool_x, tool_y - 0.36, -16.83),
@@ -403,7 +403,7 @@ func _build_workstations() -> void:
 		_box(CYAN, Vector3(x, 5.30, -16.91), Vector3(5.2, 0.06, 0.08))
 		# Slanted diagnostic displays.
 		for offset in [-1.76, 1.76]:
-			var sx := x + offset
+			var sx: float = x + offset
 			_box(BLACK, Vector3(sx, 1.68, z - 0.60), Vector3(1.48, 1.05, 0.10))
 			_box(SCREEN, Vector3(sx, 1.67, z - 0.53), Vector3(1.31, 0.83, 0.04))
 			for i in range(5):
@@ -429,7 +429,7 @@ func _build_workstations() -> void:
 				Vector3(0.07, 0.16, 0.07))
 	# Open shelving at the far right and a spare propulsion module on a stand.
 	for side in [-1.0, 1.0]:
-		var x := side * 16.0
+		var x: float = side * 16.0
 		var z := -12.3
 		for dx in [-1.9, 1.9]:
 			for dz in [-0.72, 0.72]:
@@ -437,13 +437,13 @@ func _build_workstations() -> void:
 		for h in [0.65, 2.0, 3.45, 4.9]:
 			_box(TRIM, Vector3(x, h, z), Vector3(4.1, 0.14, 1.8))
 		for k in range(11):
-			var bx := x - 1.65 + float(k % 6) * 0.61
+			var bx: float = x - 1.65 + float(k % 6) * 0.61
 			var by := 0.98 + float(k / 6) * 1.5
 			_box(GRAPHITE, Vector3(bx, by, z), Vector3(0.51, 0.56, 0.85))
 			_box(AMBER if k % 3 == 0 else CYAN,
 				Vector3(bx, by + 0.31, z + 0.45), Vector3(0.32, 0.05, 0.018))
 		# Large turbine display with stacked concentric industrial rings.
-		var px := side * 15.1
+		var px: float = side * 15.1
 		var pz := -6.0
 		_box(STEEL, Vector3(px, 0.56, pz), Vector3(3.4, 0.4, 2.0))
 		_rod(GRAPHITE, Vector3(px, 1.45, pz - 1.0), Vector3(px, 1.45, pz + 1.0), 0.94, 28)
@@ -457,7 +457,7 @@ func _build_workstations() -> void:
 func _build_service_bays() -> void:
 	# Background service bays read as automotive maintenance (not showroom).
 	for side in [-1.0, 1.0]:
-		var x := side * 13.1
+		var x: float = side * 13.1
 		var z := -9.6
 		for column in [-2.18, 2.18]:
 			_box(STEEL, Vector3(x + column, 2.48, z), Vector3(0.53, 4.9, 0.73))
@@ -495,7 +495,7 @@ func _build_robot_base() -> void:
 		_box(CYAN, Vector3(7.55 + cos(a) * 1.07, 0.42, -3.85 + sin(a) * 1.07),
 			Vector3(0.17, 0.08, 0.15))
 	for i in range(5):
-		var x := 8.6 + float(i) * 0.44
+		var x: float = 8.6 + float(i) * 0.44
 		_box(YELLOW, Vector3(x, 0.025, -4.9), Vector3(0.28, 0.026, 0.15), -0.52)
 
 func _mesh_between(parent: Node3D, a: Vector3, b: Vector3,
