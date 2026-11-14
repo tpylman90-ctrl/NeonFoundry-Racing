@@ -121,8 +121,8 @@ func _apply_cc0_pbr() -> void:
 	# Assign each map to its respective physical channel on Vulkan Mobile;
 	# no procedural-color substitute is used when the sourced map is present.
 	var ids: Dictionary = {
-		STEEL: "steel", FLOOR: "deck", GRAPHITE: "paint",
-		TRIM: "clean", SILVER: "clean"
+		STEEL: "steel", FLOOR: "clean", GRAPHITE: "paint",
+		TRIM: "clean", SILVER: "deck"
 	}
 	var mapped: int = 0
 	for material_id in ids:
@@ -138,7 +138,10 @@ func _apply_cc0_pbr() -> void:
 		mat.albedo_texture = load(color_path)
 		mat.normal_enabled = true
 		mat.normal_texture = load(normal_path)
-		mat.normal_scale = 0.72
+		mat.normal_scale = 0.25 if material_id == FLOOR else 0.70
+		if material_id == FLOOR:
+			mat.roughness = 0.66
+			mat.metallic = 0.15
 		mat.roughness_texture = load(rough_path)
 		mat.uv1_scale = Vector3.ONE
 		var metal_path: String = root + "metallic.jpg"
