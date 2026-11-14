@@ -26,3 +26,5 @@ This is an **interactive UI skeleton**, not a production racing gameplay loop. E
 ## Acceptance
 
 `game/tests/menu_smoke_test.gd` exercises the title, hub, device settings, garage, store, profile, mode, tracks, lobby, loading, race-demo, pause, results, and return-to-menu sequence. Godot 4.5.1 headless import/startup and this smoke script run in CI. The actual Android Vulkan device review remains required.
+
+Automated Android workflow screenshots now include garage, store, mode selection, lobby, and results alongside the title, hub, and settings. They are generated through Godot Mobile/Vulkan under software Vulkan CI, not concept-art mockups.

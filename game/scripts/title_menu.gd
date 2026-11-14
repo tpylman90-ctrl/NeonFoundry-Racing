@@ -45,6 +45,26 @@ func _ready() -> void:
 		_capture_screen("NeonFoundry-MainMenu.png", "menu")
 	elif "--capture-settings" in OS.get_cmdline_user_args():
 		_capture_screen("NeonFoundry-Settings.png", "settings")
+	elif "--capture-garage" in OS.get_cmdline_user_args():
+		_open_section("garage")
+		_capture_screen("NeonFoundry-Garage.png", "flow")
+	elif "--capture-store" in OS.get_cmdline_user_args():
+		_open_section("store")
+		_capture_screen("NeonFoundry-Store.png", "flow")
+	elif "--capture-mode" in OS.get_cmdline_user_args():
+		_open_section("races")
+		_capture_screen("NeonFoundry-RaceMode.png", "flow")
+	elif "--capture-lobby" in OS.get_cmdline_user_args():
+		_open_section("races")
+		_flow_page.call("_choose_mode", "hybrid")
+		_flow_page.call("_choose_track", "neon_cross")
+		_capture_screen("NeonFoundry-RaceLobby.png", "flow")
+	elif "--capture-results" in OS.get_cmdline_user_args():
+		_open_section("races")
+		_flow_page.call("_choose_mode", "hybrid")
+		_flow_page.call("_choose_track", "neon_cross")
+		_flow_page.call("_goto", "results")
+		_capture_screen("NeonFoundry-RaceResults.png", "flow")
 
 func _process(_delta: float) -> void:
 	if _fps_label != null and _fps_label.visible:
