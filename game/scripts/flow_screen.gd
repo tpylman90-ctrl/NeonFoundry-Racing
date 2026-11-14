@@ -1,4 +1,5 @@
 extends Control
+const PageBackdrop = preload("res://scripts/page_backdrop.gd")
 ## Lightweight, touch-first navigation skeleton. No craft, race, checkout, or rewards are simulated as production gameplay.
 signal request_main_menu
 signal request_device_settings
@@ -21,6 +22,7 @@ var selected_track: String = ""
 var selected_craft: String = "NF-H01 / UI TEST MULE"
 var _history: Array[String] = []
 var _eyebrow: Label
+var _stage: Control
 var _title: Label
 var _summary: Label
 var _content: VBoxContainer
@@ -32,12 +34,17 @@ func _ready() -> void:
 	_build_shell()
 
 func _build_shell() -> void:
+	_stage = Control.new()
+	_stage.name = "PageAtmosphere"
+	_stage.set_script(PageBackdrop)
+	_stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_stage)
 	var panel := PanelContainer.new()
 	panel.name = "FlowPanel"
-	panel.anchor_left = 0.067
-	panel.anchor_top = 0.145
-	panel.anchor_right = 0.652
-	panel.anchor_bottom = 0.912
+	panel.anchor_left = 0.04
+	panel.anchor_top = 0.10
+	panel.anchor_right = 0.615
+	panel.anchor_bottom = 0.923
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.013, 0.035, 0.057, 0.93)
@@ -215,6 +222,9 @@ func _demo_finished() -> void:
 	_goto("results")
 
 func _render() -> void:
+	if _stage != null:
+		_stage.set("current_page", current_page)
+		_stage.queue_redraw()
 	if _content == null:
 		return
 	for item in _content.get_children():
