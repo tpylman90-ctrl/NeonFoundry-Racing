@@ -3,6 +3,7 @@ const PageBackdrop = preload("res://scripts/page_backdrop.gd")
 ## Lightweight, touch-first navigation skeleton. No craft, race, checkout, or rewards are simulated as production gameplay.
 signal request_main_menu
 signal request_device_settings
+signal request_garage
 signal flow_page_changed(page: String)
 
 const CYAN: Color = Color("4dd5db")
@@ -300,7 +301,7 @@ func _render() -> void:
 			var track: Dictionary = _selected_track()
 			_card("EVENT / " + str(track.get("name", "NO TRACK")), "Discipline: %s. Venue is currently a selection record, not a playable Godot scene." % selected_mode.to_upper())
 			_card("CRAFT / " + selected_craft, "Eligibility: UI DEMO ONLY. Vehicle class, upgrades, and rule validation cannot be evaluated yet.")
-			_pair("CHANGE CRAFT / GARAGE", func() -> void: _goto("garage"), "CHANGE TRACK", func() -> void: _goto("tracks"))
+			_pair("CHANGE CRAFT / GARAGE", func() -> void: request_garage.emit(), "CHANGE TRACK", func() -> void: _goto("tracks"))
 			_action("LAUNCH UI FLOW DEMO", _start_flow_demo, true)
 		"loading":
 			_header("09 / RACE INITIALIZATION", "LOADING", "Preparing interface demonstration...")

@@ -477,6 +477,7 @@ func _open_section(section: String) -> void:
 	_flow_page.name = "Destination_%s" % section
 	_flow_page.connect("request_main_menu", Callable(self, "show_main_menu"))
 	_flow_page.connect("request_device_settings", Callable(self, "open_settings"))
+	_flow_page.connect("request_garage", Callable(self, "_open_section").bind("garage"))
 	add_child(_flow_page)
 	_flow_page.call("open_page", first_page)
 	_show_page("module")
