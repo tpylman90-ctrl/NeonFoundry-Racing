@@ -24,6 +24,13 @@ var _detail: Label
 var _bay_state: String = "inspect"
 var _view_button: Button
 var _stage_status: Label
+var _walk_mode: bool = false
+var _walk_position: Vector3 = Vector3(0, 1.75, 11)
+var _walk_yaw: float = 0.0
+var _walk_forward: float = 0.0
+var _walk_turn: float = 0.0
+var _walk_pad: PanelContainer
+var _walk_toggle: Button
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -32,6 +39,18 @@ func _ready() -> void:
 	set_process(true)
 
 func _process(delta: float) -> void:
+	if _walk_mode:
+		_walk_yaw += _walk_turn * delta * 1.75
+		_walk_position += Vector3(-sin(_walk_yaw), 0, -cos(_walk_yaw)) * _walk_forward * delta * 4.6
+		_walk_position.x = clampf(_walk_position.x, -17.0, 17.0)
+		_walk_position.z = clampf(_walk_position.z, -15.0, 14.0)
+		var ground_radius: float = Vector2(_walk_position.x, _walk_position.z).length()
+		if ground_radius < 6.35:
+			var safe: Vector2 = Vector2(_walk_position.x, _walk_position.z).normalized() * 6.35
+			if ground_radius < 0.01:
+				safe = Vector2(0, 6.35)
+			_walk_position.x = safe.x
+			_walk_position.z = safe.y
 	_refresh_camera(delta)
 
 func _material(color: Color, metal: float = 0.0, rough: float = 0.55, glow: bool = false) -> StandardMaterial3D:
@@ -234,6 +253,10 @@ func _load_craft_preview() -> void:
 func _refresh_camera(delta: float) -> void:
 	if _camera == null:
 		return
+	if _walk_mode:
+		_camera.position = _walk_position
+		_camera.look_at(_walk_position + Vector3(-sin(_walk_yaw), -0.09, -cos(_walk_yaw)), Vector3.UP)
+		return
 	var blend: float = clampf(delta * 9.0, 0.0, 1.0)
 	_yaw = lerp_angle(_yaw, _target_yaw, blend)
 	_pitch = lerpf(_pitch, _target_pitch, blend)
@@ -246,8 +269,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event is InputEventScreenDrag:
-		_target_yaw -= event.relative.x * 0.007
-		_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
+		if _walk_mode:
+			_walk_yaw -= event.relative.x * 0.006
+		else:
+			_target_yaw -= event.relative.x * 0.007
+			_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -257,8 +283,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			_target_distance = minf(20.0, _target_distance + 1.0)
 	elif event is InputEventMouseMotion and _dragging:
-		_target_yaw -= event.relative.x * 0.007
-		_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
+		if _walk_mode:
+			_walk_yaw -= event.relative.x * 0.006
+		else:
+			_target_yaw -= event.relative.x * 0.007
+			_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
 
 func _label(value: String, size_px: int, color: Color) -> Label:
 	var label := Label.new()
@@ -339,7 +368,7 @@ func _build_overlay() -> void:
 	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tools.add_child(_detail)
 
-	var camera_panel := _panel(0.753, 0.20, 0.974, 0.45)
+	var camera_panel := _panel(0.753, 0.19, 0.974, 0.52)
 	var views := VBoxContainer.new()
 	views.add_theme_constant_override("separation", 7)
 	camera_panel.add_child(views)
@@ -365,6 +394,42 @@ func _build_overlay() -> void:
 	zoom_row.add_child(plus)
 	minus.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	plus.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_walk_toggle = _button("WALK THE GARAGE", _toggle_walk)
+	views.add_child(_walk_toggle)
+
+	_walk_pad = _panel(0.753, 0.545, 0.974, 0.855)
+	var walk_content := VBoxContainer.new()
+	walk_content.add_theme_constant_override("separation", 6)
+	_walk_pad.add_child(walk_content)
+	walk_content.add_child(_label("FIRST-PERSON WALKAROUND", 15, ORANGE))
+	var motion_row := HBoxContainer.new()
+	motion_row.add_theme_constant_override("separation", 7)
+	walk_content.add_child(motion_row)
+	var forwards: Button = _button("▲  FWD", func() -> void: pass)
+	var backwards: Button = _button("▼  BACK", func() -> void: pass)
+	forwards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	backwards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	motion_row.add_child(forwards)
+	motion_row.add_child(backwards)
+	forwards.button_down.connect(func() -> void: _walk_forward = 1.0)
+	forwards.button_up.connect(func() -> void: _walk_forward = 0.0)
+	backwards.button_down.connect(func() -> void: _walk_forward = -1.0)
+	backwards.button_up.connect(func() -> void: _walk_forward = 0.0)
+	var turn_row := HBoxContainer.new()
+	turn_row.add_theme_constant_override("separation", 7)
+	walk_content.add_child(turn_row)
+	var left: Button = _button("◀  TURN", func() -> void: pass)
+	var right: Button = _button("TURN  ▶", func() -> void: pass)
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	turn_row.add_child(left)
+	turn_row.add_child(right)
+	left.button_down.connect(func() -> void: _walk_turn = -1.0)
+	left.button_up.connect(func() -> void: _walk_turn = 0.0)
+	right.button_down.connect(func() -> void: _walk_turn = 1.0)
+	right.button_up.connect(func() -> void: _walk_turn = 0.0)
+	walk_content.add_child(_label("HOLD TO MOVE  /  DRAG TO LOOK", 13, MUTED))
+	_walk_pad.visible = false
 
 	var bottom := _panel(0.327, 0.89, 0.977, 0.978)
 	var action_row := HBoxContainer.new()
@@ -395,9 +460,19 @@ func _show_cosmetic() -> void:
 	_detail.text = "CUSTOMIZATION BAY\nFuture systems: paint, material layers, armor accents, decals and propulsion FX. No model textures are changed in this prototype."
 
 func _move_view(yaw: float, pitch: float, distance: float) -> void:
+	if _walk_mode:
+		_toggle_walk()
 	_target_yaw = yaw
 	_target_pitch = pitch
 	_target_distance = distance
+
+func _toggle_walk() -> void:
+	_walk_mode = not _walk_mode
+	_walk_forward = 0.0
+	_walk_turn = 0.0
+	_walk_pad.visible = _walk_mode
+	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
+	_detail.text = "WALKAROUND MODE\\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\\nTouch-drag to orbit around the model. Use the camera presets for detail study."
 
 func _zoom(amount: float) -> void:
 	_target_distance = clampf(_target_distance + amount, 6.8, 20.0)

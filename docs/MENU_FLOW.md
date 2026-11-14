@@ -21,3 +21,6 @@ Run `python3 tools/stage_garage_preview.py` before first Godot import if develop
 
 ## Acceptance
 Godot 4.5.1 import/startup and smoke validation cover each destination, garage viewport/camera controls, device settings, race UI sequence, and return to hub. Android build captures title, hub, settings, garage, dealership, mode, lobby and results for Vulkan device review.
+
+## Walkaround milestone (initial implementation)
+Switch **WALK THE GARAGE** from the 3D inspection toolbar. On-screen hold-to-move and turn buttons provide first-person camera walking in the rendered hangar; touch-drag rotates the view. Position is clamped to the workshop bounds and inspection platform perimeter as an interim collision barrier. This is not a player character or final physics/navmesh system. **RETURN TO INSPECTION** restores the orbiting inspection camera.
