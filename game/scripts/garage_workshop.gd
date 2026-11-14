@@ -42,6 +42,10 @@ func _ready() -> void:
 	_build_service_bays()
 	_build_robot_base()
 	_build_signage()
+	_build_precision_tools()
+	_build_spare_assemblies()
+	_build_workshop_diagnostics()
+	_build_lift_mechanics()
 	_commit_batches()
 	_build_robot()
 	_build_task_lights()
@@ -453,18 +457,7 @@ func _build_workstations() -> void:
 				Vector3(0.72, 0.04, 0.04))
 		_box(STEEL, Vector3(x, 3.65, -17.03), Vector3(5.4, 3.15, 0.22))
 		_box(DARK, Vector3(x, 3.63, -16.91), Vector3(5.15, 2.9, 0.08))
-		for k in range(17):
-			var tool_x: float = x - 2.44 + float(k) * 0.30
-			var tool_y := 2.95 + float(k % 3) * 0.52
-			# Wrenches, probes, socket drivers, scribe tools and clamps.
-			_rod(SILVER, Vector3(tool_x, tool_y - 0.36, -16.83),
-				Vector3(tool_x, tool_y + 0.36, -16.83), 0.042, 8)
-			_rod(SILVER if k % 4 else YELLOW,
-				Vector3(tool_x - 0.13, tool_y + 0.35, -16.83),
-				Vector3(tool_x + 0.13, tool_y + 0.35, -16.83), 0.040, 8)
-			if k % 4 == 0:
-				_box(YELLOW, Vector3(tool_x, tool_y - 0.25, -16.80),
-					Vector3(0.13, 0.35, 0.12))
+		_build_precision_tool_board(x)
 		_box(CYAN, Vector3(x, 5.30, -16.91), Vector3(5.2, 0.06, 0.08))
 		# Slanted diagnostic displays.
 		for offset in [-1.76, 1.76]:
@@ -718,3 +711,339 @@ func _build_signage() -> void:
 			var h := 6.25 + float(k) * 0.13
 			_box(CYAN, Vector3(x - 0.67 + float(k % 3) * 0.1, h, -17.08),
 				Vector3(0.45 + float(k % 4) * 0.14, 0.02, 0.014))
+
+
+# DESIGN B: ENGINEERED WORKSHOP PROPS
+# All additions are in the original batched mesh, so they cast no additional
+# per-prop draw calls on Vulkan. Tools have intentionally different silhouettes.
+
+func _build_precision_tool_board(cx: float) -> void:
+	# Six clearly distinguishable tool types, grouped rather than repeated Ts.
+	var face_z: float = -16.76
+	for k in range(15):
+		var px: float = cx - 2.22 + float(k % 8) * 0.60
+		var py: float = 4.10 - float(k / 8) * 1.55
+		var kind: int = k % 7
+		# Tool peg and shadow registration plate.
+		_box(TRIM, Vector3(px, py + 0.45, face_z - 0.06), Vector3(0.44, 0.06, 0.06))
+		_rod(SILVER, Vector3(px, py + 0.45, face_z), Vector3(px, py + 0.45, face_z + 0.22), 0.037, 8)
+		match kind:
+			0: # open-ended spanner
+				_rod(SILVER, Vector3(px, py - 0.37, face_z + 0.09),
+					Vector3(px, py + 0.31, face_z + 0.09), 0.047, 10)
+				_rod(SILVER, Vector3(px, py + 0.27, face_z + 0.09),
+					Vector3(px - 0.19, py + 0.51, face_z + 0.09), 0.060, 9)
+				_rod(SILVER, Vector3(px, py + 0.27, face_z + 0.09),
+					Vector3(px + 0.19, py + 0.51, face_z + 0.09), 0.060, 9)
+			1: # torque screwdriver
+				_rod(BLACK, Vector3(px, py - 0.35, face_z + 0.12),
+					Vector3(px, py + 0.03, face_z + 0.12), 0.105, 12)
+				_rod(SILVER, Vector3(px, py + 0.03, face_z + 0.12),
+					Vector3(px, py + 0.50, face_z + 0.12), 0.038, 10)
+				_box(AMBER, Vector3(px, py - 0.27, face_z + 0.22),
+					Vector3(0.17, 0.10, 0.055))
+			2: # pliers
+				for sign in [-1.0, 1.0]:
+					_rod(YELLOW, Vector3(px + sign * 0.14, py - 0.36, face_z + 0.10),
+						Vector3(px - sign * 0.035, py + 0.17, face_z + 0.10), 0.065, 10)
+					_rod(SILVER, Vector3(px - sign * 0.035, py + 0.17, face_z + 0.10),
+						Vector3(px - sign * 0.17, py + 0.47, face_z + 0.10), 0.039, 8)
+				_rod(BLACK, Vector3(px, py + 0.15, face_z + 0.07),
+					Vector3(px, py + 0.15, face_z + 0.19), 0.075, 8)
+			3: # trigger power wrench
+				_box(YELLOW, Vector3(px, py + 0.21, face_z + 0.10), Vector3(0.39, 0.28, 0.22))
+				_box(BLACK, Vector3(px + 0.22, py + 0.21, face_z + 0.10),
+					Vector3(0.17, 0.18, 0.17))
+				_box(TRIM, Vector3(px - 0.08, py - 0.09, face_z + 0.10),
+					Vector3(0.12, 0.36, 0.17))
+				_box(BLACK, Vector3(px - 0.08, py - 0.27, face_z + 0.10),
+					Vector3(0.19, 0.12, 0.19))
+			4: # ratchet drive and socket
+				_rod(SILVER, Vector3(px, py - 0.39, face_z + 0.12),
+					Vector3(px, py + 0.33, face_z + 0.12), 0.056, 10)
+				_rod(TRIM, Vector3(px - 0.15, py + 0.35, face_z + 0.12),
+					Vector3(px + 0.15, py + 0.35, face_z + 0.12), 0.092, 11)
+				_rod(BLACK, Vector3(px, py - 0.38, face_z + 0.11),
+					Vector3(px, py - 0.14, face_z + 0.11), 0.088, 9)
+			5: # C-shaped service clamp
+				_rod(SILVER, Vector3(px - 0.17, py - 0.26, face_z + 0.10),
+					Vector3(px - 0.17, py + 0.44, face_z + 0.10), 0.065, 8)
+				for dy in [-0.26, 0.44]:
+					_rod(SILVER, Vector3(px - 0.17, py + dy, face_z + 0.10),
+						Vector3(px + 0.22, py + dy, face_z + 0.10), 0.065, 8)
+				_rod(BLACK, Vector3(px + 0.18, py - 0.42, face_z + 0.10),
+					Vector3(px + 0.18, py - 0.12, face_z + 0.10), 0.045, 8)
+			_: # hex key set with different leg lengths
+				for i in range(4):
+					var xx: float = px - 0.2 + float(i) * 0.13
+					var height: float = 0.31 + float(i) * 0.1
+					_rod(SILVER, Vector3(xx, py - 0.30, face_z + 0.08),
+						Vector3(xx, py - 0.30 + height, face_z + 0.08), 0.029, 7)
+					_rod(SILVER, Vector3(xx, py - 0.30 + height, face_z + 0.08),
+						Vector3(xx + 0.095, py - 0.30 + height, face_z + 0.08), 0.029, 7)
+
+func _build_precision_tools() -> void:
+	# Front service island: sockets, diagnostics, torque gauges and magnetic trays.
+	for spec in [
+		{"x": -11.7, "z": 10.1},
+		{"x": 11.7, "z": 10.1}
+	]:
+		var cx: float = float(spec["x"])
+		var cz: float = float(spec["z"])
+		_box(BLACK, Vector3(cx, 0.92, cz), Vector3(3.6, 0.19, 1.55))
+		_box(STEEL, Vector3(cx, 0.49, cz), Vector3(3.3, 0.90, 1.25))
+		for drawer in range(3):
+			var z: float = cz + 0.66
+			_box(GRAPHITE, Vector3(cx, 0.24 + float(drawer) * 0.26, z),
+				Vector3(2.78, 0.19, 0.05))
+			_box(AMBER if drawer == 1 else TRIM,
+				Vector3(cx, 0.30 + float(drawer) * 0.26, z + 0.03),
+				Vector3(1.12, 0.03, 0.025))
+		# Loose impact driver, torque ratchet and contact probes.
+		_box(YELLOW, Vector3(cx - 0.92, 1.10, cz - 0.16), Vector3(0.55, 0.23, 0.27))
+		_box(BLACK, Vector3(cx - 1.11, 1.14, cz - 0.16), Vector3(0.24, 0.30, 0.28))
+		_box(STEEL, Vector3(cx - 0.8, 1.04, cz + 0.20), Vector3(0.20, 0.44, 0.18))
+		_rod(SILVER, Vector3(cx + 0.00, 1.06, cz),
+			Vector3(cx + 1.05, 1.06, cz - 0.32), 0.05, 10)
+		_rod(SILVER, Vector3(cx + 1.01, 1.04, cz - 0.43),
+			Vector3(cx + 1.01, 1.04, cz - 0.20), 0.13, 12)
+		for k in range(5):
+			var px: float = cx + 0.11 + float(k) * 0.24
+			_rod(BLACK, Vector3(px, 1.04, cz + 0.4),
+				Vector3(px, 1.04 + float(k % 3) * 0.08 + 0.16, cz + 0.4),
+				0.06 + float(k % 3) * 0.01, 10)
+		_box(STEEL, Vector3(cx, 1.025, cz - 0.54), Vector3(1.15, 0.08, 0.45))
+		_box(BLACK, Vector3(cx, 1.09, cz - 0.54), Vector3(0.88, 0.06, 0.31))
+
+	# Wall-mounted reels, real coiled pneumatic hoses and service canisters.
+	for side in [-1.0, 1.0]:
+		var cx: float = side * 10.5
+		var cz: float = -16.08
+		_rod(STEEL, Vector3(cx, 4.55, cz - 0.21),
+			Vector3(cx, 4.55, cz + 0.35), 0.45, 24)
+		_rod(BLACK, Vector3(cx, 4.55, cz + 0.28),
+			Vector3(cx, 4.55, cz + 0.51), 0.30, 24)
+		for i in range(18):
+			var a: float = TAU * float(i) / 18.0
+			var b: float = TAU * float(i+1) / 18.0
+			_rod(AMBER if side < 0 else CYAN,
+				Vector3(cx + cos(a)*0.36, 4.55 + sin(a)*0.36, cz + 0.51),
+				Vector3(cx + cos(b)*0.36, 4.55 + sin(b)*0.36, cz + 0.51),
+				0.060, 6)
+		var hose_origin := Vector3(cx, 4.23, cz + 0.50)
+		for k in range(22):
+			var t: float = float(k) / 22.0
+			var t2: float = float(k+1) / 22.0
+			var a_pos := hose_origin + Vector3(0.16*sin(t*12.0),
+				-2.6*t, 0.65 + 0.16*cos(t*12.0))
+			var b_pos := hose_origin + Vector3(0.16*sin(t2*12.0),
+				-2.6*t2, 0.65 + 0.16*cos(t2*12.0))
+			_rod(AMBER if side < 0 else CYAN, a_pos, b_pos, 0.063, 6)
+		for bottle in range(6):
+			var bx: float = side * 15.4 + float(bottle % 3) * 0.34
+			var by: float = 0.72 + float(bottle / 3) * 0.66
+			_rod(STEEL, Vector3(bx, by, -7.6), Vector3(bx, by+0.46, -7.6),
+				0.12, 12)
+			_box(AMBER if bottle%3==0 else CYAN,
+				Vector3(bx, by+0.42, -7.43), Vector3(0.13, 0.13, 0.025))
+
+func _assembly_fan(cx: float, cy: float, cz: float, radius: float, orientation: float) -> void:
+	# 3D axial-flow propulsion cell: ring, blades, stator, hub and bolt circle.
+	for i in range(32):
+		var a: float = TAU * float(i) / 32.0
+		var b: float = TAU * float(i+1) / 32.0
+		for offset in [-0.23, 0.23]:
+			var pa := Vector3(cx+cos(a)*radius,cy+sin(a)*radius,cz+offset)
+			var pb := Vector3(cx+cos(b)*radius,cy+sin(b)*radius,cz+offset)
+			_rod(STEEL,pa,pb,0.16,8)
+		# Structural braces join front/back shrouds every quarter turn.
+		if i%4 == 0:
+			_rod(TRIM,
+				Vector3(cx+cos(a)*radius,cy+sin(a)*radius,cz-0.23),
+				Vector3(cx+cos(a)*radius,cy+sin(a)*radius,cz+0.23),0.13,9)
+	for i in range(9):
+		var a: float = TAU * float(i) / 9.0
+		var b: float = a+0.38
+		var outer := Vector3(cx+cos(b)*radius*0.75,cy+sin(b)*radius*0.75,cz+0.13)
+		_rod(SILVER,Vector3(cx,cy,cz+0.14),outer,0.12,10)
+		_rod(GRAPHITE,Vector3(cx+cos(b)*radius*0.4,cy+sin(b)*radius*0.4,cz+0.13),
+			outer,0.08,9)
+	_rod(TRIM,Vector3(cx,cy,cz-0.46),Vector3(cx,cy,cz+0.46),radius*0.22,24)
+	_rod(BLACK,Vector3(cx,cy,cz+0.46),Vector3(cx,cy,cz+0.51),radius*0.12,16)
+	for i in range(12):
+		var a: float = TAU*float(i)/12.0
+		_rod(AMBER if i%3==0 else BLACK,
+			Vector3(cx+cos(a)*radius*0.9,cy+sin(a)*radius*0.9,cz+0.35),
+			Vector3(cx+cos(a)*radius*0.9,cy+sin(a)*radius*0.9,cz+0.42),0.045,6)
+
+func _build_spare_assemblies() -> void:
+	# Separate active work pieces: an open turbine, a second vector duct and
+	# a partly assembled repulsor pod on purpose-built steel cradles.
+	for spec in [
+		{"x": -14.3, "z": 7.1, "r": 0.82},
+		{"x": 14.1, "z": 7.1, "r": 0.76},
+		{"x": -14.0, "z": -4.9, "r": 0.62}
+	]:
+		var cx: float = float(spec["x"])
+		var cz: float = float(spec["z"])
+		var radius: float = float(spec["r"])
+		_box(GRAPHITE, Vector3(cx,0.28,cz), Vector3(3.4,0.49,2.0))
+		_box(STEEL, Vector3(cx,0.55,cz), Vector3(2.8,0.16,1.8))
+		for dx in [-1.15,1.15]:
+			_box(YELLOW,Vector3(cx+dx,0.74,cz),
+				Vector3(0.24,0.45,1.52))
+			_box(BLACK,Vector3(cx+dx,0.97,cz),Vector3(0.42,0.16,1.72))
+		_assembly_fan(cx, 1.55, cz, radius, 0.0)
+		for side in [-1.0,1.0]:
+			_box(STEEL,Vector3(cx+side*1.35,1.12,cz),
+				Vector3(0.13,0.93,0.7))
+		_box(CYAN,Vector3(cx,0.51,cz+0.93),Vector3(1.5,0.045,0.055))
+
+	# One prominent loose armored hovercraft side-panel: curved edge rails,
+	# separate overlapping skins, vent channels and carbon-backed braces.
+	var px: float = 13.4
+	var pz: float = 3.8
+	_box(BLACK,Vector3(px,0.24,pz),Vector3(5.2,0.28,2.1))
+	for i in range(7):
+		var x: float = px-2.20+float(i)*0.73
+		_box(GRAPHITE,Vector3(x,0.65,pz),Vector3(0.54,0.14,1.75),-0.17)
+		_box(TRIM,Vector3(x,0.75,pz-0.26),Vector3(0.54,0.046,0.82),-0.17)
+		if i%2==0:
+			_box(AMBER,Vector3(x,0.81,pz+0.55),Vector3(0.28,0.025,0.19),-0.17)
+	for side in [-1.0,1.0]:
+		_rod(STEEL,Vector3(px-2.45,0.72,pz+side*1.05),
+			Vector3(px+2.45,0.72,pz+side*1.05),0.11,9)
+	# A partially assembled pair of mechanical damper/hover coils on a test bench.
+	for cx in [-10.3, -8.8]:
+		var cz: float = 8.3
+		_box(BLACK,Vector3(cx,0.9,cz),Vector3(1.35,0.2,1.35))
+		_rod(STEEL,Vector3(cx,1.03,cz),Vector3(cx,2.7,cz),0.17,16)
+		for coil in range(13):
+			var a: float = TAU*float(coil)/7.0
+			var b: float = TAU*float(coil+1)/7.0
+			var y: float = 1.23+float(coil)/13.0*1.18
+			_rod(AMBER,Vector3(cx+cos(a)*0.44,y,cz+sin(a)*0.44),
+				Vector3(cx+cos(b)*0.44,y+0.09,cz+sin(b)*0.44),0.07,9)
+		_box(YELLOW,Vector3(cx,2.76,cz),Vector3(0.85,0.23,0.82))
+
+func _diagnostic_panel(center: Vector3, width: float, height: float,
+		index: int, title: String) -> void:
+	# Pixel-free physical HUD assembled from actual geometry and labeled panels,
+	# instead of generic blue rectangles everywhere.
+	var z: float = center.z
+	_box(BLACK, center, Vector3(width+0.16,height+0.19,0.25))
+	_box(TRIM,center+Vector3(0,0,0.145),Vector3(width+0.07,height+0.08,0.04))
+	_box(DARK,center+Vector3(0,0,0.185),Vector3(width-0.13,height-0.14,0.025))
+	_box(CYAN,center+Vector3(0,height*0.5-0.12,0.204),
+		Vector3(width-0.22,0.052,0.012))
+	_box(AMBER if index%2==0 else CYAN,
+		center+Vector3(-width*0.5+0.19,-height*0.5+0.17,0.207),
+		Vector3(0.23,0.045,0.013))
+	_add_label(title,center+Vector3(0,height*0.5-0.32,0.27),
+		18,Color("b7edf7"),0.006)
+	var left: float = center.x-width*0.40
+	var right: float = center.x+width*0.40
+	var bottom: float = center.y-height*0.37
+	for i in range(7):
+		var y: float = bottom+float(i)*(height*0.091)
+		_rod(STEEL,Vector3(left,y,z+0.211),Vector3(right,y,z+0.211),0.009,6)
+	for i in range(11):
+		var x: float = lerpf(left,right,float(i)/10.0)
+		_rod(STEEL,Vector3(x,bottom,z+0.211),
+			Vector3(x,bottom+height*0.56,z+0.211),0.008,6)
+	if index%3 == 0:
+		# Power curves with transient peaks, large multi-channel scope.
+		for i in range(42):
+			var t: float = float(i)/42.0
+			var u: float = float(i+1)/42.0
+			var x0: float = lerpf(left,right,t)
+			var x1: float = lerpf(left,right,u)
+			var y0: float = bottom+height*(0.20+0.14*sin(t*16.0)+0.07*sin(t*49.0))
+			var y1: float = bottom+height*(0.20+0.14*sin(u*16.0)+0.07*sin(u*49.0))
+			_rod(CYAN,Vector3(x0,y0,z+0.229),Vector3(x1,y1,z+0.229),0.021,6)
+	elif index%3 == 1:
+		# Stacked live-spectrum bars / telemetry histogram.
+		for i in range(14):
+			var h: float = 0.15+0.43*(0.5+0.5*sin(float(i)*1.68))
+			var x: float = left+float(i)*width*0.057
+			_box(CYAN if i%3 else AMBER,
+				Vector3(x,bottom+height*h*0.50,z+0.229),
+				Vector3(width*0.037,height*h,0.022))
+	else:
+		# Schematic cell: a readable concentric scanner and crosshair.
+		for i in range(32):
+			var a: float = TAU*float(i)/32.0
+			var b: float = TAU*float(i+1)/32.0
+			var r: float = height*0.24
+			_rod(CYAN,Vector3(center.x+cos(a)*r,center.y-0.14+sin(a)*r,z+0.230),
+				Vector3(center.x+cos(b)*r,center.y-0.14+sin(b)*r,z+0.230),0.015,6)
+		_rod(AMBER,Vector3(center.x-width*0.2,center.y-0.14,z+0.231),
+			Vector3(center.x+width*0.2,center.y-0.14,z+0.231),0.022,6)
+		_rod(AMBER,Vector3(center.x,center.y-0.14-height*0.25,z+0.231),
+			Vector3(center.x,center.y-0.14+height*0.25,z+0.231),0.022,6)
+	for i in range(5):
+		_box(TRIM if i%3 else AMBER,
+			Vector3(right-0.11,bottom+0.12+float(i)*height*0.095,z+0.233),
+			Vector3(width*0.085,0.024,0.013))
+
+func _build_workshop_diagnostics() -> void:
+	# Rear engine bays and nearer freestanding touch-control terminals.
+	var boards: Array[Dictionary] = [
+		{"p": Vector3(-8.4,6.5,-17.0), "w":2.8, "h":1.95, "t":"HOVER CELL / THRUST"},
+		{"p": Vector3(8.4,6.5,-17.0), "w":2.8, "h":1.95, "t":"LIFT ACTUATORS"},
+		{"p": Vector3(0,6.3,-17.02), "w":3.9, "h":2.1, "t":"SERVICE TELEMETRY"},
+		{"p": Vector3(-11.9,3.1,8.3), "w":2.55, "h":1.65, "t":"VECTOR MAP"},
+		{"p": Vector3(12.0,3.1,8.3), "w":2.55, "h":1.65, "t":"DIAGNOSTICS"},
+		{"p": Vector3(9.7,7.9,-2.0), "w":2.9, "h":1.7, "t":"POD ALIGNMENT"}
+	]
+	for k in range(boards.size()):
+		var board: Dictionary = boards[k]
+		var pos: Vector3 = board["p"]
+		_diagnostic_panel(pos,float(board["w"]),float(board["h"]),k,str(board["t"]))
+		if pos.z > 2.0:
+			_box(STEEL,Vector3(pos.x,1.55,pos.z-0.28),
+				Vector3(0.24,2.65,0.5))
+			_box(GRAPHITE,Vector3(pos.x,0.26,pos.z-0.26),
+				Vector3(1.25,0.34,1.1))
+			_box(CYAN,Vector3(pos.x,0.49,pos.z+0.12),
+				Vector3(0.65,0.04,0.09))
+	# Long horizontal status bars and shielded inspection displays.
+	for x in [-14.0,14.0]:
+		var y: float = 8.75
+		_box(BLACK,Vector3(x,y,-17.0),Vector3(4.35,0.72,0.18))
+		for i in range(11):
+			_box(CYAN if (i+int(x))%4!=0 else AMBER,
+				Vector3(x-1.91+float(i)*0.38,y,-16.85),
+				Vector3(0.26,0.13+float(i%3)*0.09,0.035))
+		_add_label("NF / ACTIVE WORKBAY",Vector3(x,y+0.56,-16.85),
+			20,Color("b8e9f4"),0.008)
+
+func _build_lift_mechanics() -> void:
+	# Articulator drives, guide rails and hydraulic plumbing independently
+	# modeled inside each tall lift support, without real wheel physics.
+	for side in [-1.0,1.0]:
+		var x: float = side*8.2
+		var z: float = -1.75
+		for dx in [-0.45,0.45]:
+			_rod(SILVER,Vector3(x+dx,0.4,z+0.83),
+				Vector3(x+dx,5.8,z+0.83),0.085,10)
+			_rod(BLACK,Vector3(x+dx,0.72,z+0.96),
+				Vector3(x+dx,5.46,z+0.96),0.025,8)
+		for k in range(18):
+			var yy: float = 0.6+float(k)*0.27
+			_box(YELLOW if k%3==0 else TRIM,
+				Vector3(x,yy,z+0.82),Vector3(0.67,0.033,0.07))
+		for i in range(4):
+			var zz: float = z-0.65+float(i)*0.46
+			_box(STEEL,Vector3(x+side*0.75,0.52,zz),
+				Vector3(0.35,0.29,0.25))
+			_box(BLACK,Vector3(x+side*0.92,0.52,zz),
+				Vector3(0.055,0.11,0.16))
+	# Overhead tool rails and task-light casings positioned to face the bay.
+	for x in [-10.9,-5.1,5.1,10.9]:
+		_box(STEEL,Vector3(x,10.0,1.6),Vector3(0.52,0.35,4.2))
+		_box(TRIM,Vector3(x,9.75,1.6),Vector3(0.59,0.16,3.8))
+		_box(CYAN,Vector3(x,9.64,1.6),Vector3(0.38,0.055,3.25))
+		for i in range(3):
+			var z: float = -0.10+float(i)*1.7
+			_box(BLACK,Vector3(x,10.18,z),Vector3(0.67,0.10,0.13))
