@@ -1,0 +1,28 @@
+{
+  "asset": "FORGE V18.04 - modular canopy, cockpit, and aft roof transition",
+  "gate": "Unapproved inspection experiment",
+  "base_mesh_count": 396,
+  "new_mesh_count": 161,
+  "total_mesh_count": 557,
+  "triangle_count": 38596,
+  "part_materials_with_alpha_blend": 4,
+  "all_parts_closed_with_consistent_normals": true,
+  "previous_meshes_exactly_unchanged": true,
+  "verified_cross_section_contacts_m2": {
+    "PORT canopy mount \u2194 approved upper sill at z=-1.24m": 0.012151,
+    "PORT aft cowl saddle \u2194 approved upper sill at z=-3.12m": 0.012151,
+    "PORT front fairing \u2194 approved upper sill at z=-1.24m": 0.004236,
+    "PORT rear fairing \u2194 approved upper sill at z=-1.89m": 0.0038471,
+    "PORT canopy foot \u2194 preserved rear hood at z=0.22m": 0.0190246,
+    "STBD canopy mount \u2194 approved upper sill at z=-1.24m": 0.012151,
+    "STBD aft cowl saddle \u2194 approved upper sill at z=-3.12m": 0.012151,
+    "STBD front fairing \u2194 approved upper sill at z=-1.24m": 0.004236,
+    "STBD rear fairing \u2194 approved upper sill at z=-1.89m": 0.003848,
+    "STBD canopy foot \u2194 preserved rear hood at z=0.22m": 0.0190246
+  },
+  "contact_measurement": "Positive XY area shared by independent solid meshes at stated Z planes; proves interpenetration, not a global boolean union or structural load rating",
+  "base_sha256": "f89480b7f4b8929becb395b8d937c5ce5da6e1117ad0fd21ba9001e0d4e6ac7c",
+  "export_sha256": "a96370ece7b9a89d435bfa1f60d358fcac9140e2175544c442f99895811df3d5",
+  "source_geometry_modified": false,
+  "production_replacement": false
+}
