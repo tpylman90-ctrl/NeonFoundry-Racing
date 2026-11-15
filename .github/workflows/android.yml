@@ -2,7 +2,7 @@ name: Android APK
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces', 'garage/stage01-pbr-orm-bake']
     paths:
       - 'game/**'
       - 'tools/**'
@@ -111,7 +111,7 @@ jobs:
             game/assets/garage/shell/shell_stage01.glb
             build/garage_shell_stage01.blend
             build/shell_source/
-          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py') }}
+          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py') }}
       - name: Build isolated Blender Stage 01 hangar shell
         if: steps.shell-cache.outputs.cache-hit != 'true'
         timeout-minutes: 12
@@ -140,6 +140,12 @@ jobs:
           assert data[:4] == b"glTF"
           print("NEON_FOUNDRY_STAGE01_GLTF_INCLUDED")
           PY
+      - name: Verify Stage 01 packed ORM and normal bake
+        run: |
+          set -euo pipefail
+          python3 tools/validate_shell_pbr.py
+          test -s build/shell_source/NF_SHELL_floor_ORM.png
+          test -s build/shell_source/NF_SHELL_floor_bakedNormalGL.png
       - name: Import and smoke-test project
         run: |
           set -euo pipefail

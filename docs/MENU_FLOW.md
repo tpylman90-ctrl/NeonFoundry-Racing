@@ -89,3 +89,17 @@ The first Vulkan screenshot exposed a Blender-to-Godot coordinate error: the flo
 ### Surface-material refinement after Android visual capture
 
 The second Android review revealed too much block-like procedural variation in Stage 01's floor/wall finishes. The generator used repeated nearest-neighbor noise cells and incomplete smoothing. It now uses continuous, smooth, periodic bilinear interpolated noise; the epoxy floor is a largely matte, neutral gray, the walls have restrained ceramic/paint grain, and the ceiling uses a subtle dark powder coat. Roughness modulation and micro-normal amplitudes were reduced, with physical panel seams left as distinct Blender geometry. No new machinery or girders were introduced.
+
+## Stage 01 — PBR material correction based on Android 103 FPS screenshot
+
+The user-provided Stage 01 wall screenshot showed 103 FPS but severe repetitive vertical corrugation. The culprit was a high-frequency sinusoidal striae pattern and independent local UVs on each tile. The construction geometry was sound, so the new material pass changes **only the six shell meshes' source texture data and world-space atlas UVs**, leaving every lift/girder/partition absent for this stage.
+
+- Floor: one deterministic 2048×2048 original atlas spanning ~39.8×32.3m, with mostly matte epoxy/concrete roughness, soft glossy oil streaks, understated thruster scuffs, physically painted graphite/amber clearance stripes around the future turntable, and subtle grooves aligned to existing panel junctions. This is a paint marking, not a turntable object.
+- Long walls and side walls: separate 1024 atlases with no hard-frequency vertical line pattern. Surface geometry remains broad satin-composite panels with mild color/roughness variation.
+- Ceiling: independent 1024 rough powder-coated acoustic-steel atlas.
+- All four surfaces: **glTF packed ORM** R=baked cavity occlusion, G=roughness, B=metallic, created offline by Blender and connected to Principled BSDF and Blender's glTF Material Output node. Panel seams, rivet dimples and subtle microroughness are **precomputed high-resolution signed height relief converted into Y+ OpenGL tangent-space normal maps**, not extra meshes or runtime displacement. This is a procedural relief-map bake, not yet a Cycles high-poly-to-low-poly mesh bake.
+- UVs: contiguous atlas coordinates derived from the world-space panel positions before Blender's axis conversion, eliminating identical repeated patches on every segment.
+- Performance: no additional runtime geometry, no reintroduced dynamic fog/glow/shadows, still a six-surface material review. Original shell .blend, GLB and image maps are retained for inspection.
+- Export validation: `tools/validate_shell_pbr.py` inspects the binary GLB and verifies the four real albedo, packed ORM and normal materials, and ensures the AO and metallic/roughness share the exact same GLB image source.
+
+Do not advance to girders and interior wall until this shell appearance and real phone FPS are approved.

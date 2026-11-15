@@ -2,7 +2,7 @@ name: Repository checks
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces', 'garage/stage01-pbr-orm-bake']
   pull_request:
   workflow_dispatch:
 
@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/check_repository.py
-          python3 -m py_compile tools/build_garage_shell.py
+          python3 -m py_compile tools/build_garage_shell.py tools/garage_shell_pbr.py tools/validate_shell_pbr.py
           python3 tools/validate_hero_workflow.py
           python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
       - name: Install pinned Godot
@@ -41,7 +41,7 @@ jobs:
             game/assets/garage/shell/shell_stage01.glb
             build/garage_shell_stage01.blend
             build/shell_source/
-          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py') }}
+          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py') }}
       - name: Generate isolated Blender hangar shell (Stage 01)
         if: steps.shell-cache.outputs.cache-hit != 'true'
         timeout-minutes: 12
@@ -64,6 +64,15 @@ jobs:
           assert struct.unpack('<I', asset.read_bytes()[8:12])[0] == asset.stat().st_size
           print('NEON_FOUNDRY_SHELL_GLB_VALID', asset.stat().st_size)
           PY
+      - name: Validate glTF materials, packed ORM and baked normals
+        run: |
+          set -euo pipefail
+          python3 tools/validate_shell_pbr.py
+          test -s build/shell_source/NF_SHELL_floor_ORM.png
+          test -s build/shell_source/NF_SHELL_wall_long_ORM.png
+          test -s build/shell_source/NF_SHELL_wall_side_ORM.png
+          test -s build/shell_source/NF_SHELL_ceiling_ORM.png
+          test -s build/shell_source/NF_SHELL_floor_bakedNormalGL.png
       - name: Godot import and startup smoke
         run: |
           set -euo pipefail
