@@ -85,3 +85,7 @@ For this **single-stage review build only**, the previous turntable, Forge vehic
 ### Axis correction discovered by visual inspection
 
 The first Vulkan screenshot exposed a Blender-to-Godot coordinate error: the floor appeared as a giant wall. The Blender generator now pre-rotates its Godot-oriented coordinates by +90° about Blender X before glTF export, compensating for Blender Z-up to Godot Y-up. Added bounding-box assertions for the six imported meshes, including the floor horizontal dimensions and ceiling Y height. The initial Build 96 is NOT approved.
+
+### Surface-material refinement after Android visual capture
+
+The second Android review revealed too much block-like procedural variation in Stage 01's floor/wall finishes. The generator used repeated nearest-neighbor noise cells and incomplete smoothing. It now uses continuous, smooth, periodic bilinear interpolated noise; the epoxy floor is a largely matte, neutral gray, the walls have restrained ceramic/paint grain, and the ceiling uses a subtle dark powder coat. Roughness modulation and micro-normal amplitudes were reduced, with physical panel seams left as distinct Blender geometry. No new machinery or girders were introduced.

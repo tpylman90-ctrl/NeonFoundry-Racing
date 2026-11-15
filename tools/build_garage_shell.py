@@ -40,15 +40,20 @@ def smooth_noise(w: int, seed: int, scale: int) -> np.ndarray:
     # Periodic multiscale field: no visible seams after texture wrap.
     random = np.random.default_rng(seed)
     base = random.random((scale, scale)).astype(np.float32)
-    rep = max(1, w // scale)
-    up = np.repeat(np.repeat(base, rep, axis=0), rep, axis=1)
-    up = up[:w, :w]
-    # Periodic low-pass, flat and cheap to generate in Blender's NumPy.
-    for n in (3, 6, 12):
-        up = (
-            up + np.roll(up, n, axis=0) + np.roll(up, -n, axis=0)
-            + np.roll(up, n, axis=1) + np.roll(up, -n, axis=1)
-        ) / 5.0
+    # Smooth periodic bicubic-style interpolation. The previous nearest-cell
+    # expansion left visible 8-32 px square patches on Android.
+    uv = np.arange(w, dtype=np.float32) * (float(scale) / float(w))
+    i0 = np.floor(uv).astype(np.int32) % scale
+    i1 = (i0 + 1) % scale
+    f = uv - np.floor(uv)
+    f = f * f * (3.0 - 2.0 * f)
+    xw = f[None, :]
+    yw = f[:, None]
+    a = base[np.ix_(i0, i0)]
+    b = base[np.ix_(i0, i1)]
+    c = base[np.ix_(i1, i0)]
+    d = base[np.ix_(i1, i1)]
+    up = a * (1.0 - xw) * (1.0 - yw) + b * xw * (1.0 - yw) + c * (1.0 - xw) * yw + d * xw * yw
     up -= up.mean()
     up /= max(float(up.std()), 0.0001)
     return up
@@ -78,29 +83,30 @@ def make_maps(kind: str, count: int) -> tuple:
     fine = smooth_noise(count, 951 + len(kind), 128)
     if kind == "floor":
         # Oil-tinted industrial epoxy with subtle, physically plausible patches.
-        base = np.array([0.27, 0.315, 0.334], dtype=np.float32)
-        rough = 0.64 + 0.065 * low + 0.03 * med
-        height = 0.13 * low + 0.055 * med + 0.01 * fine
-        stains = np.clip(0.13 * low + 0.035 * med, -0.16, 0.13)
-        color = base + stains[..., None] * np.array([0.12, 0.16, 0.16])
+        base = np.array([0.315, 0.335, 0.345], dtype=np.float32)
+        rough = 0.70 + 0.026 * low + 0.016 * med
+        height = 0.025 * low + 0.010 * med + 0.002 * fine
+        # Subtle epoxy-to-concrete microtones; avoid grainy blue camouflage.
+        stains = np.clip(0.012 * low + 0.006 * med + 0.002 * fine, -0.028, 0.028)
+        color = base + stains[..., None]
         # Hairline abrasion, not black rust blotches.
         scuff = (np.sin(37.0 * x + 3.0 * np.sin(2.0 * y)) > 0.986).astype(np.float32)
-        color += scuff[..., None] * 0.010
-        rough += scuff * 0.035
+        color += scuff[..., None] * 0.003
+        rough += scuff * 0.018
     elif kind == "wall":
         # Brushed painted industrial sheet/ceramic-finished concrete panels.
-        base = np.array([0.39, 0.435, 0.454], dtype=np.float32)
-        striae = 0.045 * np.sin(53.0 * x + np.sin(3.0 * y))
-        color = base + (0.012 * low + 0.009 * med + striae * 0.18)[..., None]
-        rough = 0.71 + 0.026 * med + 0.012 * fine
-        height = 0.035 * low + 0.028 * med + 0.008 * striae
+        base = np.array([0.385, 0.411, 0.422], dtype=np.float32)
+        striae = 0.022 * np.sin(53.0 * x + np.sin(3.0 * y))
+        color = base + (0.008 * low + 0.005 * med + 0.002 * fine + striae * 0.06)[..., None]
+        rough = 0.73 + 0.018 * med + 0.008 * fine
+        height = 0.014 * low + 0.007 * med + 0.003 * striae
     else:
         # Powder-coated steel acoustic ceiling cassettes.
-        base = np.array([0.265, 0.30, 0.323], dtype=np.float32)
-        ribs = 0.025 * np.cos(12.0 * x)
-        color = base + (0.015 * low + ribs)[..., None]
-        rough = 0.73 + 0.034 * low + 0.017 * fine
-        height = 0.025 * low + 0.02 * med + 0.016 * np.sin(12.0 * x)
+        base = np.array([0.245, 0.274, 0.285], dtype=np.float32)
+        ribs = 0.010 * np.cos(12.0 * x)
+        color = base + (0.006 * low + ribs)[..., None]
+        rough = 0.77 + 0.018 * low + 0.007 * fine
+        height = 0.012 * low + 0.008 * med + 0.007 * np.sin(12.0 * x)
 
     rough = np.clip(rough, 0.43, 0.91)
     rough_rgb = np.repeat(rough[..., None], 3, axis=2)
