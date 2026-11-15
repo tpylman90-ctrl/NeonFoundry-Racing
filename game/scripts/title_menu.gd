@@ -59,6 +59,12 @@ func _ready() -> void:
 		_garage_page.set("_walk_position", Vector3(-11.5, 1.85, 8.8))
 		_garage_page.set("_walk_yaw", -0.38)
 		_capture_screen("NeonFoundry-WorkshopWalk.png", "garage")
+	elif "--capture-workbench" in OS.get_cmdline_user_args():
+		_open_section("garage")
+		_garage_page.call("_toggle_walk")
+		_garage_page.set("_walk_position", Vector3(-4.0, 1.75, -10.9))
+		_garage_page.set("_walk_yaw", 0.12)
+		_capture_screen("NeonFoundry-WorkbenchQC.png", "garage")
 	elif "--capture-store" in OS.get_cmdline_user_args():
 		_open_section("store")
 		_capture_screen("NeonFoundry-Store.png", "module")

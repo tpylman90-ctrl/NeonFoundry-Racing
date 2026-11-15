@@ -20,6 +20,7 @@ const SILVER := "silver"
 const GLASS := "glass"
 const TREAD := "tread"
 const WEAR := "wear"
+const BENCH := "bench"
 
 var _tools: Dictionary = {}
 var _materials: Dictionary = {}
@@ -116,7 +117,8 @@ func _create_materials() -> void:
 		SILVER: _material(Color("becbd1"), 0.73, 0.29),
 		GLASS: _material(Color("244657"), 0.54, 0.28),
 		TREAD: _material(Color("7c8892"), 0.55, 0.67),
-		WEAR: _material(Color("828b95"), 0.36, 0.70)
+		WEAR: _material(Color("5a7280"), 0.28, 0.62),
+		BENCH: _material(Color("566b75"), 0.21, 0.55)
 	}
 
 	# Physically textured-looking surfaces without runtime texture downloads.
@@ -126,13 +128,17 @@ func _create_materials() -> void:
 		mat.albedo_texture = _create_microtexture(17 if material_id == FLOOR else 53,
 			material_id == FLOOR)
 	_apply_cc0_pbr()
+	# Most base metals remain solid color or subtly stippled; this reduces
+	# conspicuous repeated noise that was previously inherited from
+	# distressed photo materials and preserves the new 70-90 FPS response.
 
 func _apply_cc0_pbr() -> void:
-	# Function-driven material assignments: damaged paint only on worn equipment,
-	# diamond plate only on actual tread, not across structural cylinders.
+	# Apply CC0 maps only to surfaces that can use the source texture
+	# predictably. Broad painted structural surfaces use authored powder
+	# coat colors and subtle local microtexture, not repeated chipped paint.
 	var ids: Dictionary = {
-		STEEL: "clean", FLOOR: "clean", GRAPHITE: "clean",
-		TRIM: "clean", SILVER: "clean", TREAD: "deck", WEAR: "paint"
+		STEEL: "clean", TRIM: "clean",
+		SILVER: "clean", TREAD: "deck"
 	}
 	_pbr_surfaces.clear()
 	var mapped: int = 0
@@ -201,14 +207,16 @@ func _start_batches() -> void:
 func _add_quad(id: String, a: Vector3, b: Vector3, c: Vector3, d: Vector3, tiling: float = 1.0) -> void:
 	var tool: SurfaceTool = _tools[id]
 	var normal: Vector3 = (b - a).cross(c - a).normalized()
-	var vertices: Array[Vector3] = [a, b, c, a, c, d]
-	# Real-world scale UVs: seams, normals and roughness stay consistent
-	# across differently-sized floor panels, lift columns and tool cabinets.
+	var vertices: Array[Vector3] = [a, c, b, a, d, c]
+	# Godot treats clockwise triangles as front-facing. Our old (a,b,c)
+	# emission made the *inside* of boxes front-facing, although we supplied
+	# outward normals; this caused missing bench tops and misleading shading.
+	# Keep authored outward normals but reverse triangle winding and its UVs.
 	var u_size: float = clampf(a.distance_to(b) * 0.85 * tiling, 0.12, 28.0)
 	var v_size: float = clampf(a.distance_to(d) * 0.85 * tiling, 0.12, 28.0)
 	var uvs: Array[Vector2] = [
-		Vector2.ZERO, Vector2(u_size, 0), Vector2(u_size, v_size),
-		Vector2.ZERO, Vector2(u_size, v_size), Vector2(0, v_size)
+		Vector2.ZERO, Vector2(u_size, v_size), Vector2(u_size, 0),
+		Vector2.ZERO, Vector2(0, v_size), Vector2(u_size, v_size)
 	]
 	for i in range(6):
 		tool.set_normal(normal)
@@ -257,11 +265,15 @@ func _rod(id: String, from: Vector3, to: Vector3, radius: float, segments: int =
 		var center_bottom := from
 		var center_top := to
 		var tool: SurfaceTool = _tools[id]
-		for pts in [[center_bottom, from + cb, from + ca], [center_top, to + ca, to + cb]]:
+		for cap in range(2):
+			var pts: Array[Vector3] = (
+				[center_bottom, from + cb, from + ca] if cap == 0
+				else [center_top, to + ca, to + cb]
+			)
 			var p0: Vector3 = pts[0]
 			var p1: Vector3 = pts[1]
 			var p2: Vector3 = pts[2]
-			tool.set_normal((p1 - p0).cross(p2 - p0).normalized())
+			tool.set_normal(-direction if cap == 0 else direction)
 			tool.set_uv(Vector2.ZERO)
 			tool.add_vertex(p0)
 			tool.set_uv(Vector2(1, 0))
@@ -285,7 +297,7 @@ func _commit_batches() -> void:
 		var tool: SurfaceTool = _tools[id]
 		# Tangents are required for normal mapped procedural meshes.
 		# Generate them once, before commit, never during a rendered frame.
-		if id in [STEEL, FLOOR, GRAPHITE, TRIM, SILVER, TREAD, WEAR]:
+		if id in [STEEL, TRIM, SILVER, TREAD]:
 			tool.generate_tangents()
 		var mesh: ArrayMesh = tool.commit()
 		var node := MeshInstance3D.new()
@@ -483,9 +495,15 @@ func _build_workstations() -> void:
 	# test monitors, drawers, rolling diagnostic carts, storage and spare turbines.
 	for x in [-7.2, 0.0, 7.2]:
 		var z := -15.3
-		_box(BLACK, Vector3(x, 0.93, z), Vector3(6.25, 0.18, 2.15))
+		# Thick continuous powder-coated worktop, with separate edge trim.
+		# The outward/upward face is now rendered properly by _add_quad().
+		_box(BENCH, Vector3(x, 0.93, z), Vector3(6.25, 0.18, 2.15))
 		_box(STEEL, Vector3(x, 0.74, z), Vector3(5.92, 1.45, 1.85))
 		_box(TRIM, Vector3(x, 1.04, z + 1.10), Vector3(6.25, 0.07, 0.13))
+		for bolt in range(7):
+			var fx: float = x - 2.75 + float(bolt) * 0.90
+			_box(SILVER, Vector3(fx, 1.032, z - 0.89),
+				Vector3(0.075, 0.017, 0.07))
 		for drawer in range(5):
 			_box(GRAPHITE, Vector3(x - 2.22 + float(drawer) * 1.1, 0.62, z + 0.96),
 				Vector3(1.0, 0.58, 0.08))
@@ -510,7 +528,7 @@ func _build_workstations() -> void:
 		var x: float = location.x
 		var z: float = location.y
 		_box(WEAR, Vector3(x, 0.69, z), Vector3(1.85, 1.32, 1.15))
-		_box(BLACK, Vector3(x, 1.42, z), Vector3(2.0, 0.15, 1.34))
+		_box(BENCH, Vector3(x, 1.42, z), Vector3(2.0, 0.15, 1.34))
 		for i in range(5):
 			_box(GRAPHITE, Vector3(x, 0.32 + float(i) * 0.21, z + 0.595),
 				Vector3(1.62, 0.16, 0.047))
@@ -829,7 +847,7 @@ func _build_precision_tools() -> void:
 	]:
 		var cx: float = float(spec["x"])
 		var cz: float = float(spec["z"])
-		_box(BLACK, Vector3(cx, 0.92, cz), Vector3(3.6, 0.19, 1.55))
+		_box(BENCH, Vector3(cx, 0.92, cz), Vector3(3.6, 0.19, 1.55))
 		_box(WEAR, Vector3(cx, 0.49, cz), Vector3(3.3, 0.90, 1.25))
 		for drawer in range(3):
 			var z: float = cz + 0.66

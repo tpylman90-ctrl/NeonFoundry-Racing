@@ -127,7 +127,7 @@ jobs:
           ICD="$(find /usr/share/vulkan/icd.d -name 'lvp_icd*.json' -print -quit)"
           test -n "$ICD"
           export VK_ICD_FILENAMES="$ICD"
-          for screen in title menu settings garage workshop store mode lobby results; do
+          for screen in title menu settings garage workshop workbench store mode lobby results; do
             timeout 120 xvfb-run -a godot --audio-driver Dummy --path game --rendering-method mobile --rendering-driver vulkan --resolution 1280x720 res://scenes/title_menu.tscn -- --capture-"$screen" 2>&1 | tee "build/menu-capture-$screen.log"
             if grep -E 'SCRIPT ERROR:|ERROR:' "build/menu-capture-$screen.log"; then exit 1; fi
             grep -q NEON_FOUNDRY_MENU_CAPTURE_OK "build/menu-capture-$screen.log"
@@ -136,6 +136,7 @@ jobs:
           test -s build/NeonFoundry-MainMenu.png
           test -s build/NeonFoundry-Settings.png
           test -s build/NeonFoundry-WorkshopWalk.png
+          test -s build/NeonFoundry-WorkbenchQC.png
           for png in Garage Store RaceMode RaceLobby RaceResults; do
             test -s "build/NeonFoundry-$png.png"
           done
