@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Stage 02A: industrial viewing mezzanine over power-cell diagnostics.
+"""Stage 02A: industrial viewing mezzanine directly above power-cell swap.
 
-User's Nov 2026 master blueprint: diagnostics is front-left, x approximately
-[-27,-11], z [+1.25,+20.25]. The viewing edge faces toward the robotic lift
-bays, across the north transverse vehicle aisle.
+User's Nov 2026 master blueprint: the power-cell swap is in the front-left
+diagnostics bay. Center the viewing mezzanine on that swap footprint, with its
+open viewing edge facing the craft and robotic lift bays across the aisle.
 
 Author original Blender meshes, export separate GLB; keep shell six meshes
 unchanged. No machinery, interior partitions or lighting are introduced.
@@ -23,10 +23,10 @@ SOURCE.parent.mkdir(parents=True, exist_ok=True)
 
 # These extents are also encoded in GaragePage for walkable stair traversal.
 X0, X1 = -25.65, -12.05
-Z0, Z1 = 2.35, 10.65
+Z0, Z1 = 3.25, 11.55
 DECK_Y = 5.20  # walkway finished top; bottom-level diagnostics stay usable
 STAIR_X0, STAIR_X1 = -25.3, -22.6
-STAIR_Z0, STAIR_Z1 = 10.65, 19.05  # upper landing -> ground landing
+STAIR_Z0, STAIR_Z1 = 11.55, 19.05  # upper landing -> ground landing
 STEPS = 24
 
 bpy.ops.object.select_all(action="SELECT")
@@ -192,10 +192,10 @@ for mat, objects in materials.items():
 for obj in joined:
     obj.matrix_world = Matrix.Rotation(math.pi/2, 4, "X") @ obj.matrix_world
 
-bpy.context.scene["garage_stage"] = "02A / observation deck over diagnostics"
+bpy.context.scene["garage_stage"] = "02A / observation deck over power-cell swap"
 bpy.context.scene["deck_finished_y"] = DECK_Y
 bpy.context.scene["deck_footprint"] = f"x[{X0},{X1}], z[{Z0},{Z1}]"
-bpy.context.scene["deck_usable_access"] = "24-step stair, lower to upper"
+bpy.context.scene["deck_usable_access"] = "24-step stair, lower to upper; faces craft/lift bays"
 bpy.context.scene["licensing"] = "original generated project meshes and PBR colors"
 bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE))
 bpy.ops.object.select_all(action="DESELECT")
@@ -207,5 +207,5 @@ bpy.ops.export_scene.gltf(filepath=str(OUTPUT), export_format="GLB",
     export_lights=False, export_tangents=True)
 assert OUTPUT.stat().st_size > 8_000, OUTPUT
 assert len(joined) == 4, len(joined)
-print("NEON_FOUNDRY_DECK_STAGE02_OK meshes=4 stair_treads=%d floor_y=%.2f glb=%d" %
+print("NEON_FOUNDRY_DECK_STAGE02_OK location=power_cell_swap meshes=4 stair_treads=%d floor_y=%.2f glb=%d" %
       (STEPS, DECK_Y, OUTPUT.stat().st_size))

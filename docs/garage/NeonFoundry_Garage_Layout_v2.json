@@ -1,0 +1,185 @@
+{
+  "project": "Neon Foundry Racing",
+  "document": "Garage structural layout and power-cell swap observation deck",
+  "version": "2.0",
+  "unit": "m",
+  "coordinate_system": {
+    "axes": "Godot X right, Z front/down, Y up",
+    "bounds": {
+      "x": [
+        -27,
+        27
+      ],
+      "z": [
+        -23.75,
+        20.25
+      ],
+      "ceiling_y": 16.2
+    },
+    "origin_note": "Existing centered staging circle near (0,-0.8) is temporary"
+  },
+  "zones": [
+    {
+      "id": "01",
+      "name": "Robotic lift bays",
+      "x": [
+        -27,
+        -3
+      ],
+      "z": [
+        -23.75,
+        -5.75
+      ],
+      "craft_centers_x": [
+        -23,
+        -15,
+        -7
+      ],
+      "craft_center_z": -15.0,
+      "each_bay_width": 7.1,
+      "each_bay_depth": 11.6
+    },
+    {
+      "id": "02",
+      "name": "Automated assembly / welding",
+      "x": [
+        -3,
+        15
+      ],
+      "z": [
+        -23.75,
+        -5.75
+      ]
+    },
+    {
+      "id": "03",
+      "name": "AI control / HQ",
+      "x": [
+        15,
+        27
+      ],
+      "z": [
+        -23.75,
+        -5.75
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Diagnostics and re-power",
+      "x": [
+        -27,
+        -11
+      ],
+      "z": [
+        1.25,
+        20.25
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Tool and parts depository",
+      "x": [
+        -11,
+        6
+      ],
+      "z": [
+        1.25,
+        20.25
+      ]
+    },
+    {
+      "id": "06",
+      "name": "Rotating showroom / visitor gallery",
+      "x": [
+        6,
+        27
+      ],
+      "z": [
+        1.25,
+        20.25
+      ],
+      "turntable_center": [
+        16.5,
+        11.0
+      ],
+      "turntable_diameter": 12.0
+    }
+  ],
+  "circulation": {
+    "cross_aisle": {
+      "x": [
+        -27,
+        27
+      ],
+      "z": [
+        -5.75,
+        1.25
+      ],
+      "clear_width": 7
+    },
+    "ingress_lane": {
+      "x": [
+        -7,
+        2
+      ],
+      "z": [
+        1.25,
+        20.25
+      ],
+      "clear_width": 9
+    },
+    "main_gate": {
+      "on_wall": "front, z=20.25",
+      "opening_x": [
+        -7,
+        2
+      ],
+      "width": 9
+    }
+  },
+  "structural": {
+    "columns": "perimeter only plus partition corners; avoid all 3 lift envelopes and main vehicle lane",
+    "roof": "long-span girders to be engineered later"
+  },
+  "stages": [
+    "Stage 1 structural perimeter shell, gate opening, tiled floor and cladding walls",
+    "Stage 2a viewing deck above power-cell swap",
+    "Stage 2b roof girders and structural frame",
+    "Stage 2c zone partitions and circulation",
+    "Stage 3 props and equipment"
+  ],
+  "important": "Schematic construction layout. No equipment or props are included in structural stages.",
+  "vehicle_gate": {
+    "wall": "front, z=20.25",
+    "opening_x": [
+      -7,
+      2
+    ],
+    "clear_width": 9,
+    "clear_height": 6.4
+  },
+  "observation_deck": {
+    "zone": "04 diagnostics / power-cell swap",
+    "x": [
+      -25.65,
+      -12.05
+    ],
+    "z": [
+      3.25,
+      11.55
+    ],
+    "finished_y": 5.2,
+    "viewing_edge": "rear/north, facing lift bays across 7m aisle",
+    "stairs": {
+      "x": [
+        -25.3,
+        -22.6
+      ],
+      "z": [
+        11.55,
+        19.05
+      ],
+      "steps": 24
+    }
+  }
+}

@@ -36,6 +36,8 @@ CENTER_Z = (BACK + FRONT) * 0.5
 FLOOR_BAYS_X, FLOOR_BAYS_Z = 14, 11
 WALL_BAYS_LONG, WALL_BAYS_SIDE = 14, 11
 WALL_TIERS = 4
+GATE_LEFT, GATE_RIGHT = -7.0, 2.0
+GATE_CLEAR_HEIGHT = 6.4
 
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
@@ -137,8 +139,8 @@ for i in range(FLOOR_BAYS_X):
              D / FLOOR_BAYS_Z - 0.045), MAT_FLOOR, 0.018))
 items.append(merge("SHELL_01_FLOOR", floor_bits))
 
-# 2. Fully enclosed walls, partitioned into physical panels with narrow
-# honest construction joints. This stage contains no pillars/girders.
+# 2. Structural perimeter walls, partitioned into physical panels with
+# narrow construction joints. The 9m front-center vehicle gate stays open.
 HEIGHT = CEILING_Y - FLOOR_Y
 for side, along_x, sign in (
     ("BACK", True, -1), ("FRONT", True, +1),
@@ -152,12 +154,44 @@ for side, along_x, sign in (
         center = (LEFT if sign < 0 else RIGHT, FLOOR_Y + HEIGHT / 2, CENTER_Z)
         size = (0.31, HEIGHT, D)
         n_bays = WALL_BAYS_SIDE
-    bits = [box(f"{side}/backing", center, size, MAT_GAP, 0.045)]
+    if side == "FRONT":
+        # Split the front backing around the blueprint's 9m gate and span it
+        # with a structural header. The clear drive-in height is 6.4m.
+        header_bottom = FLOOR_Y + GATE_CLEAR_HEIGHT
+        left_width = GATE_LEFT - LEFT
+        right_width = RIGHT - GATE_RIGHT
+        bits = [
+            box("FRONT/left backing", ((LEFT + GATE_LEFT) / 2,
+                 FLOOR_Y + HEIGHT / 2, FRONT), (left_width, HEIGHT, 0.31),
+                 MAT_GAP, 0.045),
+            box("FRONT/right backing", ((GATE_RIGHT + RIGHT) / 2,
+                 FLOOR_Y + HEIGHT / 2, FRONT), (right_width, HEIGHT, 0.31),
+                 MAT_GAP, 0.045),
+            box("FRONT/over-gate structural header",
+                 ((GATE_LEFT + GATE_RIGHT) / 2,
+                  (header_bottom + CEILING_Y) / 2, FRONT),
+                 (GATE_RIGHT - GATE_LEFT, CEILING_Y - header_bottom, 0.31),
+                 MAT_GAP, 0.035),
+            box("FRONT/gate jamb left", (GATE_LEFT + 0.08,
+                 FLOOR_Y + GATE_CLEAR_HEIGHT / 2, FRONT),
+                 (0.16, GATE_CLEAR_HEIGHT, 0.31), MAT_WALL_SIDE, 0.018),
+            box("FRONT/gate jamb right", (GATE_RIGHT - 0.08,
+                 FLOOR_Y + GATE_CLEAR_HEIGHT / 2, FRONT),
+                 (0.16, GATE_CLEAR_HEIGHT, 0.31), MAT_WALL_SIDE, 0.018),
+        ]
+    else:
+        bits = [box(f"{side}/backing", center, size, MAT_GAP, 0.045)]
     width = (RIGHT - LEFT) / n_bays if along_x else (FRONT - BACK) / n_bays
     for i in range(n_bays):
         for tier in range(WALL_TIERS):
             coord = ((LEFT if along_x else BACK) + (i + 0.5) * width)
             y = FLOOR_Y + (tier + 0.5) * (HEIGHT / WALL_TIERS)
+            panel_left = coord - width * 0.5
+            panel_right = coord + width * 0.5
+            if (side == "FRONT" and tier < 2 and
+                    panel_right > GATE_LEFT and panel_left < GATE_RIGHT):
+                # Lower front cladding stops at the 9m vehicle opening.
+                continue
             if along_x:
                 z = center[2] - sign * 0.17
                 loc = (coord, y, z)
