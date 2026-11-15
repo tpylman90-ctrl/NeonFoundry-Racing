@@ -1,0 +1,65 @@
+name: NFR / Package Android GLB Viewer Downloads
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/package-khronos-glb-downloads.yml'
+permissions:
+  contents: write
+
+jobs:
+  pack-downloads:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build direct-download ZIP of three valid Android-viewable GLBs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct, zipfile
+          root=Path('art/vehicle_studies/khronos_modular')
+          names={'NFR_Street_Phantom.glb':'preview_street.glb',
+                 'NFR_Aero_Strike.glb':'preview_aero.glb',
+                 'NFR_Industrial_Forge.glb':'preview_industrial.glb'}
+          for src in names.values():
+              f=root/src
+              b=f.read_bytes()
+              assert b[:4]==b'glTF' and struct.unpack_from('<I',b,4)[0]==2
+              assert struct.unpack_from('<I',b,8)[0]==len(b)
+          dest=root/'NFR_Three_Hovercraft_Models_Android.zip'
+          note=("NFR customization test: 3 standalone GLB models.\n"
+                "Android: download ZIP to Downloads, use Files to EXTRACT it, then open the .glb files "
+                "with your GLB viewer via Browse > Downloads. Do not select the ZIP itself.\n"
+                "Original donor: Khronos CarConcept, CC BY 4.0; Khronos marks/logos excluded. "
+                "See repository attribution file.\n")
+          with zipfile.ZipFile(dest,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+              for output,src in names.items():
+                  z.write(root/src,output)
+              z.writestr('HOW_TO_OPEN_ON_ANDROID.txt',note)
+          with zipfile.ZipFile(dest) as z:
+              assert z.testzip() is None
+              assert len(z.namelist())==4
+              for output in names:
+                  b=z.read(output)
+                  assert b[:4]==b'glTF'
+          print('NFR_ANDROID_GLB_DOWNLOADS_PACKED',dest.stat().st_size)
+          PY
+      - name: Publish stable ZIP file to the public repository
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add art/vehicle_studies/khronos_modular/NFR_Three_Hovercraft_Models_Android.zip
+          if ! git diff --cached --quiet; then
+            git commit -m 'Package three verified customization GLBs as Android-extractable ZIP'
+            git push origin HEAD:main
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NFR-Android-GLB-Downloads
+          path: art/vehicle_studies/khronos_modular/NFR_Three_Hovercraft_Models_Android.zip
+          retention-days: 30
