@@ -9,6 +9,8 @@ const WHITE: Color = Color("eef4f6")
 const MUTED: Color = Color("9aafc0")
 const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
 const WorkshopScript = preload("res://scripts/garage_workshop.gd")
+const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
+const STAGE01_REVIEW: bool = true
 
 var _world: Node3D
 var _camera: Camera3D
@@ -47,6 +49,8 @@ var _accent_lights: Array[OmniLight3D] = []
 var _garage_environment: Environment
 var _reflection_probe: ReflectionProbe
 var _contact_shadow_material: ShaderMaterial
+var _legacy_room: Node3D
+var _shell_stage: Node3D
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -133,8 +137,8 @@ func _build_3d_stage() -> void:
 	var viewport := SubViewport.new()
 	viewport.name = "GarageViewport"
 	viewport.size = Vector2i(1280, 720)
-	viewport.scaling_3d_scale = 0.72
-	viewport.msaa_3d = Viewport.MSAA_2X
+	viewport.scaling_3d_scale = 0.85 if STAGE01_REVIEW else 0.72
+	viewport.msaa_3d = Viewport.MSAA_DISABLED if STAGE01_REVIEW else Viewport.MSAA_2X
 	viewport.anisotropic_filtering_level = Viewport.ANISOTROPY_4X
 	_garage_viewport = viewport
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -150,19 +154,19 @@ func _build_3d_stage() -> void:
 	environment.background_color = Color("0a1622")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("b4c5d0")
-	environment.ambient_light_energy = 0.48
+	environment.ambient_light_energy = 0.56 if STAGE01_REVIEW else 0.48
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_BG
 	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
 	environment.tonemap_exposure = 0.96
 	environment.tonemap_white = 1.6
-	environment.fog_enabled = true
+	environment.fog_enabled = not STAGE01_REVIEW
 	environment.fog_mode = Environment.FOG_MODE_DEPTH
 	environment.fog_light_color = Color("1a2c3c")
 	environment.fog_density = 0.15
 	environment.fog_depth_begin = 13.0
 	environment.fog_depth_end = 47.0
 	environment.fog_depth_curve = 1.25
-	environment.glow_enabled = true
+	environment.glow_enabled = not STAGE01_REVIEW
 	environment.glow_hdr_threshold = 0.92
 	environment.glow_intensity = 0.70
 	environment.glow_bloom = 0.05
@@ -170,6 +174,11 @@ func _build_3d_stage() -> void:
 	environment_node.environment = environment
 	_world.add_child(environment_node)
 
+	# Retain old equipment and placements under a separate hidden root.
+	# Stage 01 displays only the six new Blender-authored shell surfaces.
+	_legacy_room = Node3D.new()
+	_legacy_room.name = "LegacyRoomReservedForFutureStages"
+	_world.add_child(_legacy_room)
 	var graphite := _material(Color("304354"), 0.37, 0.44)
 	var tile := _material(Color("384e5e"), 0.44, 0.43)
 	var beams := _material(Color("516675"), 0.55, 0.34)
@@ -178,42 +187,42 @@ func _build_3d_stage() -> void:
 	var black := _material(Color("0b141e"), 0.3, 0.6)
 	var glass := _material(Color("103c4c"), 0.6, 0.22)
 
-	_box(_world, "WorkshopFloor", Vector3(0, -0.36, -3), Vector3(46, 0.5, 34), graphite)
-	_box(_world, "BackWall", Vector3(0, 7.4, -18), Vector3(46, 15, 0.8), tile)
-	_box(_world, "LeftWall", Vector3(-20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
-	_box(_world, "RightWall", Vector3(20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
-	_box(_world, "Ceiling", Vector3(0, 14.9, -3), Vector3(46, 0.6, 34), graphite)
+	_box(_legacy_room, "WorkshopFloor", Vector3(0, -0.36, -3), Vector3(46, 0.5, 34), graphite)
+	_box(_legacy_room, "BackWall", Vector3(0, 7.4, -18), Vector3(46, 15, 0.8), tile)
+	_box(_legacy_room, "LeftWall", Vector3(-20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
+	_box(_legacy_room, "RightWall", Vector3(20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
+	_box(_legacy_room, "Ceiling", Vector3(0, 14.9, -3), Vector3(46, 0.6, 34), graphite)
 	for i in range(9):
 		var grid_z: float = -17.0 + float(i) * 4.0
-		_box(_world, "FloorGuide_%02d" % i, Vector3(0, -0.094, grid_z), Vector3(44, 0.015, 0.035), beams)
-		_box(_world, "CeilingRib_%02d" % i, Vector3(0, 14.4, grid_z), Vector3(43, 0.4, 0.5), beams)
+		_box(_legacy_room, "FloorGuide_%02d" % i, Vector3(0, -0.094, grid_z), Vector3(44, 0.015, 0.035), beams)
+		_box(_legacy_room, "CeilingRib_%02d" % i, Vector3(0, 14.4, grid_z), Vector3(43, 0.4, 0.5), beams)
 	for i in range(11):
 		var grid_x: float = -20.0 + float(i) * 4.0
-		_box(_world, "Crossfloor_%02d" % i, Vector3(grid_x, -0.083, -3.5), Vector3(0.035, 0.016, 31), beams)
+		_box(_legacy_room, "Crossfloor_%02d" % i, Vector3(grid_x, -0.083, -3.5), Vector3(0.035, 0.016, 31), beams)
 	for side in [-1, 1]:
 		var x: float = float(side) * 13.2
 		for segment in range(5):
 			var z: float = -15.0 + float(segment) * 6.2
-			_box(_world, "Support_%d_%d" % [side, segment], Vector3(x, 7.3, z), Vector3(0.65, 14, 0.65), beams)
-			_box(_world, "SupportStrip_%d_%d" % [side, segment], Vector3(x - float(side) * 0.35, 4.7, z), Vector3(0.08, 8.2, 0.12), cyan)
-		_box(_world, "UpperCatwalk_%d" % side, Vector3(x + float(side) * 2.8, 6.0, -6.6), Vector3(5.1, 0.45, 18), tile)
-		_box(_world, "CatwalkRail_%d" % side, Vector3(x + float(side) * 0.3, 7.0, -6.6), Vector3(0.12, 1.8, 18), beams)
+			_box(_legacy_room, "Support_%d_%d" % [side, segment], Vector3(x, 7.3, z), Vector3(0.65, 14, 0.65), beams)
+			_box(_legacy_room, "SupportStrip_%d_%d" % [side, segment], Vector3(x - float(side) * 0.35, 4.7, z), Vector3(0.08, 8.2, 0.12), cyan)
+		_box(_legacy_room, "UpperCatwalk_%d" % side, Vector3(x + float(side) * 2.8, 6.0, -6.6), Vector3(5.1, 0.45, 18), tile)
+		_box(_legacy_room, "CatwalkRail_%d" % side, Vector3(x + float(side) * 0.3, 7.0, -6.6), Vector3(0.12, 1.8, 18), beams)
 
 	for index in range(6):
 		var x: float = -15.0 + float(index) * 6.0
-		_box(_world, "WallLightBase_%d" % index, Vector3(x, 9.2, -17.45), Vector3(2.3, 3.2, 0.1), glass)
-		_box(_world, "WallLight_%d" % index, Vector3(x, 9.2, -17.37), Vector3(0.1, 2.8, 0.07), cyan)
-	_box(_world, "BackWallBanner", Vector3(0, 12, -17.5), Vector3(17.4, 1.1, 0.12), black)
-	_box(_world, "BackWallAccent", Vector3(0, 11.3, -17.4), Vector3(17.4, 0.07, 0.12), orange)
+		_box(_legacy_room, "WallLightBase_%d" % index, Vector3(x, 9.2, -17.45), Vector3(2.3, 3.2, 0.1), glass)
+		_box(_legacy_room, "WallLight_%d" % index, Vector3(x, 9.2, -17.37), Vector3(0.1, 2.8, 0.07), cyan)
+	_box(_legacy_room, "BackWallBanner", Vector3(0, 12, -17.5), Vector3(17.4, 1.1, 0.12), black)
+	_box(_legacy_room, "BackWallAccent", Vector3(0, 11.3, -17.4), Vector3(17.4, 0.07, 0.12), orange)
 
-	_cylinder(_world, "TurntableFoundation", Vector3(0, -0.06, 0), 6.2, 0.34, black)
-	_cylinder(_world, "TurntableDeck", Vector3(0, 0.17, 0), 5.8, 0.22, tile)
-	_ring(_world, "InspectionLightRing", Vector3(0, 0.31, 0), 5.55, 5.75, cyan)
-	_ring(_world, "OuterGuideRing", Vector3(0, -0.015, 0), 6.55, 6.62, orange)
+	_cylinder(_legacy_room, "TurntableFoundation", Vector3(0, -0.06, 0), 6.2, 0.34, black)
+	_cylinder(_legacy_room, "TurntableDeck", Vector3(0, 0.17, 0), 5.8, 0.22, tile)
+	_ring(_legacy_room, "InspectionLightRing", Vector3(0, 0.31, 0), 5.55, 5.75, cyan)
+	_ring(_legacy_room, "OuterGuideRing", Vector3(0, -0.015, 0), 6.55, 6.62, orange)
 	for i in range(24):
 		var angle: float = TAU * float(i) / 24.0
 		var point := Vector3(cos(angle) * 5.98, 0.27, sin(angle) * 5.98)
-		var marker := _box(_world, "DeckMarker_%02d" % i, point, Vector3(0.12, 0.02, 0.39), orange if i % 6 == 0 else beams)
+		var marker := _box(_legacy_room, "DeckMarker_%02d" % i, point, Vector3(0.12, 0.02, 0.39), orange if i % 6 == 0 else beams)
 		marker.rotation.y = -angle
 	_vehicle_holder = Node3D.new()
 	_vehicle_holder.name = "VehicleDisplay"
@@ -280,6 +289,37 @@ func _build_3d_stage() -> void:
 	_reflection_probe.intensity = 0.48
 	_reflection_probe.visible = false
 	_world.add_child(_reflection_probe)
+	_activate_stage01_shell()
+
+func _activate_stage01_shell() -> void:
+	if not STAGE01_REVIEW:
+		return
+	if not ResourceLoader.exists(SHELL_STAGE01_PATH):
+		push_error("STAGE_01_SHELL_MISSING: " + SHELL_STAGE01_PATH)
+		return
+	var pack: PackedScene = load(SHELL_STAGE01_PATH) as PackedScene
+	if pack == null:
+		push_error("STAGE_01_SHELL_INVALID_GLTF")
+		return
+	_shell_stage = pack.instantiate() as Node3D
+	_shell_stage.name = "ArchitecturalShell_Stage01"
+	_world.add_child(_shell_stage)
+	_legacy_room.visible = false
+	_vehicle_holder.visible = false
+	_workshop.visible = false
+	# The previous dramatic grade/post effects caused the last FPS regression;
+	# this comparison isolates material and bevel quality only.
+	_garage_environment.glow_enabled = false
+	_garage_environment.fog_enabled = false
+	_garage_environment.ambient_light_energy = 0.56
+	_hero_key.visible = false
+	_hero_key.shadow_enabled = false
+	_reflection_probe.visible = false
+	for index in range(_accent_lights.size()):
+		_accent_lights[index].visible = index == 0
+		_accent_lights[index].omni_range = 25.0
+		_accent_lights[index].light_energy = 2.8
+	print("NEON_FOUNDRY_STAGE01_SHELL_OK visible=6 surfaces props=hidden")
 
 func _add_contact_shadow(name: String, location: Vector3,
 		dimensions: Vector2, darkness: float) -> void:
@@ -441,8 +481,13 @@ func _build_overlay() -> void:
 	head.add_theme_constant_override("separation", 2)
 	title_panel.add_child(head)
 	head.add_child(_label("N / F  MOTORSPORT DIVISION   //   FOUNDRY LOT", 15, CYAN))
-	head.add_child(_label("GARAGE  /  VEHICLE INSPECTION", 30, WHITE))
-	head.add_child(_label("FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT", 14, MUTED))
+	head.add_child(_label(
+		"STAGE 01  /  ARCHITECTURAL SHELL" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
+		28, WHITE))
+	head.add_child(_label(
+		"FOUR WALLS  •  FLOOR  •  CEILING   /   TEXTURE REVIEW" if STAGE01_REVIEW
+		else "FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT",
+		14, MUTED))
 
 	var tools_panel := _panel(0.025, 0.19, 0.305, 0.89)
 	_tools_panel = tools_panel
@@ -554,6 +599,9 @@ func _build_overlay() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		action_row.add_child(b)
 	_inspect()
+	if STAGE01_REVIEW:
+		_tools_panel.visible = false
+		_equipment_panel.visible = false
 
 func _inspect() -> void:
 	_bay_state = "inspect"
@@ -583,9 +631,9 @@ func _toggle_walk() -> void:
 	_walk_forward = 0.0
 	_walk_turn = 0.0
 	_walk_pad.visible = _walk_mode
-	_equipment_panel.visible = not _walk_mode
+	_equipment_panel.visible = not _walk_mode and not STAGE01_REVIEW
 	_title_panel.visible = not _walk_mode
-	_tools_panel.visible = not _walk_mode
+	_tools_panel.visible = not _walk_mode and not STAGE01_REVIEW
 	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
 	_detail.text = "WALKAROUND MODE\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
 
@@ -606,8 +654,11 @@ func _toggle_scanner() -> void:
 func _set_graphics_detail(enabled: bool) -> void:
 	_quality_detail = enabled
 	if _garage_viewport != null:
-		_garage_viewport.scaling_3d_scale = 1.0 if enabled else 0.72
-		_garage_viewport.msaa_3d = Viewport.MSAA_2X
+		_garage_viewport.scaling_3d_scale = 1.0 if enabled else (0.85 if STAGE01_REVIEW else 0.72)
+		_garage_viewport.msaa_3d = (
+			Viewport.MSAA_2X if enabled or not STAGE01_REVIEW
+			else Viewport.MSAA_DISABLED
+		)
 		_garage_viewport.anisotropic_filtering_level = (
 			Viewport.ANISOTROPY_8X if enabled else Viewport.ANISOTROPY_4X
 		)
@@ -616,14 +667,17 @@ func _set_graphics_detail(enabled: bool) -> void:
 		_garage_environment.glow_intensity = 1.08 if enabled else 0.70
 		_garage_environment.glow_bloom = 0.09 if enabled else 0.05
 		_garage_environment.fog_density = 0.25 if enabled else 0.15
+		if STAGE01_REVIEW:
+			_garage_environment.glow_enabled = false
+			_garage_environment.fog_enabled = false
 	if _hero_key != null:
-		_hero_key.visible = true
-		_hero_key.shadow_enabled = enabled
+		_hero_key.visible = not STAGE01_REVIEW
+		_hero_key.shadow_enabled = enabled and not STAGE01_REVIEW
 	if _reflection_probe != null:
-		_reflection_probe.visible = enabled
+		_reflection_probe.visible = enabled and not STAGE01_REVIEW
 	for index in range(_accent_lights.size()):
-		_accent_lights[index].visible = enabled or index == 0
-		_accent_lights[index].omni_range = 15.0 if enabled else 13.0
+		_accent_lights[index].visible = index == 0 if STAGE01_REVIEW else enabled or index == 0
+		_accent_lights[index].omni_range = 25.0 if STAGE01_REVIEW else (15.0 if enabled else 13.0)
 	if _workshop != null:
 		_workshop.call("set_material_detail", enabled)
 		_workshop.call("set_mobile_quality", enabled)
