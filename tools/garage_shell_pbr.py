@@ -77,7 +77,7 @@ def relief_maps(kind: str, n: int) -> dict:
 
         # Small seams near existing physically separated floor tiles. These
         # reinforce those edges, rather than drawing a distracting grid.
-         sx = seam_profile(xx, FLOOR_X, 0.022)
+        sx = seam_profile(xx, FLOOR_X, 0.022)
         sy = seam_profile(yy, FLOOR_Z, 0.023)
         seam = np.maximum(sx, sy)
         height -= 0.0035 * seam
@@ -137,7 +137,7 @@ def relief_maps(kind: str, n: int) -> dict:
         # Coated precast concrete / satin steel panels. No repeated vertical
         # sin-wave grating or strong directional grooves.
         bays = FLOOR_X if kind == "wall_long" else FLOOR_Z
-        dx = (W if bays == 10 else D) / n
+        dx = (W if kind == 'wall_long' else D) / n
         dz = H / n
         base = np.array([0.405, 0.426, 0.427], dtype=np.float32)
         tone = 0.011 * low + 0.004 * medium + 0.0015 * fine
@@ -162,7 +162,7 @@ def relief_maps(kind: str, n: int) -> dict:
         fasteners = np.zeros((n, n), dtype=np.float32)
         for ax in (0.09, 0.91):
             for ay in (0.12, 0.88):
-                rx = (fx - ax) * ((W if bays == 10 else D) / bays)
+                rx = (fx - ax) * ((W if kind == 'wall_long' else D) / bays)
                 ry = (fy - ay) * (H / WALL_HEIGHT_TIERS)
                 rr = np.sqrt(rx * rx + ry * ry)
                 fasteners = np.maximum(fasteners, 1.0 - smoothstep(0.02, 0.055, rr))
