@@ -1,0 +1,3 @@
+Car Concept original contributed to the Khronos glTF-Sample-Assets project; CC BY 4.0. Source: https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept
+Original geometry modified by removal of wheels/branding nodes and neutral-material substitution; new FORGE modular engine, intake, aero, and lift objects added separately.
+Khronos logos and trademarks are not licensed with the model.

@@ -1,0 +1,347 @@
+{
+  "schema_version": 1,
+  "vehicle": "NF-H01 Khronos automotive donor conversion study",
+  "source": "KhronosGroup/glTF-Sample-Assets/Models/CarConcept",
+  "license": "CC-BY-4.0, original contributors must be credited; Khronos trademarks excluded",
+  "donor_sha256": "659c592e20aba7afa920db7d14ad767874741384c215ee1df23a5e1c5e1c411c",
+  "stage": "interchangeable module test; NOT a finished FORGE racer",
+  "model_forward": "+Z",
+  "units": "meters",
+  "donor_meshes_preserved": 82,
+  "removed_nodes": [
+    "Axles",
+    "99_c3171f",
+    "99_6c0809",
+    "WheelRearRRim_04f4bb",
+    "WheelRearRRim_3f1325",
+    "WheelRearRBrakePad",
+    "WheelRearRBrakeDisc",
+    "94_22853f",
+    "94_b09100",
+    "WheelRearLRim_37ff2e",
+    "WheelRearLRim_70c2c3",
+    "WheelRearLBrakePad",
+    "WheelRearLBrakeDisc",
+    "89_0fef98",
+    "89_32e52f",
+    "WheelFrontRBrakeDisc",
+    "WheelFrontRBrakePad",
+    "WheelFrontRRim_e88a5b",
+    "WheelFrontRRim_591d59",
+    "84_23dfdc",
+    "84_8fec90",
+    "WheelFrontLBrakeDisc",
+    "WheelFrontLBrakePad",
+    "WheelFrontLRim_242b04",
+    "WheelFrontLRim_d44bf9",
+    "License Plate",
+    "InteriorSteeringEmblem"
+  ],
+  "donor_base_triangles": 147775,
+  "base_scene": "res://assets/vehicle_modular/modular_base_clay.glb",
+  "sockets": {
+    "rear_engine": {
+      "position_m": [
+        0,
+        0.57,
+        -1.83
+      ]
+    },
+    "rear_fins": {
+      "position_m": [
+        0,
+        1.02,
+        -1.05
+      ]
+    },
+    "side_intakes": {
+      "position_m": [
+        0,
+        0.49,
+        0.15
+      ]
+    },
+    "front_splitter": {
+      "position_m": [
+        0,
+        0.18,
+        2.24
+      ]
+    },
+    "side_skirts": {
+      "position_m": [
+        0,
+        0.27,
+        0
+      ]
+    },
+    "front_lift_port": {
+      "position_m": [
+        -1.03,
+        0.38,
+        1.47
+      ]
+    },
+    "front_lift_starboard": {
+      "position_m": [
+        1.03,
+        0.38,
+        1.47
+      ]
+    },
+    "rear_lift_port": {
+      "position_m": [
+        -0.84,
+        0.22,
+        -1.3
+      ]
+    },
+    "rear_lift_starboard": {
+      "position_m": [
+        0.84,
+        0.22,
+        -1.3
+      ]
+    }
+  },
+  "slots": {
+    "rear_engine": [
+      {
+        "id": "engine_stock",
+        "name": "Foundry Pulse",
+        "scene": "res://assets/vehicle_modular/engine_stock.glb",
+        "triangles": 2148,
+        "style": "",
+        "stats": {
+          "thrust": 1.0,
+          "heat": 1.0,
+          "mass": 1.0,
+          "boost": 1.0,
+          "tier": 0
+        }
+      },
+      {
+        "id": "engine_vortex",
+        "name": "Vortex Twin",
+        "scene": "res://assets/vehicle_modular/engine_vortex.glb",
+        "triangles": 2404,
+        "style": "",
+        "stats": {
+          "thrust": 1.18,
+          "heat": 1.26,
+          "mass": 1.16,
+          "boost": 1.21,
+          "tier": 1
+        }
+      },
+      {
+        "id": "engine_titan",
+        "name": "Titan Vector",
+        "scene": "res://assets/vehicle_modular/engine_titan.glb",
+        "triangles": 2660,
+        "style": "",
+        "stats": {
+          "thrust": 1.3599999999999999,
+          "heat": 1.52,
+          "mass": 1.32,
+          "boost": 1.42,
+          "tier": 2
+        }
+      },
+      {
+        "id": "engine_nova",
+        "name": "Nova Overdrive",
+        "scene": "res://assets/vehicle_modular/engine_nova.glb",
+        "triangles": 3652,
+        "style": "",
+        "stats": {
+          "thrust": 1.54,
+          "heat": 1.78,
+          "mass": 1.48,
+          "boost": 1.63,
+          "tier": 3
+        }
+      }
+    ],
+    "rear_fins": [
+      {
+        "id": "fins_0",
+        "name": "Street Phantom rear fins",
+        "scene": "res://assets/vehicle_modular/fins_0.glb",
+        "triangles": 48,
+        "style": "Street Phantom"
+      },
+      {
+        "id": "fins_1",
+        "name": "Aero Strike rear fins",
+        "scene": "res://assets/vehicle_modular/fins_1.glb",
+        "triangles": 56,
+        "style": "Aero Strike"
+      },
+      {
+        "id": "fins_2",
+        "name": "Industrial Forge rear fins",
+        "scene": "res://assets/vehicle_modular/fins_2.glb",
+        "triangles": 248,
+        "style": "Industrial Forge"
+      }
+    ],
+    "side_intakes": [
+      {
+        "id": "intakes_0",
+        "name": "Street Phantom side intakes",
+        "scene": "res://assets/vehicle_modular/intakes_0.glb",
+        "triangles": 728,
+        "style": "Street Phantom"
+      },
+      {
+        "id": "intakes_1",
+        "name": "Aero Strike side intakes",
+        "scene": "res://assets/vehicle_modular/intakes_1.glb",
+        "triangles": 824,
+        "style": "Aero Strike"
+      },
+      {
+        "id": "intakes_2",
+        "name": "Industrial Forge side intakes",
+        "scene": "res://assets/vehicle_modular/intakes_2.glb",
+        "triangles": 920,
+        "style": "Industrial Forge"
+      }
+    ],
+    "front_splitter": [
+      {
+        "id": "splitter_0",
+        "name": "Street Phantom front splitter",
+        "scene": "res://assets/vehicle_modular/splitter_0.glb",
+        "triangles": 36,
+        "style": "Street Phantom"
+      },
+      {
+        "id": "splitter_1",
+        "name": "Aero Strike front splitter",
+        "scene": "res://assets/vehicle_modular/splitter_1.glb",
+        "triangles": 132,
+        "style": "Aero Strike"
+      },
+      {
+        "id": "splitter_2",
+        "name": "Industrial Forge front splitter",
+        "scene": "res://assets/vehicle_modular/splitter_2.glb",
+        "triangles": 132,
+        "style": "Industrial Forge"
+      }
+    ],
+    "side_skirts": [
+      {
+        "id": "skirts_0",
+        "name": "Street Phantom side skirts",
+        "scene": "res://assets/vehicle_modular/skirts_0.glb",
+        "triangles": 24,
+        "style": "Street Phantom"
+      },
+      {
+        "id": "skirts_1",
+        "name": "Aero Strike side skirts",
+        "scene": "res://assets/vehicle_modular/skirts_1.glb",
+        "triangles": 216,
+        "style": "Aero Strike"
+      },
+      {
+        "id": "skirts_2",
+        "name": "Industrial Forge side skirts",
+        "scene": "res://assets/vehicle_modular/skirts_2.glb",
+        "triangles": 216,
+        "style": "Industrial Forge"
+      }
+    ],
+    "front_lift_port": [
+      {
+        "id": "front_lift_port_stock",
+        "name": "Factory forward hover cassette",
+        "scene": "res://assets/vehicle_modular/front_lift_port_stock.glb",
+        "triangles": 684,
+        "style": "factory"
+      }
+    ],
+    "front_lift_starboard": [
+      {
+        "id": "front_lift_starboard_stock",
+        "name": "Factory forward hover cassette",
+        "scene": "res://assets/vehicle_modular/front_lift_starboard_stock.glb",
+        "triangles": 684,
+        "style": "factory"
+      }
+    ],
+    "rear_lift_port": [
+      {
+        "id": "rear_lift_port_stock",
+        "name": "Factory underside lift emitter",
+        "scene": "res://assets/vehicle_modular/rear_lift_port_stock.glb",
+        "triangles": 204,
+        "style": "factory"
+      }
+    ],
+    "rear_lift_starboard": [
+      {
+        "id": "rear_lift_starboard_stock",
+        "name": "Factory underside lift emitter",
+        "scene": "res://assets/vehicle_modular/rear_lift_starboard_stock.glb",
+        "triangles": 204,
+        "style": "factory"
+      }
+    ]
+  },
+  "default_loadout": {
+    "rear_engine": "engine_stock",
+    "rear_fins": "fins_0",
+    "side_intakes": "intakes_0",
+    "front_splitter": "splitter_0",
+    "side_skirts": "skirts_0",
+    "front_lift_port": "front_lift_port_stock",
+    "front_lift_starboard": "front_lift_starboard_stock",
+    "rear_lift_port": "rear_lift_port_stock",
+    "rear_lift_starboard": "rear_lift_starboard_stock"
+  },
+  "preview_loadouts": {
+    "street": {
+      "rear_engine": "engine_stock",
+      "rear_fins": "fins_0",
+      "side_intakes": "intakes_0",
+      "front_splitter": "splitter_0",
+      "side_skirts": "skirts_0",
+      "front_lift_port": "front_lift_port_stock",
+      "front_lift_starboard": "front_lift_starboard_stock",
+      "rear_lift_port": "rear_lift_port_stock",
+      "rear_lift_starboard": "rear_lift_starboard_stock"
+    },
+    "aero": {
+      "rear_engine": "engine_vortex",
+      "rear_fins": "fins_1",
+      "side_intakes": "intakes_1",
+      "front_splitter": "splitter_1",
+      "side_skirts": "skirts_1",
+      "front_lift_port": "front_lift_port_stock",
+      "front_lift_starboard": "front_lift_starboard_stock",
+      "rear_lift_port": "rear_lift_port_stock",
+      "rear_lift_starboard": "rear_lift_starboard_stock"
+    },
+    "industrial": {
+      "rear_engine": "engine_nova",
+      "rear_fins": "fins_2",
+      "side_intakes": "intakes_2",
+      "front_splitter": "splitter_2",
+      "side_skirts": "skirts_2",
+      "front_lift_port": "front_lift_port_stock",
+      "front_lift_starboard": "front_lift_starboard_stock",
+      "rear_lift_port": "rear_lift_port_stock",
+      "rear_lift_starboard": "rear_lift_starboard_stock"
+    }
+  },
+  "limitations": [
+    "Original rear wheel arch topology not yet reconstructed; no cosmetic covers claimed as seamless.",
+    "Existing donor paint materials replaced with unbranded inspection clay.",
+    "First stage is high-poly; game-ready LOD and collision not completed.",
+    "Sculpted donor body/roof untouched; kit exterior seams and mounts still need visual inspection."
+  ]
+}
