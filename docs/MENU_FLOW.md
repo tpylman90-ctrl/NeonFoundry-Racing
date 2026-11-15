@@ -59,3 +59,11 @@ Based on Android's ~20 FPS screenshot and visible black patches on large engine 
 
 ## Android graphics profile A/B test
 The garage now defaults to **Balanced**: SubViewport 3D scaling=0.72 (approximately 48% fewer 3D fragment pixels than native), one primary workshop omni plus one unshadowed task lamp, no spotlight shadow pass and no normal-map sampling on generated workshop meshes. The scene geometry, car and separately sourced CC0 workshop props are unchanged. **Graphics / Detail** enables native 3D scaling=1.0, extra accent/task lights, one shadowed key and the verified tangent-space normal maps. Both profiles are available in the equipment panel; the FPS counter stays visible during use. The comparison is deliberately user-testable rather than claiming 60 FPS without profiling on the actual Android GPU. Godot documents per-viewport render scaling and the tangents prerequisite for procedural normal maps.
+
+## Bench surface correction, material hygiene (Android screenshot review)
+
+The real underlying issue was an **inward-facing triangle winding order** in `_add_quad()`: it authored CCW triangles even though Godot culls CW fronts. This primarily hid top/outside faces of workbenches, cabinets, and machinery. The normals themselves were authored outward, creating a mismatch between shading and visible faces. The generator now reverses the emitted triangle and UV order while preserving outward normals; generated rod end-cap normals also match the correct faces. A headless geometry regression test checks CW top faces independently of art.
+
+The broad chipped-metal albedo maps were also overused on cabinets. Factory floor and large powder-coated bodies now use smooth, subtly varied authored PBR finishes, and CC0 normal maps remain restricted to appropriate metallic/tread components. The worktop has a separate BENCH material, mechanical edging, and spaced fastener geometry. Keep Balanced as default for Android because user-reported garage FPS improved from ~20 to **78–90** before this bench fix.
+
+For visual QA, Android Actions captures `NeonFoundry-WorkbenchQC.png` from a targeted in-engine viewpoint in addition to the full garage and walkaround views. Do not assume phone FPS until tested on device.

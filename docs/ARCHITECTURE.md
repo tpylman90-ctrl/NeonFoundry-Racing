@@ -2,7 +2,7 @@
 
 ## Technical baseline
 
-Godot 4.5.1 stable, GDScript, Mobile/Vulkan, Android ARM64, landscape orientation, 60 physics ticks per second. Blender sources export glTF/GLB. CI checks correctness, not actual phone GPU performance.
+Godot 4.7.2 stable, Blender 5.2.4 LTS, GDScript, Mobile/Vulkan, Android ARM64, landscape orientation, 60 physics ticks per second. Blender sources export glTF/GLB. CI checks correctness, not actual phone GPU performance.
 
 ## System modules (not yet implemented)
 

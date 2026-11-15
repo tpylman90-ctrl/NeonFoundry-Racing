@@ -41,6 +41,25 @@ func _run() -> void:
 	var workshop: Node3D = menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot/LiveWorkshopEquipment")
 	assert(workshop != null)
 	assert(workshop.get_node("Batched_steel") != null)
+	assert(workshop.get_node("Batched_bench") != null)
+	# Isolated unit test for the original bench-top bug: Godot is CW.
+	# For the top face, the cross product must oppose the UP normal.
+	var box_probe := SurfaceTool.new()
+	box_probe.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var old_black_tool: SurfaceTool = workshop._tools["black"]
+	workshop._tools["black"] = box_probe
+	workshop._box("black", Vector3.ZERO, Vector3.ONE)
+	var probe_arrays: Array = box_probe.commit_to_arrays()
+	workshop._tools["black"] = old_black_tool
+	var probe_vertices: PackedVector3Array = probe_arrays[Mesh.ARRAY_VERTEX]
+	var probe_normals: PackedVector3Array = probe_arrays[Mesh.ARRAY_NORMAL]
+	assert(probe_vertices.size() == 36)
+	var upper: int = 12
+	var cross_normal: Vector3 = (
+		probe_vertices[upper + 1] - probe_vertices[upper]
+	).cross(probe_vertices[upper + 2] - probe_vertices[upper])
+	assert(cross_normal.dot(Vector3.UP) < -0.99)
+	assert(probe_normals[upper].dot(Vector3.UP) > 0.99)
 	assert(workshop.get_node("ArticulatedServiceRobot") != null)
 	var diagnostic_labels: Array[Node] = workshop.find_children("*", "Label3D", true, false)
 	assert(diagnostic_labels.size() >= 12)
@@ -52,6 +71,11 @@ func _run() -> void:
 		assert(not material.normal_enabled)
 		assert(material.normal_texture != null)
 		assert(steel_mesh.mesh.surface_get_format(0) & Mesh.ARRAY_FORMAT_TANGENT != 0)
+	# Ensure bench tops and painted metal no longer sample oversized rust.
+	var worktop: MeshInstance3D = workshop.get_node("Batched_bench") as MeshInstance3D
+	assert((worktop.material_override as StandardMaterial3D).albedo_texture == null)
+	var cabinets: MeshInstance3D = workshop.get_node("Batched_wear") as MeshInstance3D
+	assert((cabinets.material_override as StandardMaterial3D).albedo_texture == null)
 	var imported_cc0: String = "res://assets/garage/kenney_factory/machine-window.obj"
 	if ResourceLoader.exists(imported_cc0):
 		assert(workshop.get_node_or_null("Kenney_machine_window") != null)

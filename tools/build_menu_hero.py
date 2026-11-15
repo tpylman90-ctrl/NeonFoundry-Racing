@@ -1,4 +1,4 @@
-"""Generate an original premium 3D hero menu in Blender 4.5.
+"""Generate an original premium 3D hero menu in Blender 5.2 LTS.
 
 Output:
  game/assets/menu/launch_scene.png   pre-rendered Android backdrop
@@ -419,21 +419,29 @@ except Exception:
     pass
 scene.render.image_settings.color_depth='8'
 scene.render.filepath=os.path.join(GAME,"launch_scene.png")
-# Filmic glow through compositor where supported by the pinned Blender version.
-scene.use_nodes=True
-nodes=scene.node_tree.nodes
-nodes.clear()
-rl=nodes.new('CompositorNodeRLayers')
-out=nodes.new('CompositorNodeComposite')
+# Blender 5.x compositing is a node-group datablock. Legacy scene.node_tree
+# and CompositorNodeComposite were removed in Blender 5.0.
+comp = bpy.data.node_groups.new("Neon Foundry Cinematic Composite", "CompositorNodeTree")
+scene.compositing_node_group = comp
+comp.interface.new_socket(name="Image", in_out="OUTPUT", socket_type="NodeSocketColor")
+nodes = comp.nodes
+rl = nodes.new("CompositorNodeRLayers")
+out = nodes.new("NodeGroupOutput")
 try:
-    glare=nodes.new('CompositorNodeGlare')
-    glare.glare_type='FOG_GLOW'
-    glare.threshold=1.25
-    glare.quality='HIGH'
-    scene.node_tree.links.new(rl.outputs['Image'],glare.inputs['Image'])
-    scene.node_tree.links.new(glare.outputs['Image'],out.inputs['Image'])
-except Exception:
-    scene.node_tree.links.new(rl.outputs['Image'],out.inputs['Image'])
+    glare = nodes.new("CompositorNodeGlare")
+    # Blender 5.2 exposes glare effects as node inputs rather than properties.
+    if "Glare Type" in glare.inputs:
+        try:
+            glare.inputs["Glare Type"].default_value = "FOG_GLOW"
+        except (TypeError, ValueError):
+            pass
+    if "Threshold" in glare.inputs:
+        glare.inputs["Threshold"].default_value = 1.25
+    comp.links.new(rl.outputs["Image"], glare.inputs["Image"])
+    comp.links.new(glare.outputs["Image"], out.inputs["Image"])
+except Exception as exc:
+    print("NEON_FOUNDRY_COMPOSITOR_FALLBACK", str(exc))
+    comp.links.new(rl.outputs["Image"], out.inputs["Image"])
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BUILD,"menu_hero.blend"))
 bpy.ops.render.render(write_still=True)
