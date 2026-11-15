@@ -33,13 +33,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.2.2' 'torchvision==0.17.2'
-          python -m pip install 'numpy<2' 'omegaconf==2.3.0' 'Pillow==10.1.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'imageio[ffmpeg]' 'xatlas==0.0.9'
+          python -m pip install 'numpy<2' 'omegaconf==2.3.0' 'Pillow==10.1.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0'
           # torchmcubes interrogates PyTorch at PEP 517 metadata/build time.
           # Build isolation hides the already installed torch; disable it.
           python -c "import torch; print('PYTORCH_AVAILABLE_FOR_EXTENSION_BUILD', torch.__version__)"
           CMAKE_BUILD_PARALLEL_LEVEL=2 python -m pip install --no-build-isolation 'git+https://github.com/tatsy/torchmcubes.git'
           git clone --depth 1 https://github.com/VAST-AI-Research/TripoSR.git /tmp/triposr
-          python -c "import torch; import torchmcubes; from PIL import Image; print('TRIPOSR_CPU_DEPENDENCIES_READY', torch.__version__)"
+          PYTHONPATH=/tmp/triposr python -c "import torch; import torchmcubes; import moderngl; from tsr.system import TSR; from PIL import Image; print('TRIPOSR_CPU_DEPENDENCIES_READY', torch.__version__)"
       - name: Run actual pretrained TripoSR on Forge reference
         run: |
           # TripoSR only creates output/0 for background-removal mode.
