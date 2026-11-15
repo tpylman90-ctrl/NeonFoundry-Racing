@@ -50,22 +50,31 @@ func _run() -> void:
 		var node: MeshInstance3D = candidate as MeshInstance3D
 		var world_aabb: AABB = node.global_transform * node.get_aabb()
 		if node.name == "SHELL_01_FLOOR":
-			assert(world_aabb.size.x > 35.0)
-			assert(world_aabb.size.z > 29.0)
+			assert(world_aabb.size.x > 53.0 and world_aabb.size.x < 55.0)
+			assert(world_aabb.size.z > 43.0 and world_aabb.size.z < 45.0)
 			assert(world_aabb.size.y < 1.0)
 			assert(absf(world_aabb.position.y) < 0.8)
 			horizontal_surfaces += 1
 		elif node.name == "SHELL_01_CEILING":
-			assert(world_aabb.size.x > 35.0)
-			assert(world_aabb.size.z > 29.0)
+			assert(world_aabb.size.x > 53.0 and world_aabb.size.x < 55.0)
+			assert(world_aabb.size.z > 43.0 and world_aabb.size.z < 45.0)
 			assert(world_aabb.size.y < 1.0)
-			assert(world_aabb.position.y > 13.5)
+			assert(world_aabb.position.y > 15.2)
 			horizontal_surfaces += 1
 		else:
-			assert(world_aabb.size.y > 13.0)
+			assert(world_aabb.size.y > 15.5)
 			vertical_surfaces += 1
 	assert(horizontal_surfaces == 2)
 	assert(vertical_surfaces == 4)
+	# The enlarged empty shell must be navigable near the new perimeter,
+	# without allowing a thumbstick to push the camera through its walls.
+	menu._garage_page._walk_position = Vector3(99.0, 1.75, -99.0)
+	menu._garage_page._toggle_walk()
+	menu._garage_page._process(0.016)
+	assert(menu._garage_page._walk_position.x < 25.0)
+	assert(menu._garage_page._walk_position.z > -22.0)
+	menu._garage_page._toggle_walk()
+	menu._garage_page._walk_position = Vector3(0.0, 1.75, 11.0)
 	assert(menu._garage_page._world.get_node("ChassisContactShadow") != null)
 	assert(menu._garage_page._world.get_node("PlatformContactShadow") != null)
 	assert(menu._garage_page._reflection_probe.update_mode == ReflectionProbe.UPDATE_ONCE)

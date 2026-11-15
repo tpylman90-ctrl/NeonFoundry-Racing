@@ -13,8 +13,9 @@ import math
 import numpy as np
 import bpy
 
-W, D, H = 39.8, 32.3, 14.78
-LEFT, BACK = -19.9, -17.9
+W, D, H = 54.0, 44.0, 16.28
+LEFT, BACK = -27.0, -23.75
+FLOOR_X, FLOOR_Z, WALL_HEIGHT_TIERS = 14, 11, 4
 SEED = 20261115
 
 
@@ -61,7 +62,7 @@ def relief_maps(kind: str, n: int) -> dict:
     ao = np.full((n, n), 0.98, dtype=np.float32)
 
     if kind == "floor":
-        # One unwrapped 39.8m x 32.3m atlas, not the same repeated panel!
+        # Room-scale 54m x 44m atlas. Painted ring stays at original center.
         X = LEFT + xx * W
         Z = BACK + yy * D
         dx = W / n
@@ -76,8 +77,8 @@ def relief_maps(kind: str, n: int) -> dict:
 
         # Small seams near existing physically separated floor tiles. These
         # reinforce those edges, rather than drawing a distracting grid.
-        sx = seam_profile(xx, 10, 0.022)
-        sy = seam_profile(yy, 8, 0.023)
+        sx = seam_profile(xx, FLOOR_X, 0.022)
+        sy = seam_profile(yy, FLOOR_Z, 0.023)
         seam = np.maximum(sx, sy)
         height -= 0.0035 * seam
         ao -= 0.13 * seam
@@ -135,8 +136,8 @@ def relief_maps(kind: str, n: int) -> dict:
     elif kind.startswith("wall"):
         # Coated precast concrete / satin steel panels. No repeated vertical
         # sin-wave grating or strong directional grooves.
-        bays = 10 if kind == "wall_long" else 8
-        dx = (W if bays == 10 else D) / n
+        bays = FLOOR_X if kind == "wall_long" else FLOOR_Z
+        dx = (W if kind == 'wall_long' else D) / n
         dz = H / n
         base = np.array([0.405, 0.426, 0.427], dtype=np.float32)
         tone = 0.011 * low + 0.004 * medium + 0.0015 * fine
@@ -149,20 +150,20 @@ def relief_maps(kind: str, n: int) -> dict:
         # Recessed panel seams are high-resolution height details baked
         # into tangent-space normals; no individual groove meshes needed.
         sx = seam_profile(xx, bays, 0.018)
-        sy = seam_profile(yy, 3, 0.019)
+        sy = seam_profile(yy, WALL_HEIGHT_TIERS, 0.019)
         seam = np.maximum(sx, sy)
         height -= 0.0045 * seam
         ao -= 0.16 * seam
         albedo *= 1.0 - 0.033 * seam[..., None]
 
         # 2x2 small stamped fasteners per panel, subtly inset in the paint.
-        fy = np.mod(yy * 3, 1.0)
+        fy = np.mod(yy * WALL_HEIGHT_TIERS, 1.0)
         fx = np.mod(xx * bays, 1.0)
         fasteners = np.zeros((n, n), dtype=np.float32)
         for ax in (0.09, 0.91):
             for ay in (0.12, 0.88):
-                rx = (fx - ax) * ((W if bays == 10 else D) / bays)
-                ry = (fy - ay) * (H / 3)
+                rx = (fx - ax) * ((W if kind == 'wall_long' else D) / bays)
+                ry = (fy - ay) * (H / WALL_HEIGHT_TIERS)
                 rr = np.sqrt(rx * rx + ry * ry)
                 fasteners = np.maximum(fasteners, 1.0 - smoothstep(0.02, 0.055, rr))
         height -= 0.0014 * fasteners
@@ -182,8 +183,8 @@ def relief_maps(kind: str, n: int) -> dict:
         rough = (0.78 + 0.025 * low + 0.010 * fine).astype(np.float32)
         metal = np.full((n, n), 0.24, dtype=np.float32)
         height = 0.0008 * low + 0.00035 * medium + 0.00015 * fine
-        seam = np.maximum(seam_profile(xx, 10, 0.021),
-                          seam_profile(yy, 8, 0.022))
+        seam = np.maximum(seam_profile(xx, FLOOR_X, 0.021),
+                          seam_profile(yy, FLOOR_Z, 0.022))
         height -= 0.0030 * seam
         ao -= 0.12 * seam
         albedo *= 1.0 - 0.045 * seam[..., None]
