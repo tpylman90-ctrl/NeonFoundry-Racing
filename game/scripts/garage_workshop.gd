@@ -18,6 +18,8 @@ const BLACK := "black"
 const SCREEN := "screen"
 const SILVER := "silver"
 const GLASS := "glass"
+const TREAD := "tread"
+const WEAR := "wear"
 
 var _tools: Dictionary = {}
 var _materials: Dictionary = {}
@@ -29,6 +31,8 @@ var _lift_height: float = 0.0
 var _lift_target: float = 0.0
 var _scanner_enabled: bool = true
 var _light_rigs: Array[OmniLight3D] = []
+var _detail_quality: bool = false
+var _pbr_surfaces: Array[StandardMaterial3D] = []
 
 func _ready() -> void:
 	_create_materials()
@@ -105,7 +109,9 @@ func _create_materials() -> void:
 		BLACK: _material(Color("1c262e"), 0.12, 0.79),
 		SCREEN: _material(Color("087991"), 0.03, 0.25, 1.4),
 		SILVER: _material(Color("becbd1"), 0.73, 0.29),
-		GLASS: _material(Color("244657"), 0.54, 0.28)
+		GLASS: _material(Color("244657"), 0.54, 0.28),
+		TREAD: _material(Color("7c8892"), 0.55, 0.67),
+		WEAR: _material(Color("828b95"), 0.36, 0.70)
 	}
 
 	# Physically textured-looking surfaces without runtime texture downloads.
@@ -117,43 +123,53 @@ func _create_materials() -> void:
 	_apply_cc0_pbr()
 
 func _apply_cc0_pbr() -> void:
-	# All offline 1K material sources are CC0, staged by stage_garage_cc0.py.
-	# Assign each map to its respective physical channel on Vulkan Mobile;
-	# no procedural-color substitute is used when the sourced map is present.
+	# Function-driven material assignments: damaged paint only on worn equipment,
+	# diamond plate only on actual tread, not across structural cylinders.
 	var ids: Dictionary = {
-		STEEL: "steel", FLOOR: "clean", GRAPHITE: "paint",
-		TRIM: "clean", SILVER: "deck"
+		STEEL: "clean", FLOOR: "clean", GRAPHITE: "clean",
+		TRIM: "clean", SILVER: "clean", TREAD: "deck", WEAR: "paint"
 	}
+	_pbr_surfaces.clear()
 	var mapped: int = 0
 	for material_id in ids:
-		var prefix: String = str(ids[material_id])
-		var root: String = "res://assets/garage/pbr/" + prefix + "_"
+		var root: String = "res://assets/garage/pbr/" + str(ids[material_id]) + "_"
 		var color_path: String = root + "color.jpg"
-		var normal_path: String = root + "normal.jpg"
-		var rough_path: String = root + "roughness.jpg"
-		if not (ResourceLoader.exists(color_path) and ResourceLoader.exists(normal_path)
-				and ResourceLoader.exists(rough_path)):
+		if not ResourceLoader.exists(color_path):
 			continue
 		var mat: StandardMaterial3D = _materials[material_id]
 		mat.albedo_texture = load(color_path)
-		mat.normal_enabled = true
-		mat.normal_texture = load(normal_path)
-		mat.normal_scale = 0.25 if material_id == FLOOR else 0.70
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		mat.texture_repeat = BaseMaterial3D.TEXTURE_REPEAT_ENABLED
 		if material_id == FLOOR:
-			mat.roughness = 0.66
-			mat.metallic = 0.15
-		mat.roughness_texture = load(rough_path)
-		mat.uv1_scale = Vector3.ONE
-		var metal_path: String = root + "metallic.jpg"
-		if ResourceLoader.exists(metal_path):
-			mat.metallic_texture = load(metal_path)
-		var ao_path: String = root + "ao.jpg"
-		if ResourceLoader.exists(ao_path):
-			mat.ao_enabled = true
-			mat.ao_texture = load(ao_path)
-			mat.ao_light_affect = 0.45
+			mat.roughness = 0.78
+			mat.metallic = 0.08
+			mat.normal_scale = 0.14
+		elif material_id == WEAR:
+			mat.roughness = 0.75
+			mat.metallic = 0.20
+			mat.normal_scale = 0.25
+		else:
+			mat.normal_scale = 0.32
+		var normal_path: String = root + "normal.jpg"
+		if ResourceLoader.exists(normal_path):
+			mat.normal_texture = load(normal_path)
+			mat.normal_enabled = _detail_quality and material_id != FLOOR
+		var rough_path: String = root + "roughness.jpg"
+		if ResourceLoader.exists(rough_path):
+			mat.roughness_texture = load(rough_path)
+		# ambientCG maps describe their source geometry, not our UV-unwrapped
+		# cylinders. AO repeated across large industrial parts caused blotches.
+		mat.ao_enabled = false
+		mat.metallic_texture = null
+		_pbr_surfaces.append(mat)
 		mapped += 1
-	print("NEON_FOUNDRY_CC0_PBR_APPLIED surfaces=%d" % mapped)
+	print("NEON_FOUNDRY_CC0_PBR_APPLIED surfaces=%d corrected_ao=off" % mapped)
+
+func set_material_detail(enabled: bool) -> void:
+	_detail_quality = enabled
+	for mat in _pbr_surfaces:
+		mat.normal_enabled = enabled and mat != _materials[FLOOR]
+	print("NEON_FOUNDRY_MATERIAL_PROFILE detail=%s" % str(enabled))
 
 func _create_microtexture(seed: int, floor_texture: bool) -> ImageTexture:
 	var img := Image.create(128, 128, false, Image.FORMAT_RGBA8)
@@ -230,6 +246,10 @@ func _rod(id: String, from: Vector3, to: Vector3, radius: float, segments: int =
 		var ca: Vector3 = (tangent * cos(a) + bitangent * sin(a)) * radius
 		var cb: Vector3 = (tangent * cos(b) + bitangent * sin(b)) * radius
 		_add_quad(id, from + ca, from + cb, to + cb, to + ca)
+		# End caps on small structural rods are typically concealed by
+		# joints, and consume more geometry than the cylindrical side.
+		if segments < 16:
+			continue
 		var center_bottom := from
 		var center_top := to
 		var tool: SurfaceTool = _tools[id]
@@ -259,6 +279,10 @@ func _arc(id: String, center: Vector3, radius: float, width: float, y: float, st
 func _commit_batches() -> void:
 	for id in _tools:
 		var tool: SurfaceTool = _tools[id]
+		# Tangents are required for normal mapped procedural meshes.
+		# Generate them once, before commit, never during a rendered frame.
+		if id in [STEEL, FLOOR, GRAPHITE, TRIM, SILVER, TREAD, WEAR]:
+			tool.generate_tangents()
 		var mesh: ArrayMesh = tool.commit()
 		var node := MeshInstance3D.new()
 		node.name = "Batched_%s" % id
@@ -481,7 +505,7 @@ func _build_workstations() -> void:
 			Vector2(-11.2, -11.9), Vector2(11.3, -11.9)]:
 		var x: float = location.x
 		var z: float = location.y
-		_box(STEEL, Vector3(x, 0.69, z), Vector3(1.85, 1.32, 1.15))
+		_box(WEAR, Vector3(x, 0.69, z), Vector3(1.85, 1.32, 1.15))
 		_box(BLACK, Vector3(x, 1.42, z), Vector3(2.0, 0.15, 1.34))
 		for i in range(5):
 			_box(GRAPHITE, Vector3(x, 0.32 + float(i) * 0.21, z + 0.595),
@@ -502,7 +526,7 @@ func _build_workstations() -> void:
 			for dz in [-0.72, 0.72]:
 				_box(STEEL, Vector3(x + dx, 3.1, z + dz), Vector3(0.20, 5.9, 0.2))
 		for h in [0.65, 2.0, 3.45, 4.9]:
-			_box(TRIM, Vector3(x, h, z), Vector3(4.1, 0.14, 1.8))
+			_box(TREAD, Vector3(x, h, z), Vector3(4.1, 0.14, 1.8))
 		for k in range(11):
 			var bx: float = x - 1.65 + float(k % 6) * 0.61
 			var by := 0.98 + float(k / 6) * 1.5
@@ -542,7 +566,7 @@ func _build_service_bays() -> void:
 			_rod(SILVER, Vector3(x, 2.05, z + 0.85),
 				Vector3(x + cos(a) * 0.44, 2.05 + sin(a) * 0.44, z + 0.85), 0.045, 6)
 		# Floor-mounted diagnostics and hoses.
-		_box(BLACK, Vector3(x, 0.16, z + 2.85), Vector3(5.0, 0.12, 0.72))
+		_box(TREAD, Vector3(x, 0.16, z + 2.85), Vector3(5.0, 0.12, 0.72))
 		_box(CYAN, Vector3(x, 0.21, z + 2.85), Vector3(3.7, 0.03, 0.055))
 		for k in range(13):
 			var t := float(k) / 12.0
@@ -800,7 +824,7 @@ func _build_precision_tools() -> void:
 		var cx: float = float(spec["x"])
 		var cz: float = float(spec["z"])
 		_box(BLACK, Vector3(cx, 0.92, cz), Vector3(3.6, 0.19, 1.55))
-		_box(STEEL, Vector3(cx, 0.49, cz), Vector3(3.3, 0.90, 1.25))
+		_box(WEAR, Vector3(cx, 0.49, cz), Vector3(3.3, 0.90, 1.25))
 		for drawer in range(3):
 			var z: float = cz + 0.66
 			_box(GRAPHITE, Vector3(cx, 0.24 + float(drawer) * 0.26, z),
