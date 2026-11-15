@@ -2,7 +2,7 @@ name: Repository checks
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces', 'garage/stage01-pbr-orm-bake', 'garage/dual-thumb-walk-controls']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces', 'garage/stage01-pbr-orm-bake', 'garage/dual-thumb-walk-controls', 'garage/stage01-expanded-footprint']
   pull_request:
   workflow_dispatch:
 

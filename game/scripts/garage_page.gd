@@ -12,6 +12,10 @@ const WorkshopScript = preload("res://scripts/garage_workshop.gd")
 const DualJoystickScript = preload("res://scripts/garage_dual_joystick.gd")
 const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
 const STAGE01_REVIEW: bool = true
+const SHELL_HALF_WIDTH: float = 27.0
+const SHELL_REAR: float = -23.75
+const SHELL_FRONT: float = 20.25
+const WALL_WALK_CLEARANCE: float = 2.2
 
 var _world: Node3D
 var _camera: Camera3D
@@ -83,8 +87,14 @@ func _process(delta: float) -> void:
 		var forward: Vector3 = Vector3(-sin(_walk_yaw), 0.0, -cos(_walk_yaw))
 		var strafe: Vector3 = Vector3(cos(_walk_yaw), 0.0, -sin(_walk_yaw))
 		_walk_position += (strafe * direction.x - forward * direction.y) * delta * 4.6
-		_walk_position.x = clampf(_walk_position.x, -17.0, 17.0)
-		_walk_position.z = clampf(_walk_position.z, -15.0, 13.8)
+		_walk_position.x = clampf(
+			_walk_position.x, -SHELL_HALF_WIDTH + WALL_WALK_CLEARANCE,
+			SHELL_HALF_WIDTH - WALL_WALK_CLEARANCE
+		) if STAGE01_REVIEW else clampf(_walk_position.x, -17.0, 17.0)
+		_walk_position.z = clampf(
+			_walk_position.z, SHELL_REAR + WALL_WALK_CLEARANCE,
+			SHELL_FRONT - WALL_WALK_CLEARANCE
+		) if STAGE01_REVIEW else clampf(_walk_position.z, -15.0, 13.8)
 		# The old showroom turntable is hidden during Stage 01. Let testers
 		# walk freely across the empty floor. Restore its radius guard later.
 		if not STAGE01_REVIEW:

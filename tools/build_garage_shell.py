@@ -24,9 +24,18 @@ SOURCE.mkdir(parents=True, exist_ok=True)
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
 # Match the established Godot Foundry Lot. Units are metres (not centimetres).
-LEFT, RIGHT = -19.9, 19.9
-BACK, FRONT = -17.9, 14.4
-FLOOR_Y, CEILING_Y = -0.08, 14.70
+# Enlarged for a three-bay garage plus assembly, diagnostics and showroom.
+# Maintain X=0 and the original -1.75m longitudinal center so the camera
+# spawn and existing (currently hidden) equipment do not shift unexpectedly.
+LEFT, RIGHT = -27.0, 27.0
+BACK, FRONT = -23.75, 20.25
+FLOOR_Y, CEILING_Y = -0.08, 16.20
+W = RIGHT - LEFT
+D = FRONT - BACK
+CENTER_Z = (BACK + FRONT) * 0.5
+FLOOR_BAYS_X, FLOOR_BAYS_Z = 14, 11
+WALL_BAYS_LONG, WALL_BAYS_SIDE = 14, 11
+WALL_TIERS = 4
 
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
@@ -117,15 +126,15 @@ def merge(name: str, objects: list):
 items: list[bpy.types.Object] = []
 
 # 1. Main floor panels; all geometry is real, not a texture over the old floor.
-floor_bits = [box("Floor/base slab", (0, -0.235, -1.75),
-                  (39.8, 0.27, 32.3), MAT_GAP, 0.035)]
-for i in range(10):
-    for j in range(8):
-        x = LEFT + (i + 0.5) * ((RIGHT - LEFT) / 10)
-        z = BACK + (j + 0.5) * ((FRONT - BACK) / 8)
+floor_bits = [box("Floor/base slab", (0, -0.235, CENTER_Z),
+                  (W, 0.27, D), MAT_GAP, 0.035)]
+for i in range(FLOOR_BAYS_X):
+    for j in range(FLOOR_BAYS_Z):
+        x = LEFT + (i + 0.5) * (W / FLOOR_BAYS_X)
+        z = BACK + (j + 0.5) * (D / FLOOR_BAYS_Z)
         floor_bits.append(box(f"Floor/epoxy bay {i}_{j}", (x, -0.076, z),
-            ((RIGHT - LEFT) / 10 - 0.045, 0.052,
-             (FRONT - BACK) / 8 - 0.045), MAT_FLOOR, 0.018))
+            (W / FLOOR_BAYS_X - 0.045, 0.052,
+             D / FLOOR_BAYS_Z - 0.045), MAT_FLOOR, 0.018))
 items.append(merge("SHELL_01_FLOOR", floor_bits))
 
 # 2. Fully enclosed walls, partitioned into physical panels with narrow
@@ -136,47 +145,48 @@ for side, along_x, sign in (
     ("LEFT", False, -1), ("RIGHT", False, +1),
 ):
     if along_x:
-        center = (0, HEIGHT / 2, BACK if sign < 0 else FRONT)
-        size = (RIGHT - LEFT, HEIGHT, 0.31)
-        n_bays = 10
+        center = (0, FLOOR_Y + HEIGHT / 2, BACK if sign < 0 else FRONT)
+        size = (W, HEIGHT, 0.31)
+        n_bays = WALL_BAYS_LONG
     else:
-        center = (LEFT if sign < 0 else RIGHT, HEIGHT / 2, -1.75)
-        size = (0.31, HEIGHT, FRONT - BACK)
-        n_bays = 8
+        center = (LEFT if sign < 0 else RIGHT, FLOOR_Y + HEIGHT / 2, CENTER_Z)
+        size = (0.31, HEIGHT, D)
+        n_bays = WALL_BAYS_SIDE
     bits = [box(f"{side}/backing", center, size, MAT_GAP, 0.045)]
     width = (RIGHT - LEFT) / n_bays if along_x else (FRONT - BACK) / n_bays
     for i in range(n_bays):
-        for tier in range(3):
+        for tier in range(WALL_TIERS):
             coord = ((LEFT if along_x else BACK) + (i + 0.5) * width)
-            y = FLOOR_Y + (tier + 0.5) * (HEIGHT / 3)
+            y = FLOOR_Y + (tier + 0.5) * (HEIGHT / WALL_TIERS)
             if along_x:
                 z = center[2] - sign * 0.17
                 loc = (coord, y, z)
-                dims = (width - 0.057, HEIGHT / 3 - 0.073, 0.045)
+                dims = (width - 0.057, HEIGHT / WALL_TIERS - 0.073, 0.045)
             else:
                 x = center[0] - sign * 0.17
                 loc = (x, y, coord)
-                dims = (0.045, HEIGHT / 3 - 0.073, width - 0.057)
+                dims = (0.045, HEIGHT / WALL_TIERS - 0.073, width - 0.057)
             bits.append(box(f"{side}/satin cladding {tier}_{i}", loc, dims,
                             (MAT_WALL_LONG if along_x else MAT_WALL_SIDE), 0.017))
     items.append(merge(f"SHELL_01_{side}_WALL", bits))
 
 # 3. Ceiling, separately tiled in a dark non-reflective architectural finish.
-roof_bits = [box("Ceiling/backing", (0, CEILING_Y + 0.15, -1.75),
-                 (39.8, 0.30, 32.3), MAT_GAP, 0.030)]
-for i in range(10):
-    for j in range(8):
-        x = LEFT + (i + 0.5) * ((RIGHT - LEFT) / 10)
-        z = BACK + (j + 0.5) * ((FRONT - BACK) / 8)
+roof_bits = [box("Ceiling/backing", (0, CEILING_Y + 0.15, CENTER_Z),
+                 (W, 0.30, D), MAT_GAP, 0.030)]
+for i in range(FLOOR_BAYS_X):
+    for j in range(FLOOR_BAYS_Z):
+        x = LEFT + (i + 0.5) * (W / FLOOR_BAYS_X)
+        z = BACK + (j + 0.5) * (D / FLOOR_BAYS_Z)
         roof_bits.append(box(f"Ceiling/acoustic cassette {i}_{j}",
             (x, CEILING_Y - 0.077, z),
-            ((RIGHT - LEFT) / 10 - 0.070, 0.060,
-             (FRONT - BACK) / 8 - 0.070), MAT_CEILING, 0.022))
+            (W / FLOOR_BAYS_X - 0.070, 0.060,
+             D / FLOOR_BAYS_Z - 0.070), MAT_CEILING, 0.022))
 items.append(merge("SHELL_01_CEILING", roof_bits))
 
 bpy.context.scene["nf_stage"] = 1
 bpy.context.scene["shell_wall_count"] = 4
-bpy.context.scene["shell_dimensions"] = "39.8m x 32.3m x 14.78m"
+bpy.context.scene["shell_dimensions"] = f"{W:.1f}m x {D:.1f}m x {CEILING_Y - FLOOR_Y:.2f}m"
+bpy.context.scene["floor_tile_counts"] = f"{FLOOR_BAYS_X} x {FLOOR_BAYS_Z}"
 bpy.context.scene["static_bake_status"] = "PBR/ORM microdetails texture-baked on UV1; UV2 GI next milestone"
 bpy.context.scene["pbr_packing"] = "Occlusion R, Roughness G, Metallic B"
 bpy.context.scene["normal_source"] = "Procedural high-resolution relief prebake, OpenGL tangent space"
