@@ -1,19 +1,22 @@
 {
   "schema": "forge-triposr-trial-diagnostic-v1",
-  "run_id": 43721334150,
+  "run_id": 43722841362,
   "attempt": "1",
-  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43721334150",
-  "commit": "2a381bbb4451ce3e4cfb91f1deeeb01670affb51",
-  "job_status": "success",
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43722841362",
+  "commit": "5c91af8c0c4c5e9cd3ed69aab59f89eeb5d53aad",
+  "job_status": "failure",
   "stages": {
-    "prepare": "success",
-    "dependencies": "success",
-    "inference": "success",
-    "audit": "success",
+    "prepare": "failure",
+    "dependencies": "skipped",
+    "inference": "skipped",
+    "audit": "skipped",
     "artifact": "success"
   },
   "error_excerpts": {
-    "prepare": [],
+    "prepare": [
+      "Traceback (most recent call last):",
+      "ModuleNotFoundError: No module named 'numpy'"
+    ],
     "dependencies": [],
     "inference": [],
     "audit": []
