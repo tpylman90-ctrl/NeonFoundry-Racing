@@ -18,7 +18,10 @@ def validate(path: Path=GLB) -> dict:
     gltf=json.loads(raw[20:20+chunk_len])
     meshes=gltf.get("meshes",[])
     assert len(meshes)==4, f"expected four batched material meshes, got {len(meshes)}"
-    names={m.get("name","") for m in meshes}
+    # Blender's glTF exporter may name the underlying MESH datablock Cube.N,
+    # while preserving authored OBS_DECK_* on the corresponding scene NODES.
+    names={node.get("name","") for node in gltf.get("nodes",[])
+           if "mesh" in node}
     for expected in ["OBS_DECK_Structure","OBS_DECK_WalkSurface",
                      "OBS_DECK_TrimRails","OBS_DECK_SafetyPaint"]:
         assert expected in names, (expected,names)
