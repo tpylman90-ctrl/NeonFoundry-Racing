@@ -2,7 +2,7 @@ name: Android APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4']
     paths:
       - 'game/**'
       - 'tools/**'
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  GODOT_VERSION: 4.5.1
+  GODOT_VERSION: 4.7.2
 
 jobs:
   android:
@@ -33,7 +33,7 @@ jobs:
           log-accepted-android-sdk-licenses: false
       - name: Install SDK tools
         run: sdkmanager "platform-tools" "build-tools;35.0.0" "platforms;android-35"
-      - name: Install official Godot 4.5.1 and Android export templates
+      - name: Install official Godot 4.7.2 and Android export templates
         run: |
           set -euo pipefail
           base="https://github.com/godotengine/godot/releases/download/$GODOT_VERSION-stable"
@@ -62,7 +62,7 @@ jobs:
               "export/android/debug_keystore_pass": "android",
           }.items():
               text += f'{key}="{value}"\n'
-          (Path.home()/".config/godot/editor_settings-4.5.tres").write_text(text)
+          (Path.home()/".config/godot/editor_settings-4.7.tres").write_text(text)
           p=Path("game/export_presets.cfg")
           p.write_text(p.read_text().replace("version/code=1", "version/code="+os.environ["GITHUB_RUN_NUMBER"]))
           PY
@@ -73,16 +73,16 @@ jobs:
           path: |
             game/assets/menu/launch_scene.png
             build/menu_hero.blend
-          key: neon-menu-hero-blender45-v1-${{ hashFiles('tools/build_menu_hero.py') }}
-      - name: Render original 3D menu art with Blender 4.5
+          key: neon-menu-hero-blender524-v1-${{ hashFiles('tools/build_menu_hero.py') }}
+      - name: Render original 3D menu art with Blender 5.2.4 LTS
         if: steps.menu-cache.outputs.cache-hit != 'true'
         timeout-minutes: 20
         run: |
           set -euo pipefail
           mkdir -p game/assets/menu build
-          curl --fail --location --retry 3 https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz -o /tmp/blender.tar.xz
+          curl --fail --location --retry 3 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender.tar.xz
           tar -xf /tmp/blender.tar.xz -C /tmp
-          NEON_MENU_SAMPLES=28 /tmp/blender-4.5.3-linux-x64/blender --background --threads 4 --python tools/build_menu_hero.py 2>&1 | tee build/blender-menu.log
+          NEON_MENU_SAMPLES=28 /tmp/blender-5.2.4-linux-x64/blender --background --threads 4 --python tools/build_menu_hero.py 2>&1 | tee build/blender-menu.log
           grep -q NEON_FOUNDRY_BLENDER_MENU_OK build/blender-menu.log
           test -s game/assets/menu/launch_scene.png
           test -s build/menu_hero.blend

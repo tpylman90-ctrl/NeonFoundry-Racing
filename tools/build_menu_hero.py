@@ -1,4 +1,4 @@
-"""Generate an original premium 3D hero menu in Blender 4.5.
+"""Generate an original premium 3D hero menu in Blender 5.2 LTS.
 
 Output:
  game/assets/menu/launch_scene.png   pre-rendered Android backdrop
