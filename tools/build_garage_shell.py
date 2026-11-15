@@ -284,6 +284,13 @@ bpy.context.scene["shell_wall_count"] = 4
 bpy.context.scene["shell_dimensions"] = "39.8m x 32.3m x 14.78m"
 bpy.context.scene["static_bake_status"] = "UV1 only - UV2 and LightmapGI next stage"
 
+# The scene above uses Godot-style X/Y/Z coordinates intentionally.
+# Blender exports from Z-up to glTF Y-up, so pre-rotate +90 degrees around
+# Blender X. The combined transform preserves Godot Y as physical height.
+from mathutils import Matrix
+for node in items:
+    node.matrix_world = Matrix.Rotation(math.pi / 2.0, 4, "X") @ node.matrix_world
+
 # Preserve editable Blender source, including source image datablocks.
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "build/garage_shell_stage01.blend"))
 bpy.ops.object.select_all(action="DESELECT")

@@ -81,3 +81,7 @@ Source of truth: `tools/build_garage_shell.py` generates an editable `build/gara
 For this **single-stage review build only**, the previous turntable, Forge vehicle, robot, lifts, props, old room and neon furniture are preserved but hidden; this is intentional so the user can inspect geometry and materials in isolation. Garage navigation and first-person walking remain available. Lighting was reset to a modest one-key, one-fill arrangement; fog, glow, live shadow maps, and repeated texture overlays are disabled. The surface GLB must be generated before Godot imports project resources in CI/Android. Mesh is intended to be reused when subsequent milestones add girders, interior walls, and equipment one at a time.
 
 **Stage 02 is NOT implemented:** no structural girders or partitions are added here. The next construction step requires explicit visual approval of the wall, floor and ceiling material quality and FPS.
+
+### Axis correction discovered by visual inspection
+
+The first Vulkan screenshot exposed a Blender-to-Godot coordinate error: the floor appeared as a giant wall. The Blender generator now pre-rotates its Godot-oriented coordinates by +90° about Blender X before glTF export, compensating for Blender Z-up to Godot Y-up. Added bounding-box assertions for the six imported meshes, including the floor horizontal dimensions and ceiling Y height. The initial Build 96 is NOT approved.

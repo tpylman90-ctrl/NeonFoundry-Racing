@@ -39,6 +39,33 @@ func _run() -> void:
 	assert(not menu._garage_page._workshop.visible)
 	assert(not menu._garage_page._vehicle_holder.visible)
 	assert(menu._garage_page._shell_stage.find_children("*", "MeshInstance3D", true, false).size() >= 6)
+	# Verify actual imported world orientation, not just scene presence.
+	var meshes: Array[Node] = menu._garage_page._shell_stage.find_children(
+		"SHELL_01_*", "MeshInstance3D", true, false
+	)
+	assert(meshes.size() == 6)
+	var horizontal_surfaces: int = 0
+	var vertical_surfaces: int = 0
+	for candidate in meshes:
+		var node: MeshInstance3D = candidate as MeshInstance3D
+		var world_aabb: AABB = node.global_transform * node.get_aabb()
+		if node.name == "SHELL_01_FLOOR":
+			assert(world_aabb.size.x > 35.0)
+			assert(world_aabb.size.z > 29.0)
+			assert(world_aabb.size.y < 1.0)
+			assert(absf(world_aabb.position.y) < 0.8)
+			horizontal_surfaces += 1
+		elif node.name == "SHELL_01_CEILING":
+			assert(world_aabb.size.x > 35.0)
+			assert(world_aabb.size.z > 29.0)
+			assert(world_aabb.size.y < 1.0)
+			assert(world_aabb.position.y > 13.5)
+			horizontal_surfaces += 1
+		else:
+			assert(world_aabb.size.y > 13.0)
+			vertical_surfaces += 1
+	assert(horizontal_surfaces == 2)
+	assert(vertical_surfaces == 4)
 	assert(menu._garage_page._world.get_node("ChassisContactShadow") != null)
 	assert(menu._garage_page._world.get_node("PlatformContactShadow") != null)
 	assert(menu._garage_page._reflection_probe.update_mode == ReflectionProbe.UPDATE_ONCE)
