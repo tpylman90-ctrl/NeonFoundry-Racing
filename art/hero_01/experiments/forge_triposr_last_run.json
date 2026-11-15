@@ -1,23 +1,20 @@
 {
   "schema": "forge-triposr-trial-diagnostic-v1",
-  "run_id": 43675127202,
+  "run_id": 43721334150,
   "attempt": "1",
-  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43675127202",
-  "commit": "7ff766710038a693b5e8b7ed4470c5d42c6159e4",
-  "job_status": "failure",
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43721334150",
+  "commit": "2a381bbb4451ce3e4cfb91f1deeeb01670affb51",
+  "job_status": "success",
   "stages": {
     "prepare": "success",
-    "dependencies": "failure",
-    "inference": "skipped",
-    "audit": "skipped",
+    "dependencies": "success",
+    "inference": "success",
+    "audit": "success",
     "artifact": "success"
   },
   "error_excerpts": {
     "prepare": [],
-    "dependencies": [
-      "Traceback (most recent call last):",
-      "ModuleNotFoundError: No module named 'onnxruntime'"
-    ],
+    "dependencies": [],
     "inference": [],
     "audit": []
   },
