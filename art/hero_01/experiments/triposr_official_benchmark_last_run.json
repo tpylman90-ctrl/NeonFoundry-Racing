@@ -1,0 +1,30 @@
+{
+  "run_id": 43766205017,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43766205017",
+  "commit": "e3f8655f183f13612492a13bd7fba612d5e527d7",
+  "status": "success",
+  "stages": {
+    "install": "success",
+    "inference": "success",
+    "audit": "success",
+    "native_install": "success",
+    "parity": "success",
+    "artifact": "success"
+  },
+  "errors": {
+    "install": [],
+    "inference": [],
+    "audit": [],
+    "native_install": [
+      "Collecting exceptiongroup>=1.0 (from scikit-build-core>=1.0)",
+      "  Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)",
+      "Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)",
+      "Installing collected packages: tomli, pybind11, pathspec, ninja, exceptiongroup, scikit-build-core",
+      "Successfully installed exceptiongroup-1.3.1 ninja-1.13.2 pathspec-1.1.1 pybind11-3.1.0 scikit-build-core-1.1.2 tomli-2.5.0"
+    ],
+    "parity": [
+      "EXTRACTOR_PARITY_RESULT {\"native_available\": true, \"test_field\": \"asymmetric displaced ellipsoid with unequal radii at 48^3 grid\", \"benchmark_purpose\": \"detect native-vs-adapter axis swaps and coordinate errors\", \"fallback_verts\": 2466, \"fallback_faces\": 4928, \"native_verts\": 2474, \"native_faces\": 4928, \"best_match\": {\"permutation\": [2, 1, 0], \"med"
+    ]
+  },
+  "note": "Independent official-example benchmark; does not change production Forge geometry"
+}
