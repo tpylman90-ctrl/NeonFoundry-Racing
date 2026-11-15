@@ -266,13 +266,10 @@ func _rod(id: String, from: Vector3, to: Vector3, radius: float, segments: int =
 		var center_top := to
 		var tool: SurfaceTool = _tools[id]
 		for cap in range(2):
-			var pts: Array[Vector3] = (
-				[center_bottom, from + cb, from + ca] if cap == 0
-				else [center_top, to + ca, to + cb]
-			)
-			var p0: Vector3 = pts[0]
-			var p1: Vector3 = pts[1]
-			var p2: Vector3 = pts[2]
+			# Avoid implicit Array -> Array[Vector3] conversion in Godot 4.7.
+			var p0: Vector3 = center_bottom if cap == 0 else center_top
+			var p1: Vector3 = from + cb if cap == 0 else to + ca
+			var p2: Vector3 = from + ca if cap == 0 else to + cb
 			tool.set_normal(-direction if cap == 0 else direction)
 			tool.set_uv(Vector2.ZERO)
 			tool.add_vertex(p0)
