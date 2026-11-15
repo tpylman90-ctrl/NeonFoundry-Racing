@@ -46,3 +46,17 @@ The user's Stage 01 screenshot showed approximately **99 FPS** with two-thumb co
 - Change no texture resolution, dynamic lights, bloom, or fog. Keeping the previous texture GPU budget makes the FPS comparison more meaningful.
 - Tests enforce all six mesh world bounds, room heights and camera collision bounds, plus the simultaneous two-touch control behavior. The previous device FPS is a reference only; re-measure the enlarged room.
 - No fixed bay coordinates or showroom relocation until the footprint is approved.
+
+## Stage 02A — elevated craft observation over diagnostics & cell swaps
+
+Built in the approved 54m × 44m Foundry Lot. The raised viewing deck is architecturally **above the front-left diagnostic/power-cell swap zone**, positioned at X -25.65 to -12.05 and Z +2.35 to +10.65. Finished deck elevation is **5.20 metres**, retaining clear usable workshop height below.
+
+- Open north-facing rail overlooks the transverse vehicle aisle and three future robotic lift bays.
+- Industrial steel I-beams, four edge posts, cross supports, anti-slip floor, low-profile orange hazard marking, open metal safety rails; original mesh geometry, entirely built in Blender and exported as its own GLB.
+- A 2.7m-wide 24-tread service stair climbs from Z +19.05 at the diagnostics front edge to the upper landing Z +10.65, with both handrails. Guardrails protect exposed deck edges; the stair opening is reserved.
+- Dual analog sticks remain unchanged. Camera movement now follows stair elevation. Ground-level walking **under** the deck does not teleport the player upstairs. Upper-level guard boundaries prevent stepping off.
+- No added area lights, dynamic shadows, fog, machinery, partitions, glass or lifts. Maintain the current phone FPS baseline (~94 FPS before this deck).
+- The six structural shell meshes and their packed PBR maps remain unchanged, while the new deck is a separate asset for inspection or future replacement.
+- Godot camera validation checks floor, stairs, deck height and fall protection; Blender/glTF validator checks exported deck materials and spatial bounds.
+
+**The user's earlier blueprint is a planning reference:** future craft and cell-swap equipment are not yet visible in Stage 02A. The deck provides a genuine elevated view of the space where those vehicles will later sit.

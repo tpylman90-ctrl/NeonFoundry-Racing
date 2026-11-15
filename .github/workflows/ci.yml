@@ -2,7 +2,7 @@ name: Repository checks
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces', 'garage/stage01-pbr-orm-bake', 'garage/dual-thumb-walk-controls', 'garage/stage01-expanded-footprint']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces', 'garage/stage01-pbr-orm-bake', 'garage/dual-thumb-walk-controls', 'garage/stage01-expanded-footprint', 'garage/stage02-observation-deck']
   pull_request:
   workflow_dispatch:
 
@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/check_repository.py
-          python3 -m py_compile tools/build_garage_shell.py tools/garage_shell_pbr.py tools/validate_shell_pbr.py
+          python3 -m py_compile tools/build_garage_shell.py tools/garage_shell_pbr.py tools/validate_shell_pbr.py tools/build_garage_observation_deck.py tools/validate_observation_deck.py
           python3 tools/validate_hero_workflow.py
           python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
       - name: Install pinned Godot
@@ -39,9 +39,11 @@ jobs:
         with:
           path: |
             game/assets/garage/shell/shell_stage01.glb
+            game/assets/garage/shell/observation_deck_stage02.glb
             build/garage_shell_stage01.blend
+            build/garage_observation_deck_stage02.blend
             build/shell_source/
-          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py') }}
+          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py', 'tools/build_garage_observation_deck.py') }}
       - name: Generate isolated Blender hangar shell (Stage 01)
         if: steps.shell-cache.outputs.cache-hit != 'true'
         timeout-minutes: 12
@@ -56,6 +58,8 @@ jobs:
           grep -q NEON_FOUNDRY_SHELL_STAGE01_OK build/garage-shell-generator.log
           test -s game/assets/garage/shell/shell_stage01.glb
           test -s build/garage_shell_stage01.blend
+          test -s game/assets/garage/shell/observation_deck_stage02.glb
+          test -s build/garage_observation_deck_stage02.blend
           python3 - <<'PY'
           from pathlib import Path
           import struct
@@ -73,6 +77,11 @@ jobs:
           test -s build/shell_source/NF_SHELL_wall_side_ORM.png
           test -s build/shell_source/NF_SHELL_ceiling_ORM.png
           test -s build/shell_source/NF_SHELL_floor_bakedNormalGL.png
+      - name: Verify separate deck GLB geometry
+        run: |
+          set -euo pipefail
+          python3 tools/validate_observation_deck.py
+          test -s build/garage_observation_deck_stage02.blend
       - name: Godot import and startup smoke
         run: |
           set -euo pipefail
