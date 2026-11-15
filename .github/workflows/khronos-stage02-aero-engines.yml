@@ -88,16 +88,16 @@ jobs:
           cat > build/stage02_test/project.godot <<'EOF'
           config_version=5
           [application]
-          config/name='NFR Module Stage02 CI'
+          config/name="NFR Module Stage02 CI"
           [rendering]
-          renderer/rendering_method='mobile'
-          renderer/rendering_method.mobile='mobile'
+          renderer/rendering_method="mobile"
+          renderer/rendering_method.mobile="mobile"
           EOF
           cp game/scripts/vehicle_modular_rig.gd build/stage02_test/scripts/
           cp game/tests/modular_vehicle_stage02_smoke_test.gd build/stage02_test/tests/
           cp game/assets/vehicle_modular/* build/stage02_test/assets/vehicle_modular/
-          godot --headless --path build/stage02_test --editor --import --quit > build/stage02_import.log 2>&1
-          if grep -E 'SCRIPT ERROR:|ERROR:' build/stage02_import.log; then exit 1; fi
+          godot --headless --path build/stage02_test --editor --import --quit > build/stage02_import.log 2>&1 || { cat build/stage02_import.log; exit 1; }
+          if grep -E 'SCRIPT ERROR:|ERROR:' build/stage02_import.log; then cat build/stage02_import.log; exit 1; fi
           timeout 90 godot --headless --path build/stage02_test --script res://tests/modular_vehicle_stage02_smoke_test.gd 2>&1 | tee build/stage02_swap.log
           if grep -E 'SCRIPT ERROR:|ERROR:' build/stage02_swap.log; then exit 1; fi
           grep -q NFR_STAGE02_GODOT_MODULAR_SWAP_OK build/stage02_swap.log
