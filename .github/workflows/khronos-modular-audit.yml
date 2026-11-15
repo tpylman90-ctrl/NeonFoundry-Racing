@@ -1,0 +1,62 @@
+name: NF-H01 / Khronos Donor Topology and License Audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/khronos-modular-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch original Khronos CarConcept mesh + model-specific license
+        run: |
+          set -euo pipefail
+          mkdir -p build/khronos_audit
+          curl -fL --retry 3 --max-time 110 \
+            "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/GLB/CarConcept.glb" \
+            -o build/khronos_audit/CarConcept_ORIGINAL.glb
+          curl -fL --retry 3 \
+            "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/LICENSE.md" \
+            -o build/khronos_audit/KHRONOS_LICENSE.md
+          grep -q "CC-BY-4.0" build/khronos_audit/KHRONOS_LICENSE.md
+      - name: Install geometry inspection
+        run: python -m pip install --disable-pip-version-check "numpy==2.3.5" "trimesh==4.11.1" "networkx==3.6.1" "scipy==1.17.0"
+      - name: Extract mesh hierarchy, wheel/roof part names, transforms and scale
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import trimesh,json,numpy as np,hashlib,collections
+          p=Path("build/khronos_audit/CarConcept_ORIGINAL.glb")
+          scene=trimesh.load(p,force="scene",process=False)
+          parts=[]
+          for node in scene.graph.nodes_geometry:
+            matrix,name=scene.graph[node]
+            mesh=scene.geometry[name]
+            v=trimesh.transform_points(mesh.vertices,matrix)
+            parts.append(dict(node=node,mesh=name,triangles=len(mesh.faces),bounds=np.round([v.min(0),v.max(0)],3).tolist()))
+          report=dict(license="CC BY 4.0; logos/trademarks excluded",source="KhronosGroup/glTF-Sample-Assets/Models/CarConcept",
+              glb_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),
+              bounds=np.round(scene.bounds,3).tolist(),extents=np.round(scene.extents,3).tolist(),
+              nodes=len(parts),unique_meshes=len(scene.geometry),triangles=sum(len(x.faces) for x in scene.geometry.values()),
+              wheel_like=[x for x in parts if any(k in x["node"].lower() for k in ("wheel","tire","tyre","brake","rim","hub"))],
+              visible_shell=[x for x in parts if any(k in x["node"].lower() for k in ("body","glass","windscreen","roof","hood","door","fender","bumper","engine","logo","badge","decal","text","trademark","khronos"))],
+              all_node_names=[x["node"] for x in parts])
+          Path("build/khronos_audit/TOPOLOGY_REPORT.json").write_text(json.dumps(report,indent=2)+"\n")
+          print("NFR_KHRONOS_AUDIT", json.dumps({k:report[k] for k in ("bounds","extents","nodes","unique_meshes","triangles","glb_sha256")}))
+          print("NFR_WHEEL_SHELL_LIST",json.dumps({"wheels":report["wheel_like"][:55],"shell":report["visible_shell"][:95]}))
+          print("NFR_ALL_NODE_NAMES",json.dumps(report["all_node_names"][:300]))
+          assert len(parts)>20 and len(report["wheel_like"])>0,"No safe wheel assembly distinction"
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-Khronos-Donor-Audit
+          path: build/khronos_audit/
+          retention-days: 14
