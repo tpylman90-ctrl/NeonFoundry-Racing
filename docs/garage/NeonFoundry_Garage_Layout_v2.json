@@ -162,13 +162,13 @@
     "zone": "04 diagnostics / power-cell swap",
     "x": [
       -25.65,
-      -12.05
+      -11.18
     ],
     "z": [
       3.25,
-      11.55
+      12.05
     ],
-    "finished_y": 5.2,
+    "finished_y": 7.2,
     "viewing_edge": "rear/north, facing lift bays across 7m aisle",
     "stairs": {
       "x": [
@@ -176,10 +176,10 @@
         -22.6
       ],
       "z": [
-        11.55,
-        19.05
+        12.05,
+        19.9
       ],
-      "steps": 24
+      "steps": 34
     }
   }
 }

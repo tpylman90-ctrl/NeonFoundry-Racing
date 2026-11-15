@@ -77,7 +77,7 @@ func _ready() -> void:
 	elif "--capture-deckwalk" in OS.get_cmdline_user_args():
 		_open_section("garage")
 		_garage_page.call("_toggle_walk")
-		_garage_page.set("_walk_position", Vector3(-19.0, 6.95, 5.2))
+		_garage_page.set("_walk_position", Vector3(-19.0, 8.95, 5.2))
 		_garage_page.set("_walk_yaw", 0.0)
 		_capture_screen("NeonFoundry-ObservationOverlook.png", "garage")
 	elif "--capture-store" in OS.get_cmdline_user_args():

@@ -15,14 +15,14 @@ const DECK_STAGE02_PATH: String = "res://assets/garage/shell/observation_deck_st
 const PARTITIONS_STAGE02C_PATH: String = "res://assets/garage/shell/interior_partitions_stage02c.glb"
 # The viewing deck is above the front-left diagnostics and cell-swap zone.
 const DECK_X0: float = -25.65
-const DECK_X1: float = -12.05
+const DECK_X1: float = -11.18
 const DECK_Z0: float = 3.25
-const DECK_Z1: float = 11.55
-const DECK_SURFACE_Y: float = 5.20
+const DECK_Z1: float = 12.05
+const DECK_SURFACE_Y: float = 7.20
 const DECK_STAIR_X0: float = -25.3
 const DECK_STAIR_X1: float = -22.6
-const DECK_STAIR_TOP_Z: float = 11.55
-const DECK_STAIR_BOTTOM_Z: float = 19.05
+const DECK_STAIR_TOP_Z: float = 12.05
+const DECK_STAIR_BOTTOM_Z: float = 19.90
 const WALK_EYE_HEIGHT: float = 1.75
 const INTERNAL_PARTITION_HEIGHT: float = 7.2
 const STAGE01_REVIEW: bool = true
@@ -429,7 +429,7 @@ func _activate_stage02_deck() -> void:
 	_observation_deck = packed.instantiate() as Node3D
 	_observation_deck.name = "PowerCellSwapObservationDeck"
 	_world.add_child(_observation_deck)
-	print("NEON_FOUNDRY_STAGE02_DECK_LOADED height=5.20 location=power-cell-swap")
+	print("NEON_FOUNDRY_STAGE02_DECK_LOADED height=7.20 wall_aligned=true location=power-cell-swap")
 
 func _activate_stage02c_partitions() -> void:
 	# Internal zone walls are a separate GLB so the authored perimeter shell

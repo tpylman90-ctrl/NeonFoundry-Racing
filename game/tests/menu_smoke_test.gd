@@ -74,8 +74,8 @@ func _run() -> void:
 		"OBS_DECK_*", "MeshInstance3D", true, false
 	)
 	assert(deck_meshes.size() == 4)
-	# Cell-swap mezzanine at about 5.2m overlooks lift bays; top of
-	# guard rails at about 6.37m. Stairs extend to z ~= 19.05m.
+	# Cell-swap mezzanine is flush with the partition cap at 7.2m; guard
+	# rails top at about 8.37m. Stair opening meets the deck at z=12.05.
 	var deck_bounds: AABB = (
 		(deck_meshes[0] as MeshInstance3D).global_transform *
 		(deck_meshes[0] as MeshInstance3D).get_aabb()
@@ -84,38 +84,39 @@ func _run() -> void:
 		var node: MeshInstance3D = candidate as MeshInstance3D
 		deck_bounds = deck_bounds.merge(node.global_transform * node.get_aabb())
 	assert(deck_bounds.position.x < -25.0)
-	assert(deck_bounds.end.x > -12.6)
+	assert(deck_bounds.end.x > -11.5)
 	assert(deck_bounds.position.z > 3.0)
 	assert(deck_bounds.position.z < 3.6)
-	assert(deck_bounds.end.z > 18.8)
-	assert(deck_bounds.end.y > 6.1)
-	assert(deck_bounds.end.y < 6.7)
+	assert(deck_bounds.end.z > 19.8)
+	assert(deck_bounds.end.z < 20.2)
+	assert(deck_bounds.end.y > 8.2)
+	assert(deck_bounds.end.y < 8.6)
 	# Floor can be traversed UNDER the deck without snapping upstairs.
 	var old_under: Vector3 = Vector3(-18.0, 1.75, 8.0)
 	menu._garage_page._walk_position = old_under + Vector3(0.4, 0, 0.2)
 	menu._garage_page._resolve_deck_walk(old_under)
 	assert(is_equal_approx(menu._garage_page._walk_position.y, 1.75))
 	# Stair height is continuous; entering from the lower landing works.
-	var foot: Vector3 = Vector3(-24.0, 1.75, 19.12)
-	menu._garage_page._walk_position = Vector3(-24.0, 1.75, 18.96)
+	var foot: Vector3 = Vector3(-24.0, 1.75, 19.98)
+	menu._garage_page._walk_position = Vector3(-24.0, 1.75, 19.78)
 	menu._garage_page._resolve_deck_walk(foot)
 	assert(menu._garage_page._walk_position.y > 1.75)
 	assert(menu._garage_page._walk_position.y < 2.0)
-	var stair_mid: Vector3 = Vector3(-24.0, 4.1, 14.6)
-	menu._garage_page._walk_position = Vector3(-24.0, 4.1, 14.4)
+	var stair_mid: Vector3 = Vector3(-24.0, 5.7, 16.0)
+	menu._garage_page._walk_position = Vector3(-24.0, 5.7, 15.8)
 	menu._garage_page._resolve_deck_walk(stair_mid)
 	assert(menu._garage_page._walk_position.y > 3.5)
-	assert(menu._garage_page._walk_position.y < 5.5)
+	assert(menu._garage_page._walk_position.y < 6.0)
 	# Reaching upper landing grants actual 3D viewing level.
-	var upper_stair: Vector3 = Vector3(-24.0, 6.88, 10.72)
-	menu._garage_page._walk_position = Vector3(-24.0, 6.88, 10.54)
+	var upper_stair: Vector3 = Vector3(-24.0, 8.95, 12.05)
+	menu._garage_page._walk_position = Vector3(-24.0, 8.90, 12.08)
 	menu._garage_page._resolve_deck_walk(upper_stair)
 	assert(is_equal_approx(
 		menu._garage_page._walk_position.y, 1.75 + menu._garage_page.DECK_SURFACE_Y
 	))
 	# Do not walk through guardrails or fall from the elevated platform.
-	var upper_deck: Vector3 = Vector3(-18.0, 6.95, 4.0)
-	menu._garage_page._walk_position = Vector3(-11.0, 6.95, 4.0)
+	var upper_deck: Vector3 = Vector3(-18.0, 8.95, 4.0)
+	menu._garage_page._walk_position = Vector3(-11.0, 8.95, 4.0)
 	menu._garage_page._resolve_deck_walk(upper_deck)
 	assert(menu._garage_page._walk_position.is_equal_approx(upper_deck))
 	menu._garage_page._walk_position = Vector3(0, 1.75, 11.0)

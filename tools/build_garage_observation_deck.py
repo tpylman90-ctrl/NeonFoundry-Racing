@@ -21,13 +21,14 @@ SOURCE = ROOT / "build/garage_observation_deck_stage02.blend"
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 SOURCE.parent.mkdir(parents=True, exist_ok=True)
 
-# These extents are also encoded in GaragePage for walkable stair traversal.
-X0, X1 = -25.65, -12.05
-Z0, Z1 = 3.25, 11.55
-DECK_Y = 5.20  # walkway finished top; bottom-level diagnostics stay usable
+# The mezzanine sits flush against the diagnostics/depot partition. Its floor
+# is level with the 7.2m partition wall cap. Mirror these values in GaragePage.
+X0, X1 = -25.65, -11.18
+Z0, Z1 = 3.25, 12.05
+DECK_Y = 7.20
 STAIR_X0, STAIR_X1 = -25.3, -22.6
-STAIR_Z0, STAIR_Z1 = 11.55, 19.05  # upper landing -> ground landing
-STEPS = 24
+STAIR_Z0, STAIR_Z1 = 12.05, 19.90  # upper landing -> ground landing
+STEPS = 34
 
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
@@ -84,20 +85,29 @@ def beam_between(name: str, start: tuple, end: tuple,
     return obj
 
 
-# Platform: 13.6m across the diagnostics bay, extending 8.3m back from the
-# aisle. Its finished surface is 5.20m, leaving about 5m clear below.
+# Platform is tied to the partition cap; the adjoining wall acts as its east
+# guard. The stair opening meets the deck edge at z=12.05.
 cx = (X0+X1)/2
 cz = (Z0+Z1)/2
 box("Deck/anti-slip walking plate", (cx, DECK_Y-.10, cz),
     (X1-X0, .20, Z1-Z0), FLOOR, .034)
-for edge, axis in [(Z0, "z"), (Z1, "z")]:
-    box("Deck/outer edge I-beam flange", (cx, DECK_Y-.36, edge),
-        (X1-X0+.26, .12, .34), STEEL)
-    box("Deck/outer edge I-beam web", (cx, DECK_Y-.52, edge),
-        (X1-X0+.26, .32, .105), STEEL)
-    box("Deck/inner flange", (cx, DECK_Y-.71, edge),
-        (X1-X0+.26, .12, .34), STEEL)
-for x in (X0, X1):
+edge_segments = [
+    (X0, X1),
+    (X0, STAIR_X0-.12),
+    (STAIR_X1+.12, X1),
+]
+for edge, segments in ((Z0, [edge_segments[0]]),
+                       (Z1, edge_segments[1:])):
+    for seg_a, seg_b in segments:
+        seg_cx = (seg_a + seg_b) / 2
+        seg_width = seg_b - seg_a
+        box("Deck/outer edge I-beam flange", (seg_cx, DECK_Y-.36, edge),
+            (seg_width, .12, .34), STEEL)
+        box("Deck/outer edge I-beam web", (seg_cx, DECK_Y-.52, edge),
+            (seg_width, .32, .105), STEEL)
+        box("Deck/inner flange", (seg_cx, DECK_Y-.71, edge),
+            (seg_width, .12, .34), STEEL)
+for x in (X0, X1-.135):
     box("Deck/perimeter cross member", (x, DECK_Y-.36, cz),
         (.27, .35, Z1-Z0), STEEL)
 # Lower-cost secondary metal cross beams underneath.
@@ -106,12 +116,12 @@ for z in (4.5, 6.55, 8.65):
         (X1-X0-.5, .19, .20), STEEL)
 
 # Four columns at the perimeter preserve the power-cell swap footprint.
-for x in (X0+.30, X1-.30):
-    for z in (Z0+.25, Z1-.25):
-        box("Deck/support-column", (x, (DECK_Y-.75)/2, z),
-            (.32, DECK_Y-.75, .32), STEEL, .035)
-        box("Deck/anchor-shoe", (x, .12, z), (.66, .24, .66), TRIM)
-        box("Deck/upper-bracket", (x, DECK_Y-.65, z), (.65, .28, .65), STEEL)
+for x, z in ((X0+.30, Z0+.25), (STAIR_X1+.35, Z1-.25),
+             (X1-.45, Z0+.25), (X1-.45, Z1-.25)):
+    box("Deck/support-column", (x, (DECK_Y-.75)/2, z),
+        (.32, DECK_Y-.75, .32), STEEL, .035)
+    box("Deck/anchor-shoe", (x, .12, z), (.66, .24, .66), TRIM)
+    box("Deck/upper-bracket", (x, DECK_Y-.61, z), (.65, .36, .65), STEEL)
 
 # Edge railings: the NORTH viewing rail is open visually, facing lift craft.
 # Stairs enter via a 2.7m opening in the SOUTH rail at the west side.
@@ -136,18 +146,20 @@ def rail_run(axis: str, fixed: float, a: float, b: float):
 rail_run("x", Z0+.15, X0, X1)
 rail_run("x", Z1-.15, STAIR_X1+.16, X1)
 rail_run("z", X0+.12, Z0, Z1-.18)
-rail_run("z", X1-.12, Z0, Z1)
+# The adjacent full-height wall replaces the railing on the east edge.
 box("Deck/amber edge indicating inspection outlook",
     (cx, DECK_Y+.008, Z0+.10), (X1-X0-.65, .016, .08), YELLOW, .008)
 
-# One clear 2.7m-wide stair rises from front-left diagnostics.
+# One clear 2.7m-wide stair rises from the front-left diagnostics. Both ends
+# meet level landings. Its lower landing stays clear of the perimeter wall;
+# the upper opening interrupts the edge beam so no structure blocks the stair.
 STAIR_CX=(STAIR_X0+STAIR_X1)/2
 run=STAIR_Z1-STAIR_Z0
 for i in range(STEPS):
     y=(i+1)/STEPS*DECK_Y
     z=STAIR_Z1-(i+.5)/STEPS*run
     box("Deck/stair-tread", (STAIR_CX, y-.060, z),
-        (STAIR_X1-STAIR_X0, .12, run/STEPS-.022), FLOOR, .012)
+        (STAIR_X1-STAIR_X0, .12, run/STEPS+.018), FLOOR, .012)
     if i % 3 == 0:
         box("Deck/stair-nosings", (STAIR_CX, y+.009, z-run/STEPS*.38),
             (STAIR_X1-STAIR_X0-.16, .018, .055), TRIM, .009)
@@ -166,6 +178,8 @@ for x in (STAIR_X0+.16, STAIR_X1-.16):
 # Floor marker for stairs access, not a partition.
 box("Deck/stair-entry-safety-marking", (STAIR_CX, .015, STAIR_Z1+.15),
     (STAIR_X1-STAIR_X0+.25, .018, .085), YELLOW, .008)
+box("Deck/stair-ground-landing", (STAIR_CX, .075, STAIR_Z1-.52),
+    (STAIR_X1-STAIR_X0, .15, .70), FLOOR, .018)
 
 
 def batch(name, objs):
@@ -195,7 +209,7 @@ for obj in joined:
 bpy.context.scene["garage_stage"] = "02A / observation deck over power-cell swap"
 bpy.context.scene["deck_finished_y"] = DECK_Y
 bpy.context.scene["deck_footprint"] = f"x[{X0},{X1}], z[{Z0},{Z1}]"
-bpy.context.scene["deck_usable_access"] = "24-step stair, lower to upper; faces craft/lift bays"
+bpy.context.scene["deck_usable_access"] = "34-step stair, flush upper landing, clear ground landing; faces craft/lift bays"
 bpy.context.scene["licensing"] = "original generated project meshes and PBR colors"
 bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE))
 bpy.ops.object.select_all(action="DESELECT")
