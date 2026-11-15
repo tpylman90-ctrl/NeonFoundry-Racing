@@ -1,0 +1,14 @@
+{
+  "experimental_model": "Forge V5 TripoSR native extractor, original pretrained model",
+  "source_run": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43766707137",
+  "source_sha256": "9d2cac64fdf4b70a4313e3ec96f6b8c6966cccaac0d23c8598bc80058a884fc6",
+  "v4_triangles": 84744,
+  "v5_triangles": 84720,
+  "v4_watertight": true,
+  "v5_watertight": false,
+  "v5_boundary_edges": 338,
+  "fraction_v4_vertices_matching_v5_within_1e_5_after_xz_axis_reorder": 0.9998584037381413,
+  "assessment": "Native and scikit-image extraction generate effectively equivalent learned geometry, with a coordinate-order mismatch in the custom adapter. Forge remains soft and melted; changing the mesh extractor did not improve feature interpretation.",
+  "next_controlled_test": "A/B inputs with different hard-surface contrast and silhouettes while keeping model weights, marching cubes and inference parameters constant. Evaluate known Forge reference alignment instead of triangle count.",
+  "production_model_modified": false
+}
