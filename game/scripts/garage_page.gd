@@ -9,6 +9,7 @@ const WHITE: Color = Color("eef4f6")
 const MUTED: Color = Color("9aafc0")
 const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
 const WorkshopScript = preload("res://scripts/garage_workshop.gd")
+const DualJoystickScript = preload("res://scripts/garage_dual_joystick.gd")
 const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
 const STAGE01_REVIEW: bool = true
 
@@ -30,9 +31,8 @@ var _stage_status: Label
 var _walk_mode: bool = false
 var _walk_position: Vector3 = Vector3(0, 1.75, 11)
 var _walk_yaw: float = 0.0
-var _walk_forward: float = 0.0
-var _walk_turn: float = 0.0
-var _walk_pad: PanelContainer
+var _walk_pitch: float = 0.0
+var _walk_joysticks: Control
 var _walk_toggle: Button
 var _workshop: Node3D
 var _equipment_panel: PanelContainer
@@ -64,17 +64,37 @@ func _process(delta: float) -> void:
 	if _performance_label != null and _performance_samples % 18 == 0:
 		_performance_label.text = "MOBILE VULKAN  /  FPS %d" % Engine.get_frames_per_second()
 	if _walk_mode:
-		_walk_yaw += _walk_turn * delta * 1.75
-		_walk_position += Vector3(-sin(_walk_yaw), 0, -cos(_walk_yaw)) * _walk_forward * delta * 4.6
+		var move_axis: Vector2 = _walk_joysticks.get("move_axis")
+		var look_axis: Vector2 = _walk_joysticks.get("look_axis")
+		# WASD/arrow keys remain useful in the Godot editor and desktop CI.
+		var keyboard: Vector2 = Vector2.ZERO
+		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+			keyboard.y -= 1.0
+		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+			keyboard.y += 1.0
+		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+			keyboard.x -= 1.0
+		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+			keyboard.x += 1.0
+		var direction: Vector2 = (move_axis + keyboard).limit_length(1.0)
+		# Independent right thumb changes yaw AND vertical eye angle.
+		_walk_yaw -= look_axis.x * delta * 2.30
+		_walk_pitch = clampf(_walk_pitch - look_axis.y * delta * 1.55, -1.10, 1.10)
+		var forward: Vector3 = Vector3(-sin(_walk_yaw), 0.0, -cos(_walk_yaw))
+		var strafe: Vector3 = Vector3(cos(_walk_yaw), 0.0, -sin(_walk_yaw))
+		_walk_position += (strafe * direction.x - forward * direction.y) * delta * 4.6
 		_walk_position.x = clampf(_walk_position.x, -17.0, 17.0)
-		_walk_position.z = clampf(_walk_position.z, -15.0, 14.0)
-		var ground_radius: float = Vector2(_walk_position.x, _walk_position.z).length()
-		if ground_radius < 6.35:
-			var safe: Vector2 = Vector2(_walk_position.x, _walk_position.z).normalized() * 6.35
-			if ground_radius < 0.01:
-				safe = Vector2(0, 6.35)
-			_walk_position.x = safe.x
-			_walk_position.z = safe.y
+		_walk_position.z = clampf(_walk_position.z, -15.0, 13.8)
+		# The old showroom turntable is hidden during Stage 01. Let testers
+		# walk freely across the empty floor. Restore its radius guard later.
+		if not STAGE01_REVIEW:
+			var ground_radius: float = Vector2(_walk_position.x, _walk_position.z).length()
+			if ground_radius < 6.35:
+				var safe: Vector2 = Vector2(_walk_position.x, _walk_position.z).normalized() * 6.35
+				if ground_radius < 0.01:
+					safe = Vector2(0, 6.35)
+				_walk_position.x = safe.x
+				_walk_position.z = safe.y
 	_refresh_camera(delta)
 
 func _material(color: Color, metal: float = 0.0, rough: float = 0.55, glow: bool = false) -> StandardMaterial3D:
@@ -386,7 +406,12 @@ func _refresh_camera(delta: float) -> void:
 		return
 	if _walk_mode:
 		_camera.position = _walk_position
-		_camera.look_at(_walk_position + Vector3(-sin(_walk_yaw), -0.09, -cos(_walk_yaw)), Vector3.UP)
+		var eye: Vector3 = Vector3(
+			-sin(_walk_yaw) * cos(_walk_pitch),
+			sin(_walk_pitch),
+			-cos(_walk_yaw) * cos(_walk_pitch)
+		)
+		_camera.look_at(_walk_position + eye, Vector3.UP)
 		return
 	var blend: float = clampf(delta * 9.0, 0.0, 1.0)
 	_yaw = lerp_angle(_yaw, _target_yaw, blend)
@@ -396,15 +421,27 @@ func _refresh_camera(delta: float) -> void:
 	_camera.position = aim + Vector3(sin(_yaw) * cos(_pitch), sin(_pitch), cos(_yaw) * cos(_pitch)) * _distance
 	_camera.look_at(aim, Vector3.UP)
 
+func _input(event: InputEvent) -> void:
+	if not visible or not _walk_mode or _walk_joysticks == null:
+		return
+	# ScreenTouch/ScreenDrag events carry independent finger IDs, so using
+	# one thumb never steals or releases the other thumb's joystick.
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		if bool(_walk_joysticks.call("handle_screen_event", event)):
+			_dragging = false
+			get_viewport().set_input_as_handled()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event is InputEventScreenDrag:
+		# First-person touch-look is now owned by the right joystick, NOT
+		# arbitrary swipes which previously conflicted with move touches.
 		if _walk_mode:
-			_walk_yaw -= event.relative.x * 0.006
-		else:
-			_target_yaw -= event.relative.x * 0.007
-			_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
+			return
+		_target_yaw -= event.relative.x * 0.007
+		_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -415,7 +452,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			_target_distance = minf(20.0, _target_distance + 1.0)
 	elif event is InputEventMouseMotion and _dragging:
 		if _walk_mode:
+			if _walk_joysticks != null and (
+					int(_walk_joysticks.get("move_finger")) >= 0 or
+					int(_walk_joysticks.get("look_finger")) >= 0):
+				return
 			_walk_yaw -= event.relative.x * 0.006
+			_walk_pitch = clampf(_walk_pitch - event.relative.y * 0.004, -1.10, 1.10)
 		else:
 			_target_yaw -= event.relative.x * 0.007
 			_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
@@ -554,39 +596,14 @@ func _build_overlay() -> void:
 	equipment.add_child(_equipment_status)
 	_refresh_equipment_status()
 
-	_walk_pad = _panel(0.753, 0.545, 0.974, 0.855)
-	var walk_content := VBoxContainer.new()
-	walk_content.add_theme_constant_override("separation", 6)
-	_walk_pad.add_child(walk_content)
-	walk_content.add_child(_label("FIRST-PERSON WALKAROUND", 15, ORANGE))
-	var motion_row := HBoxContainer.new()
-	motion_row.add_theme_constant_override("separation", 7)
-	walk_content.add_child(motion_row)
-	var forwards: Button = _button("▲  FWD", func() -> void: pass)
-	var backwards: Button = _button("▼  BACK", func() -> void: pass)
-	forwards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	backwards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	motion_row.add_child(forwards)
-	motion_row.add_child(backwards)
-	forwards.button_down.connect(func() -> void: _walk_forward = 1.0)
-	forwards.button_up.connect(func() -> void: _walk_forward = 0.0)
-	backwards.button_down.connect(func() -> void: _walk_forward = -1.0)
-	backwards.button_up.connect(func() -> void: _walk_forward = 0.0)
-	var turn_row := HBoxContainer.new()
-	turn_row.add_theme_constant_override("separation", 7)
-	walk_content.add_child(turn_row)
-	var left: Button = _button("◀  TURN", func() -> void: pass)
-	var right: Button = _button("TURN  ▶", func() -> void: pass)
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	turn_row.add_child(left)
-	turn_row.add_child(right)
-	left.button_down.connect(func() -> void: _walk_turn = -1.0)
-	left.button_up.connect(func() -> void: _walk_turn = 0.0)
-	right.button_down.connect(func() -> void: _walk_turn = 1.0)
-	right.button_up.connect(func() -> void: _walk_turn = 0.0)
-	walk_content.add_child(_label("HOLD TO MOVE  /  DRAG TO LOOK", 13, MUTED))
-	_walk_pad.visible = false
+	# Minimal draw-only overlay: two thumbsticks rather than four buttons.
+	# They sit above the bottom navigation bar and outside camera controls.
+	_walk_joysticks = DualJoystickScript.new() as Control
+	_walk_joysticks.name = "DualThumbWalkControls"
+	_walk_joysticks.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_walk_joysticks.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_walk_joysticks)
+	_walk_joysticks.visible = false
 
 	var bottom := _panel(0.327, 0.89, 0.977, 0.978)
 	var action_row := HBoxContainer.new()
@@ -628,14 +645,16 @@ func _move_view(yaw: float, pitch: float, distance: float) -> void:
 
 func _toggle_walk() -> void:
 	_walk_mode = not _walk_mode
-	_walk_forward = 0.0
-	_walk_turn = 0.0
-	_walk_pad.visible = _walk_mode
+	_walk_joysticks.call("release_all")
+	_walk_joysticks.visible = _walk_mode
+	_dragging = false
+	if _walk_mode:
+		_walk_pitch = 0.0
 	_equipment_panel.visible = not _walk_mode and not STAGE01_REVIEW
 	_title_panel.visible = not _walk_mode
 	_tools_panel.visible = not _walk_mode and not STAGE01_REVIEW
 	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
-	_detail.text = "WALKAROUND MODE\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
+	_detail.text = "WALKAROUND MODE\nLeft thumb moves/strafe; right thumb pans and looks up/down. Both sticks support independent fingers." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
 
 func _refresh_equipment_status() -> void:
 	if _workshop != null and _equipment_status != null:
