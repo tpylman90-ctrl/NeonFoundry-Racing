@@ -11,6 +11,18 @@ const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
 const WorkshopScript = preload("res://scripts/garage_workshop.gd")
 const DualJoystickScript = preload("res://scripts/garage_dual_joystick.gd")
 const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
+const DECK_STAGE02_PATH: String = "res://assets/garage/shell/observation_deck_stage02.glb"
+# The viewing deck is above the front-left diagnostics and cell-swap zone.
+const DECK_X0: float = -25.65
+const DECK_X1: float = -12.05
+const DECK_Z0: float = 2.35
+const DECK_Z1: float = 10.65
+const DECK_SURFACE_Y: float = 5.20
+const DECK_STAIR_X0: float = -25.3
+const DECK_STAIR_X1: float = -22.6
+const DECK_STAIR_TOP_Z: float = 10.65
+const DECK_STAIR_BOTTOM_Z: float = 19.05
+const WALK_EYE_HEIGHT: float = 1.75
 const STAGE01_REVIEW: bool = true
 const SHELL_HALF_WIDTH: float = 27.0
 const SHELL_REAR: float = -23.75
@@ -55,6 +67,7 @@ var _reflection_probe: ReflectionProbe
 var _contact_shadow_material: ShaderMaterial
 var _legacy_room: Node3D
 var _shell_stage: Node3D
+var _observation_deck: Node3D
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -86,6 +99,7 @@ func _process(delta: float) -> void:
 		_walk_pitch = clampf(_walk_pitch - look_axis.y * delta * 1.55, -1.10, 1.10)
 		var forward: Vector3 = Vector3(-sin(_walk_yaw), 0.0, -cos(_walk_yaw))
 		var strafe: Vector3 = Vector3(cos(_walk_yaw), 0.0, -sin(_walk_yaw))
+		var old_walk_position: Vector3 = _walk_position
 		_walk_position += (strafe * direction.x - forward * direction.y) * delta * 4.6
 		_walk_position.x = clampf(
 			_walk_position.x, -SHELL_HALF_WIDTH + WALL_WALK_CLEARANCE,
@@ -105,7 +119,50 @@ func _process(delta: float) -> void:
 					safe = Vector2(0, 6.35)
 				_walk_position.x = safe.x
 				_walk_position.z = safe.y
+		_resolve_deck_walk(old_walk_position)
 	_refresh_camera(delta)
+
+func _point_inside_horizontal(pos: Vector3, xlo: float, xhi: float,
+		zlo: float, zhi: float) -> bool:
+	return pos.x >= xlo and pos.x <= xhi and pos.z >= zlo and pos.z <= zhi
+
+
+func _resolve_deck_walk(previous: Vector3) -> void:
+	# Floor-level player can pass underneath the mezzanine. No teleport
+	# to its platform when crossing the same X/Z from below.
+	if _observation_deck == null or not STAGE01_REVIEW:
+		return
+	var on_stairs: bool = _point_inside_horizontal(_walk_position,
+		DECK_STAIR_X0, DECK_STAIR_X1, DECK_STAIR_TOP_Z, DECK_STAIR_BOTTOM_Z)
+	var was_on_stairs: bool = _point_inside_horizontal(previous,
+		DECK_STAIR_X0, DECK_STAIR_X1, DECK_STAIR_TOP_Z, DECK_STAIR_BOTTOM_Z)
+	var on_deck: bool = _point_inside_horizontal(_walk_position,
+		DECK_X0, DECK_X1, DECK_Z0, DECK_Z1)
+	var from_upper: bool = previous.y > WALK_EYE_HEIGHT + 0.2
+	if on_stairs:
+		# Guard against entering halfway up from a side: stairs can be
+		# mounted from the lower landing or crossed from the upper deck.
+		if not from_upper and not was_on_stairs and (
+				_walk_position.z < DECK_STAIR_BOTTOM_Z - 0.7):
+			_walk_position = previous
+			return
+		var fraction: float = clampf(
+			(DECK_STAIR_BOTTOM_Z - _walk_position.z) /
+			(DECK_STAIR_BOTTOM_Z - DECK_STAIR_TOP_Z), 0.0, 1.0
+		)
+		_walk_position.y = WALK_EYE_HEIGHT + fraction * DECK_SURFACE_Y
+	elif on_deck:
+		# Stay below the platform unless the player actually climbed up.
+		_walk_position.y = WALK_EYE_HEIGHT + (
+			DECK_SURFACE_Y if previous.y > WALK_EYE_HEIGHT + DECK_SURFACE_Y - 0.45
+			else 0.0
+		)
+	elif from_upper:
+		# Handrail collision proxy: do not step off a five-metre deck.
+		_walk_position = previous
+	else:
+		_walk_position.y = WALK_EYE_HEIGHT
+
 
 func _material(color: Color, metal: float = 0.0, rough: float = 0.55, glow: bool = false) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -320,6 +377,7 @@ func _build_3d_stage() -> void:
 	_reflection_probe.visible = false
 	_world.add_child(_reflection_probe)
 	_activate_stage01_shell()
+	_activate_stage02_deck()
 
 func _activate_stage01_shell() -> void:
 	if not STAGE01_REVIEW:
@@ -350,6 +408,24 @@ func _activate_stage01_shell() -> void:
 		_accent_lights[index].omni_range = 25.0
 		_accent_lights[index].light_energy = 2.8
 	print("NEON_FOUNDRY_STAGE01_SHELL_OK visible=6 surfaces props=hidden")
+
+func _activate_stage02_deck() -> void:
+	# Deck is a separately exported glTF scene so our six-wall shell
+	# remains immutable, and equipment stays hidden in this stage.
+	if not STAGE01_REVIEW:
+		return
+	if not ResourceLoader.exists(DECK_STAGE02_PATH):
+		push_error("STAGE02_VIEWING_DECK_MISSING: " + DECK_STAGE02_PATH)
+		return
+	var packed: PackedScene = load(DECK_STAGE02_PATH) as PackedScene
+	if packed == null:
+		push_error("STAGE02_VIEWING_DECK_INVALID_GLTF")
+		return
+	_observation_deck = packed.instantiate() as Node3D
+	_observation_deck.name = "DiagnosticsObservationDeck"
+	_world.add_child(_observation_deck)
+	print("NEON_FOUNDRY_STAGE02_DECK_LOADED height=5.20 diagnostics=front-left")
+
 
 func _add_contact_shadow(name: String, location: Vector3,
 		dimensions: Vector2, darkness: float) -> void:

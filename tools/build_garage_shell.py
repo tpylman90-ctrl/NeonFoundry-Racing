@@ -211,3 +211,10 @@ assert OUTPUT.stat().st_size > 20_000, "GLB is unexpectedly small"
 assert len(items) == 6, "Expected exactly four walls, one ceiling, one floor"
 print("NEON_FOUNDRY_SHELL_STAGE01_OK meshes=6 assets=original_ORM_bakedNormals blend=editable glb=%d" %
       OUTPUT.stat().st_size)
+
+# Generate the independent architectural mezzanine from the same pinned
+# Blender installation and cache, after saving the approved six-mesh shell.
+# This keeps the expensive shell PBR bake stable and makes deck removal/review
+# independent of the original user-approved room.
+import runpy
+runpy.run_path(str(ROOT / "tools/build_garage_observation_deck.py"), run_name="__main__")
