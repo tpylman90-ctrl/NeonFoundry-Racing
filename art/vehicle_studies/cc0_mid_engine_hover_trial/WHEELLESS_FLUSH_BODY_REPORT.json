@@ -1,0 +1,53 @@
+{
+  "variant": "WHEELLESS_FLUSH_BODY",
+  "donor_source": "Innerscene original Generic Mid-engine Supercar",
+  "license": "CC0 per source page",
+  "source_url": "https://www.innerscene.com/tools/library/3d-parts/generic-mid-engine-supercar-73f252c5",
+  "source_sha256": "ad0fd94845edb9af474407fe08fb379b624c56ec4d4b4ad6b47822b65c6f8903",
+  "mesh_source_count": 348,
+  "original_mesh_nodes_retained": 100,
+  "original_wheel_nodes_deleted": 248,
+  "created_geometry_meshes": 62,
+  "result_meshes": 162,
+  "result_triangles": 60082,
+  "result_bounds_m": [
+    [
+      -2.306,
+      0.056,
+      -1.045
+    ],
+    [
+      2.49,
+      1.189,
+      1.045
+    ]
+  ],
+  "wheel_hubs_remaining": false,
+  "converted_locations": [
+    {
+      "axle": "front",
+      "longitudinal_m": -1.27,
+      "side": "port"
+    },
+    {
+      "axle": "front",
+      "longitudinal_m": -1.27,
+      "side": "starboard"
+    },
+    {
+      "axle": "rear",
+      "longitudinal_m": 1.43,
+      "side": "port"
+    },
+    {
+      "axle": "rear",
+      "longitudinal_m": 1.43,
+      "side": "starboard"
+    }
+  ],
+  "donor_body_shell_untouched": true,
+  "wheel_arch_strategy": "4 curved independent outer pressings to fill cutouts; physically modeled seamless-intent removable armor with visible seams, not welded topology",
+  "hidden_lift_units": 6,
+  "visible_hover_pods": 0,
+  "warning": "Not the canonical FORGE craft; first donor adaptation experiment. Flush-fender surfaces are separate physically continuous sheets, NOT a single retopologized watertight original hull."
+}
