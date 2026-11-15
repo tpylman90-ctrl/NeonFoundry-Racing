@@ -1,0 +1,36 @@
+{
+  "test": "Forge V6 versus V5 — image-only A/B test",
+  "provenance": {
+    "run_id": 43777132348,
+    "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43777132348",
+    "branch": "experiments/forge-triposr-trial",
+    "commit": "81e526969343cfb15a432ea7d8c4fd00ebb8b1c6",
+    "v6_image_sha256": "35e3d65ef0b1bab8b554cf11b8d5b2f083a642d9dab48355f289aea78d12e14b",
+    "tripo_model": "stabilityai/TripoSR",
+    "original_native_extractor": true,
+    "mc_resolution": 256,
+    "chunk_size": 2048,
+    "cpu_only": true
+  },
+  "v5": {
+    "triangles": 84720,
+    "mesh_count": 1,
+    "watertight": false,
+    "connected_components": 4
+  },
+  "v6": {
+    "triangles": 91984,
+    "vertices": 46077,
+    "mesh_count": 1,
+    "watertight": false,
+    "connected_components": 6,
+    "output_sha256": "a0a7e763819d4cae51c6d08dee5182a72fc06d81adae5607ed05d9453d7f4460"
+  },
+  "assessment": {
+    "technical": "All job stages passed and GLB round-trip verified.",
+    "observed": "Slightly better fin and upper-body mass distinction, but no clean hard-surface body, canopy, intake or propulsion assemblies. Large-scale geometry remains organic and distorted.",
+    "conclusion": "Improving the single input image alone did not solve Forge reconstruction. Additional triangle count is not a measure of visual fidelity.",
+    "next_test": "Switch to multi-view silhouette/camera fitting on original engineered Forge mesh, or benchmark a different permissively-licensed multi-view 3D model; do not continue increasing marching-cubes resolution without new reconstruction evidence."
+  },
+  "production_assets_modified": false
+}
