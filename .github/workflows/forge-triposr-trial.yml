@@ -5,7 +5,7 @@ on:
     branches: [experiments/forge-triposr-trial]
     paths:
       - .github/workflows/forge-triposr-trial.yml
-      - tools/ai_forge_triposr_trial.py
+      - tools/ai_forge_triposr_trial_v2.py
       - tools/triposr_cpu_marching_cubes.py
   workflow_dispatch:
 
@@ -31,7 +31,7 @@ jobs:
         run: |
           exec > >(tee "$RUNNER_TEMP/forge_prepare.log") 2>&1
           python -m pip install --disable-pip-version-check 'Pillow==10.1.0'
-          python tools/ai_forge_triposr_trial.py prepare
+          python tools/ai_forge_triposr_trial_v2.py prepare
       - name: Install open-source TripoSR CPU inference dependencies
         id: dependencies
         timeout-minutes: 30
@@ -52,13 +52,13 @@ jobs:
         timeout-minutes: 65
         run: |
           exec > >(tee "$RUNNER_TEMP/forge_inference.log") 2>&1
-          # TripoSR only creates output/0 for background-removal mode.
-          # Our --no-remove-bg mode needs this directory explicitly.
+          # Background removal is now mandatory: the former disabled mode
+          # turned the reference's dark grid into a rectangular 3D slab.
           mkdir -p build/forge_triposr_trial/0
           python /tmp/triposr/run.py \
             build/forge_triposr_trial/forge_front_three_quarter_input.png \
             --device cpu \
-            --no-remove-bg \
+            --foreground-ratio 0.85 \
             --mc-resolution 128 \
             --chunk-size 2048 \
             --model-save-format glb \
@@ -67,7 +67,7 @@ jobs:
         id: audit
         run: |
           exec > >(tee "$RUNNER_TEMP/forge_audit.log") 2>&1
-          python tools/ai_forge_triposr_trial.py audit
+          python tools/ai_forge_triposr_trial_v2.py audit
       - name: Export experimental inspection package
         id: artifact
         uses: actions/upload-artifact@v4
