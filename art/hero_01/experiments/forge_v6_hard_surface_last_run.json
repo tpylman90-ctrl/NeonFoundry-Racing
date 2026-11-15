@@ -1,0 +1,20 @@
+{
+  "run_id": 43776776157,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43776776157",
+  "commit": "472ae822453528859fa13c3fedf0b68b9e8c4ea0",
+  "status": "failure",
+  "stages": {
+    "prepare": "failure",
+    "native": "skipped",
+    "inference": "skipped",
+    "audit": "skipped",
+    "artifact": "success"
+  },
+  "errors": {
+    "prepare": [],
+    "native": [],
+    "inference": [],
+    "audit": []
+  },
+  "note": "Native extractor experiment; uses V6 higher-contrast Forge image. No production assets changed."
+}
