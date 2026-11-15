@@ -9,7 +9,6 @@ import hashlib
 import json
 from pathlib import Path
 from PIL import Image
-import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "build" / "forge_triposr_trial"
@@ -50,6 +49,7 @@ def prepare():
 
 def audit():
     import trimesh
+    import numpy as np
     model = OUT / "0" / "mesh.glb"
     if not model.is_file() or model.stat().st_size < 1024:
         raise SystemExit("AI inference did not create a valid mesh.glb.")
