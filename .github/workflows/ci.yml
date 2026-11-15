@@ -33,13 +33,23 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp
           sudo install "/tmp/Godot_v$GODOT_VERSION-stable_linux.x86_64" /usr/local/bin/godot
           godot --version
+      - name: Restore Stage 01 shell cache
+        uses: actions/cache@v4
+        id: shell-cache
+        with:
+          path: |
+            game/assets/garage/shell/shell_stage01.glb
+            build/garage_shell_stage01.blend
+            build/shell_source/
+          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py') }}
       - name: Generate isolated Blender hangar shell (Stage 01)
+        if: steps.shell-cache.outputs.cache-hit != 'true'
         timeout-minutes: 12
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq libegl1 libgl1 libx11-6 libxrender1 libxi6
-          curl --fail --location --retry 3 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender-shell.tar.xz
+          curl --fail --location --retry 6 --retry-all-errors --retry-delay 5 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender-shell.tar.xz
           tar -xf /tmp/blender-shell.tar.xz -C /tmp
           mkdir -p build game/assets/garage/shell
           /tmp/blender-5.2.4-linux-x64/blender --background --threads 4 --python tools/build_garage_shell.py 2>&1 | tee build/garage-shell-generator.log
