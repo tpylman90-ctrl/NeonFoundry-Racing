@@ -1,0 +1,95 @@
+name: FORGE / CC0 Sports Car to Hover Pilot
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cc0-car-hover-pilot.yml'
+      - 'tools/build_cc0_donor_hover_variants.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  two-real-mesh-conversions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Obtain unbranded CC0 donor direct from original author and verify checksum
+        run: |
+          set -euo pipefail
+          mkdir -p build/donor
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 100 \
+            --user-agent "NFR-Modeling-Pipeline/1.0" \
+            "https://www.innerscene.com/api/library/generic-mid-engine-supercar-73f252c5/download" \
+            --output build/donor/original_CC0_mid_engine_supercar.glb
+          echo "ad0fd94845edb9af474407fe08fb379b624c56ec4d4b4ad6b47822b65c6f8903  build/donor/original_CC0_mid_engine_supercar.glb" | sha256sum -c -
+      - name: Install freely licensed geometry tools
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check "numpy==2.3.5" "trimesh==4.11.1" "scipy==1.17.0" "networkx==3.6.1" "Pillow>=10,<13"
+      - name: Build actual wheel-replacement variant and genuine wheel-less variant
+        env:
+          NFR_DONOR_SOURCE: build/donor/original_CC0_mid_engine_supercar.glb
+          NFR_DONOR_OUTPUT: build/donor_trial
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_cc0_donor_hover_variants.py
+          python tools/build_cc0_donor_hover_variants.py --variant pods
+          python tools/build_cc0_donor_hover_variants.py --variant flush
+      - name: Inspect GLB topology, original body retention, and wheel removal
+        run: |
+          python - <<'PY'
+          import json, numpy as np, trimesh, pathlib, struct
+          p=pathlib.Path('build/donor_trial')
+          for name,expected_meshes,expected_tris,missing,visible in [
+              ('VISIBLE_HOVER_PODS',220,60994,240,4),
+              ('WHEELLESS_FLUSH_BODY',162,60082,248,0),
+          ]:
+              fp=p/('CC0_Supercar_'+name+'.glb')
+              raw=fp.read_bytes()
+              assert raw[:4]==b'glTF' and struct.unpack_from('<I',raw,8)[0]==len(raw)
+              s=trimesh.load(fp,force='scene',process=False)
+              rep=json.loads((p/(name+'_REPORT.json')).read_text())
+              assert len(s.geometry)==expected_meshes,len(s.geometry)
+              assert sum(len(g.faces) for g in s.geometry.values())==expected_tris
+              assert rep['original_wheel_nodes_deleted']==missing
+              assert rep['visible_hover_pods']==visible
+              assert rep['wheel_hubs_remaining'] is False
+              assert len([k for k in s.geometry if k.startswith('Original_mid-engine_supercar_sculpted_body_shell')])>=2
+              assert all('tyre' not in k.lower() and 'tread' not in k.lower() and 'centre-lock' not in k.lower() for k in s.geometry)
+              assert all(g.is_watertight for k,g in s.geometry.items() if k.startswith(('HOVER_POD_','WHEELLESS_','UNDERBODY_','REAR_PROPULSION_')))
+              if name=='VISIBLE_HOVER_PODS':
+                  assert sum(k.endswith('DOWNWARD_EMITTER') for k in s.geometry)==4
+              else:
+                  assert sum(k.endswith('DOWN_EMISSION') for k in s.geometry)==6
+                  assert sum('CURVED_FULL_PANEL' in k for k in s.geometry)==4
+                  assert all('Wheelhouse_arched_liner' not in k and 'Rolled_fender_lip' not in k for k in s.geometry)
+              print('NFR_CC0_HOVER_CONVERSION_CHECK_OK',name,len(s.geometry),rep['result_triangles'])
+          PY
+      - name: Save both inspection GLBs to public repo (NOT to production game)
+        run: |
+          set -euo pipefail
+          target=art/vehicle_studies/cc0_mid_engine_hover_trial
+          mkdir -p "$target"
+          cp build/donor_trial/CC0_Supercar_VISIBLE_HOVER_PODS.glb "$target/"
+          cp build/donor_trial/CC0_Supercar_WHEELLESS_FLUSH_BODY.glb "$target/"
+          cp build/donor_trial/*_REPORT.json "$target/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$target"/*.glb "$target"/*_REPORT.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish verified CC0 supercar hover-pod and wheel-less body GLB experiments"
+            git push origin HEAD:main
+          fi
+      - name: Upload alternate download artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-CC0-Supercar-Two-Hover-Variants
+          path: |
+            build/donor_trial/*.glb
+            build/donor_trial/*_REPORT.json
+          retention-days: 30
