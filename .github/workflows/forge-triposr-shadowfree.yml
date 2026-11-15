@@ -1,0 +1,130 @@
+name: FORGE shadow-free TripoSR reconstruction
+
+on:
+  push:
+    branches: [experiments/forge-triposr-trial]
+    paths:
+      - art/hero_01/references/forge_shadowfree_512_q88.webp.b64
+      - .github/workflows/forge-triposr-clay-trial.yml
+      - tools/ai_forge_triposr_shadowfree.py
+      - tools/triposr_cpu_marching_cubes.py
+  workflow_dispatch:
+    inputs:
+      mc_resolution:
+        description: CPU mesh extraction resolution
+        required: true
+        type: choice
+        options: ["192","256"]
+        default: "256"
+
+permissions:
+  contents: write
+
+jobs:
+  reconstruct-shadowfree-forge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Check pre-isolated Forge reference
+        id: prepare
+        run: |
+          exec > >(tee "$RUNNER_TEMP/forge_shadowfree_prepare.log") 2>&1
+          python -m pip install --disable-pip-version-check 'Pillow==10.1.0' 'numpy==1.26.4'
+          python tools/ai_forge_triposr_shadowfree.py prepare
+      - name: Install TripoSR CPU dependencies
+        id: dependencies
+        timeout-minutes: 30
+        run: |
+          exec > >(tee "$RUNNER_TEMP/forge_shadowfree_dependencies.log") 2>&1
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.2.2' 'torchvision==0.17.2'
+          python -m pip install 'omegaconf==2.3.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'onnxruntime==1.19.2' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0' 'scikit-image==0.22.0' 'numpy==1.26.4'
+          # Some indirect dependencies may select NumPy 2.x; PyTorch 2.2.2 and
+          # the scikit-image 0.22 binary used here require a NumPy 1.x ABI.
+          # Re-pin *after* the full dependency installation, then fail early
+          # if either compiled extension cannot use the final NumPy version.
+          python -m pip install --force-reinstall --no-deps 'numpy==1.26.4'
+          python -c "import numpy, torch, skimage, scipy; from skimage.measure import marching_cubes; from PIL import Image; assert numpy.__version__=='1.26.4', numpy.__version__; print('FORGE_NUMPY_ABI_PREFLIGHT_OK numpy=',numpy.__version__, 'torch=',torch.__version__, 'skimage=',skimage.__version__)"
+          git clone --depth 1 https://github.com/VAST-AI-Research/TripoSR.git /tmp/triposr
+          cp tools/triposr_cpu_marching_cubes.py /tmp/triposr/tsr/models/mc_cpu_fallback.py
+          python tools/triposr_cpu_marching_cubes.py
+          python -c "from pathlib import Path; p=Path('/tmp/triposr/tsr/models/isosurface.py'); s=p.read_text(); old='from torchmcubes import marching_cubes'; assert s.count(old)==1; p.write_text(s.replace(old,'from .mc_cpu_fallback import marching_cubes'))"
+          PYTHONPATH=/tmp/triposr python -c "import torch, rembg, onnxruntime; from tsr.system import TSR; print('FORGE_CPU_IMPORTS_VALID')"
+      - name: Generate raw AI mesh from clean Forge
+        id: inference
+        timeout-minutes: 65
+        run: |
+          exec > >(tee "$RUNNER_TEMP/forge_shadowfree_inference.log") 2>&1
+          # PREMASKED, neutral gray shadow-free image. Reconstructed from pinned WebP source before inference.
+          # The --foreground-ratio switch is ignored by --no-remove-bg: avoid a false claim.
+          mkdir -p build/forge_triposr_shadowfree/0
+          python /tmp/triposr/run.py \
+            build/forge_triposr_shadowfree/forge_input.png \
+            --device cpu \
+            --no-remove-bg \
+            --mc-resolution ${{ inputs.mc_resolution || '256' }} \
+            --chunk-size 2048 \
+            --model-save-format glb \
+            --output-dir build/forge_triposr_shadowfree
+      - name: Audit raw geometry, do not cosmetically hide defects
+        id: audit
+        run: |
+          exec > >(tee "$RUNNER_TEMP/forge_shadowfree_audit.log") 2>&1
+          python tools/ai_forge_triposr_shadowfree.py audit
+      - name: Upload GLB, real masked input, metrics, and logs
+        id: artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: FORGE-TripoSR-ShadowFree-${{ github.run_number }}
+          path: |
+            build/forge_triposr_shadowfree/
+            ${{ runner.temp }}/forge_shadowfree_*.log
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Save last-run diagnostic to experiment branch
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const path = 'art/hero_01/experiments/forge_triposr_shadowfree_last_run.json';
+            const stage = {
+              prepare: '${{ steps.prepare.outcome }}',
+              dependencies: '${{ steps.dependencies.outcome }}',
+              inference: '${{ steps.inference.outcome }}',
+              audit: '${{ steps.audit.outcome }}',
+              artifact: '${{ steps.artifact.outcome }}'
+            };
+            const fs=require('fs');
+            const os=require('path');
+            const errors={};
+            for (const k of ['prepare','dependencies','inference','audit']) {
+              const log=os.join(process.env.RUNNER_TEMP||'/tmp','forge_shadowfree_'+k+'.log');
+              errors[k]=fs.existsSync(log) ? fs.readFileSync(log,'utf8').split(/\r?\n/)
+                .filter(s=>/traceback|error|exception|failed|out of memory|killed|terminated/i.test(s)).slice(-8)
+                .map(s=>s.slice(0,300).replace(/(?:ghp_|github_pat_|hf_)[A-Za-z0-9_-]+/g,'[REDACTED]')) : [];
+            }
+            const {owner,repo}=context.repo;
+            const branch=context.ref.replace(/^refs\/heads\//,'');
+            const report={
+              run_id: context.runId, run_url:'https://github.com/'+owner+'/'+repo+'/actions/runs/'+context.runId,
+              commit:context.sha, status:'${{ job.status }}', stages:stage,
+              errors, notes:'Independent raw AI mesh test, no production promotion'
+            };
+            let sha;
+            try {const found=await github.rest.repos.getContent({owner,repo,path,ref:branch}); sha=found.data.sha;}
+            catch(e) {if(e.status!==404)throw e;}
+            await github.rest.repos.createOrUpdateFileContents({
+              owner,repo,path,branch,message:'ci: record Forge clay-only AI trial status',
+              content:Buffer.from(JSON.stringify(report,null,2)+'\n').toString('base64'),
+              ...(sha?{sha}:{})
+            });
