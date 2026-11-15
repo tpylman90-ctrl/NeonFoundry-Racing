@@ -1,0 +1,128 @@
+name: NFR / Stage02 Front Quarter Fins and Rear Engine Assemblies
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/khronos-stage02-aero-engines.yml'
+      - 'tools/build_khronos_stage02.py'
+      - 'game/tests/modular_vehicle_stage02_smoke_test.gd'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify-glb-and-godot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Free pinned geometry dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'numpy==2.3.5' 'trimesh==4.11.1' 'networkx==3.6.1' 'scipy==1.17.0'
+      - name: Build independent mounted aero surfaces and variable rear rocket geometry
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_khronos_stage02.py
+          python tools/build_khronos_stage02.py --root game/assets/vehicle_modular --previews game/assets/vehicle_modular --output build/khronos_stage02 | tee /tmp/nfr_stage02.log
+          grep -q NFR_STAGE02_MODULAR_HARDWARE_OK /tmp/nfr_stage02.log
+      - name: Verify real geometry preserves every donor mesh and all GLBs are valid
+        run: |
+          python - <<'PY'
+          import json,struct
+          from pathlib import Path
+          import numpy as np,trimesh
+          root=Path('build/khronos_stage02')
+          manifest=json.loads((root/'module_manifest_stage02.json').read_text())
+          assert manifest['schema_version']==1
+          assert len(manifest['sockets'])==len(manifest['slots'])==10
+          assert len(manifest['slots']['front_quarter_fins'])==3
+          assert len(manifest['slots']['rear_engine'])==4
+          for n,prefix in [('street','preview_street'),('aero','preview_aero'),('industrial','preview_industrial')]:
+              old=trimesh.load('game/assets/vehicle_modular/'+prefix+'.glb',force='scene',process=False)
+              new=trimesh.load(root/(prefix+'_stage02.glb'),force='scene',process=False)
+              donor=[key for key in old.geometry if key.startswith('DONOR_')]
+              assert len(donor)==82
+              assert all(key in new.geometry for key in donor)
+              for key in donor:
+                  assert np.array_equal(old.geometry[key].faces,new.geometry[key].faces),key
+                  assert np.array_equal(old.geometry[key].vertices,new.geometry[key].vertices),key
+              assert sum('QUARTER_' in key for key in new.geometry)>5
+              assert not any(key.startswith(('INSTALLED_rear_engine_','INSTALLED_rear_fins_')) for key in new.geometry)
+              assert any(key.startswith('STAGE02_rear_engine_') for key in new.geometry)
+              print('NFR_STAGE02_DONOR_SURFACES_PRESERVED',n,len(donor),len(new.geometry))
+          for key,part in [(key,p) for slot,options in manifest['slots'].items() for p in options for key in [p['id']]]:
+              if not (key.startswith('quarter_fins_') or key.startswith('fins_') or key.startswith('engine_')):continue
+              source=root/(key+'.glb' if key.startswith('quarter_fins_') else (key+'_v2.glb' if not key.endswith('_v2') else key+'.glb'))
+              assert source.is_file(),source
+              b=source.read_bytes()
+              assert b[:4]==b'glTF' and struct.unpack_from('<I',b,8)[0]==len(b)
+              s=trimesh.load(source,force='scene',process=False)
+              assert len(s.geometry)>5 and all(m.is_watertight for m in s.geometry.values()),key
+              assert sum(len(m.faces) for m in s.geometry.values())==part['triangles'],key
+          print('NFR_STAGE02_HARDPOINT_TOPOLOGY_PASS')
+          PY
+      - name: Stage experimental new modules and 10th slot without replacing Stage01 manifest
+        run: |
+          set -euo pipefail
+          cp build/khronos_stage02/quarter_fins_*.glb game/assets/vehicle_modular/
+          cp build/khronos_stage02/fins_*_v2.glb game/assets/vehicle_modular/
+          cp build/khronos_stage02/engine_*_v2.glb game/assets/vehicle_modular/
+          cp build/khronos_stage02/module_manifest_stage02.json game/assets/vehicle_modular/
+      - name: Fetch pinned Godot for native swap smoke test
+        run: |
+          set -euo pipefail
+          base='https://github.com/godotengine/godot/releases/download/4.7.2-stable'
+          curl --fail --location --retry 3 "$base/Godot_v4.7.2-stable_linux.x86_64.zip" -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp
+          sudo install /tmp/Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
+      - name: Test all front quarter variants, full presets and rear rocket swaps in Godot
+        run: |
+          set -euo pipefail
+          mkdir -p build/stage02_test/{scripts,tests,assets/vehicle_modular}
+          cat > build/stage02_test/project.godot <<'EOF'
+          config_version=5
+          [application]
+          config/name='NFR Module Stage02 CI'
+          [rendering]
+          renderer/rendering_method='mobile'
+          renderer/rendering_method.mobile='mobile'
+          EOF
+          cp game/scripts/vehicle_modular_rig.gd build/stage02_test/scripts/
+          cp game/tests/modular_vehicle_stage02_smoke_test.gd build/stage02_test/tests/
+          cp game/assets/vehicle_modular/* build/stage02_test/assets/vehicle_modular/
+          godot --headless --path build/stage02_test --editor --import --quit > build/stage02_import.log 2>&1
+          if grep -E 'SCRIPT ERROR:|ERROR:' build/stage02_import.log; then exit 1; fi
+          timeout 90 godot --headless --path build/stage02_test --script res://tests/modular_vehicle_stage02_smoke_test.gd 2>&1 | tee build/stage02_swap.log
+          if grep -E 'SCRIPT ERROR:|ERROR:' build/stage02_swap.log; then exit 1; fi
+          grep -q NFR_STAGE02_GODOT_MODULAR_SWAP_OK build/stage02_swap.log
+      - name: Publish only verified new kit parts and three complete preview GLBs
+        run: |
+          set -euo pipefail
+          target=art/vehicle_studies/khronos_modular/stage02
+          mkdir -p "$target"
+          cp build/khronos_stage02/preview_*_stage02.glb "$target/"
+          cp build/khronos_stage02/STAGE02_REPORT.json "$target/"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$target" game/assets/vehicle_modular/*_v2.glb game/assets/vehicle_modular/quarter_fins_*.glb game/assets/vehicle_modular/module_manifest_stage02.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish verified Stage02 removable front quarter fins, swept stabilizers and engine cartridges'
+            git push origin HEAD:main
+          fi
+      - name: Offer complete inspection GLBs and audited modules
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NFR-Stage02-Quarter-Fins-and-Rockets
+          path: |
+            build/khronos_stage02/*.glb
+            build/khronos_stage02/*.json
+            build/stage02_swap.log
+          if-no-files-found: warn
+          retention-days: 30
