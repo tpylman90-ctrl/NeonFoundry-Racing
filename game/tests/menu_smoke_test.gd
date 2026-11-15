@@ -49,7 +49,7 @@ func _run() -> void:
 	var staged_cc0: String = "res://assets/garage/pbr/steel_color.jpg"
 	if ResourceLoader.exists(staged_cc0):
 		var material: StandardMaterial3D = steel_mesh.material_override as StandardMaterial3D
-			assert(not material.normal_enabled)
+		assert(not material.normal_enabled)
 		assert(material.normal_texture != null)
 		assert(steel_mesh.mesh.surface_get_format(0) & Mesh.ARRAY_FORMAT_TANGENT != 0)
 	var imported_cc0: String = "res://assets/garage/kenney_factory/machine-window.obj"
