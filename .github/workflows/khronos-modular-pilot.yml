@@ -1,0 +1,135 @@
+name: NF-H01 / Modular Bodykits and Rocket Swap Pilot
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/khronos-modular-pilot.yml'
+      - 'tools/build_khronos_customization_pilot.py'
+      - 'game/scripts/vehicle_modular_rig.gd'
+      - 'game/tests/modular_vehicle_smoke_test.gd'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: nfr-khronos-modular-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  real-donor-swap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch licensed donor and verify pinned SHA
+        run: |
+          set -euo pipefail
+          mkdir -p build/khronos_donor
+          curl --fail --location --retry 3 --max-time 120 \
+            https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/GLB/CarConcept.glb \
+            -o build/khronos_donor/CarConcept_ORIGINAL.glb
+          echo '659c592e20aba7afa920db7d14ad767874741384c215ee1df23a5e1c5e1c411c  build/khronos_donor/CarConcept_ORIGINAL.glb' | sha256sum -c -
+      - name: Install geometry inspection tools
+        run: python -m pip install --disable-pip-version-check 'numpy==2.3.5' 'trimesh==4.11.1' 'scipy==1.17.0' 'networkx==3.6.1'
+      - name: Build authentic modular body, engines, fins, intakes, and preview loadouts
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_khronos_customization_pilot.py
+          mkdir -p game/assets/vehicle_modular
+          python tools/build_khronos_customization_pilot.py \
+            --source build/khronos_donor/CarConcept_ORIGINAL.glb \
+            --out game/assets/vehicle_modular 2>&1 | tee build/khronos_modular.log
+          grep -q NFR_KHRONOS_MODULAR_PILOT_OK build/khronos_modular.log
+      - name: Verify real GLB topology, legal source, cassette variants and socket registry
+        run: |
+          python - <<'PY'
+          import json,struct
+          from pathlib import Path
+          import trimesh
+          root=Path('game/assets/vehicle_modular')
+          data=json.loads((root/'module_manifest.json').read_text())
+          assert len(data['sockets'])==9 and len(data['slots'])==9
+          assert len(data['slots']['rear_engine'])==4
+          for key in ('rear_fins','side_intakes','front_splitter','side_skirts'):
+              assert len(data['slots'][key])==3
+          assert sum(map(len,data['slots'].values()))==20
+          assert data['donor_meshes_preserved']==82
+          original=trimesh.load(root/'modular_base_clay.glb',force='scene',process=False)
+          assert len(original.geometry)==82
+          assert 'DONOR_BodyHood' in original.geometry
+          assert 'DONOR_BodyRoofPanel' in original.geometry
+          assert 'DONOR_BodyWindshield' in original.geometry
+          assert not any('WheelRear' in s or 'WheelFront' in s or 'SteeringEmblem' in s or 'License Plate' in s for s in original.geometry)
+          assert len(list(root.glob('*.glb')))==24
+          for entries in data['slots'].values():
+              for entry in entries:
+                  file=root/Path(entry['scene']).name
+                  assert file.is_file()
+                  s=trimesh.load(file,force='scene',process=False)
+                  assert sum(len(m.faces) for m in s.geometry.values())==entry['triangles']
+          for tier,entry in enumerate(data['slots']['rear_engine']):
+              part=trimesh.load(root/Path(entry['scene']).name,force='scene',process=False)
+              assert any('HOLLOW_BELL' in name for name in part.geometry)
+              assert entry['stats']['tier']==tier
+              assert all(m.is_watertight for m in part.geometry.values())
+          for preset in ('street','aero','industrial'):
+              s=trimesh.load(root/f'preview_{preset}.glb',force='scene',process=False)
+              assert len(s.geometry)>140
+              assert any(n.startswith('INSTALLED_rear_engine') for n in s.geometry)
+          print('NFR_KHRONOS_REAL_MODULE_ASSETS_VERIFIED')
+          PY
+      - name: Install Godot 4.7.2 for actual GLB swap testing
+        run: |
+          set -euo pipefail
+          base='https://github.com/godotengine/godot/releases/download/4.7.2-stable'
+          curl --fail --location --retry 3 "$base/Godot_v4.7.2-stable_linux.x86_64.zip" -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp
+          sudo install /tmp/Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
+          godot --version
+      - name: Run native Godot tests on actual imported module GLBs
+        run: |
+          set -euo pipefail
+          mkdir -p build/modular_godot_test/scripts build/modular_godot_test/tests build/modular_godot_test/assets/vehicle_modular
+          cat > build/modular_godot_test/project.godot <<'EOF'
+          config_version=5
+          [application]
+          config/name="NFR Modular Test"
+          [rendering]
+          renderer/rendering_method="mobile"
+          renderer/rendering_method.mobile="mobile"
+          EOF
+          cp game/scripts/vehicle_modular_rig.gd build/modular_godot_test/scripts/
+          cp game/tests/modular_vehicle_smoke_test.gd build/modular_godot_test/tests/
+          cp game/assets/vehicle_modular/* build/modular_godot_test/assets/vehicle_modular/
+          godot --headless --path build/modular_godot_test --editor --import --quit 2>&1 | tee build/khronos_godot_import.log
+          if grep -E 'SCRIPT ERROR:|ERROR:' build/khronos_godot_import.log; then exit 1; fi
+          timeout 90 godot --headless --path build/modular_godot_test \
+            --script res://tests/modular_vehicle_smoke_test.gd 2>&1 | tee build/khronos_godot_swap.log
+          if grep -E 'SCRIPT ERROR:|ERROR:' build/khronos_godot_swap.log; then exit 1; fi
+          grep -q NFR_MODULAR_KHRONOS_GLB_SWAP_TEST_OK build/khronos_godot_swap.log
+      - name: Publish inspection module assets only after Godot verification
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          mkdir -p art/vehicle_studies/khronos_modular
+          cp game/assets/vehicle_modular/preview_*.glb art/vehicle_studies/khronos_modular/
+          git add game/assets/vehicle_modular art/vehicle_studies/khronos_modular/preview_*.glb
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish verified candidate C modular chassis, engines and aero kit GLBs'
+            git push origin HEAD:main
+          fi
+      - name: Upload native GLBs and diagnostic results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-H01-Khronos-Modular-Swap-Pilot
+          path: |
+            game/assets/vehicle_modular/*.glb
+            game/assets/vehicle_modular/*.json
+            game/assets/vehicle_modular/*.txt
+            build/khronos_godot_swap.log
+            build/khronos_modular.log
+          if-no-files-found: warn
+          retention-days: 30
