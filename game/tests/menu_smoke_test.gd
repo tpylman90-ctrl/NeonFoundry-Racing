@@ -74,7 +74,7 @@ func _run() -> void:
 		"OBS_DECK_*", "MeshInstance3D", true, false
 	)
 	assert(deck_meshes.size() == 4)
-	# Front-left mezzanine at about 5.2m overlooks lift bays; top of
+	# Cell-swap mezzanine at about 5.2m overlooks lift bays; top of
 	# guard rails at about 6.37m. Stairs extend to z ~= 19.05m.
 	var deck_bounds: AABB = (
 		(deck_meshes[0] as MeshInstance3D).global_transform *
@@ -85,7 +85,8 @@ func _run() -> void:
 		deck_bounds = deck_bounds.merge(node.global_transform * node.get_aabb())
 	assert(deck_bounds.position.x < -25.0)
 	assert(deck_bounds.end.x > -12.6)
-	assert(deck_bounds.position.z < 2.8)
+	assert(deck_bounds.position.z > 3.0)
+	assert(deck_bounds.position.z < 3.6)
 	assert(deck_bounds.end.z > 18.8)
 	assert(deck_bounds.end.y > 6.1)
 	assert(deck_bounds.end.y < 6.7)
