@@ -1,0 +1,77 @@
+name: NF-H01 / V18.05 Rear Body and Underframe Fit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-v18-stage05.yml'
+      - 'tools/build_forge_v18_stage05.py'
+      - 'tools/check_forge_v18_stage05.py'
+      - 'art/hero_01/experiments/V18_Stage05/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-real-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned free geometry dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "numpy==2.3.5" "trimesh==4.11.1" "networkx==3.6.1" \
+            "scipy==1.17.0" "shapely==2.1.2"
+      - name: Rebuild V18.05 in physical mesh geometry on top of actual V18.04
+        env:
+          NFR_BASE_GLB: art/hero_01/experiments/V18_Stage04/FORGE_V18_04_Cockpit_Assembly.glb
+          NFR_OUTPUT_DIR: build/forge_v18_stage05
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/build_forge_v18_stage05.py tools/check_forge_v18_stage05.py
+          python tools/build_forge_v18_stage05.py | tee /tmp/v18-05-build.log
+          grep -q NFR_V18_05_BODY_PANELS_OK /tmp/v18-05-build.log
+      - name: Audit original geometry, rear shoulder mounts and lower covers
+        run: |
+          set -euo pipefail
+          python tools/check_forge_v18_stage05.py \
+            --base art/hero_01/experiments/V18_Stage04/FORGE_V18_04_Cockpit_Assembly.glb \
+            --model build/forge_v18_stage05/FORGE_V18_05_Body_Integration.glb \
+            --out build/forge_v18_stage05/V18_05_Attachment_Audit.json | tee /tmp/v18-05-qa.log
+          grep -q NFR_V18_05_REAR_ROOF_AND_LOWER_FAIRINGS_VERIFIED /tmp/v18-05-qa.log
+      - name: Confirm independently rebuilt GLB matches published mesh data
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import numpy as np, trimesh, hashlib
+          stored=Path("art/hero_01/experiments/V18_Stage05/FORGE_V18_05_Body_Integration.glb")
+          rebuilt=Path("build/forge_v18_stage05/FORGE_V18_05_Body_Integration.glb")
+          assert hashlib.sha256(stored.read_bytes()).hexdigest() == "60fb8bfdaf490f9f8571f60a272be04e03017c11a266d12f6b6d4a2d6a90035a"
+          a=trimesh.load(stored,force="scene",process=False)
+          b=trimesh.load(rebuilt,force="scene",process=False)
+          assert set(a.geometry)==set(b.geometry)
+          assert len(a.geometry)==len(b.geometry)==697
+          assert sum(len(m.faces) for m in b.geometry.values()) == 43444
+          for name in a.geometry:
+              x,y=a.geometry[name],b.geometry[name]
+              assert x.vertices.shape==y.vertices.shape,name
+              assert np.array_equal(x.faces,y.faces),name
+              assert np.allclose(x.vertices,y.vertices,atol=1e-5,rtol=0),name
+              assert y.is_watertight and y.is_winding_consistent,name
+          print("NFR_V18_05_REBUILD_MATCHED_PUBLIC_MODEL")
+          PY
+      - name: Upload GLB + geometry audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-V18-05-Body-Fit-GLB
+          path: |
+            build/forge_v18_stage05/FORGE_V18_05_Body_Integration.glb
+            build/forge_v18_stage05/V18_05_Attachment_Audit.json
+          if-no-files-found: warn
+          retention-days: 14
