@@ -80,6 +80,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p game/assets/menu build
+          # Blender 5.x compositor initializes EGL even during headless CPU renders.
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libegl1 libgl1 libx11-6 libxrender1 libxi6
           curl --fail --location --retry 3 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender.tar.xz
           tar -xf /tmp/blender.tar.xz -C /tmp
           NEON_MENU_SAMPLES=28 /tmp/blender-5.2.4-linux-x64/blender --background --threads 4 --python tools/build_menu_hero.py 2>&1 | tee build/blender-menu.log
