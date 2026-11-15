@@ -6,10 +6,11 @@ on:
     paths:
       - .github/workflows/forge-triposr-trial.yml
       - tools/ai_forge_triposr_trial.py
+      - tools/triposr_cpu_marching_cubes.py
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate-forge-ai-mesh:
@@ -26,11 +27,15 @@ jobs:
         with:
           python-version: "3.10"
       - name: Prepare Forge reference from existing approved image
+        id: prepare
         run: |
+          exec > >(tee "$RUNNER_TEMP/forge_prepare.log") 2>&1
           python -m pip install --disable-pip-version-check 'Pillow==10.1.0'
           python tools/ai_forge_triposr_trial.py prepare
       - name: Install open-source TripoSR CPU inference dependencies
+        id: dependencies
         run: |
+          exec > >(tee "$RUNNER_TEMP/forge_dependencies.log") 2>&1
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.2.2' 'torchvision==0.17.2'
           python -m pip install 'numpy<2' 'omegaconf==2.3.0' 'Pillow==10.1.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0' 'scikit-image==0.22.0'
@@ -42,7 +47,9 @@ jobs:
           python -c "from pathlib import Path; p=Path('/tmp/triposr/tsr/models/isosurface.py'); s=p.read_text(); old='from torchmcubes import marching_cubes'; assert s.count(old)==1, 'Unexpected upstream TripoSR import'; p.write_text(s.replace(old, 'from .mc_cpu_fallback import marching_cubes'))"
           PYTHONPATH=/tmp/triposr python -c "import torch; import moderngl; from tsr.system import TSR; print('TRIPOSR_CPU_IMPORTS_OK', torch.__version__)"
       - name: Run actual pretrained TripoSR on Forge reference
+        id: inference
         run: |
+          exec > >(tee "$RUNNER_TEMP/forge_inference.log") 2>&1
           # TripoSR only creates output/0 for background-removal mode.
           # Our --no-remove-bg mode needs this directory explicitly.
           mkdir -p build/forge_triposr_trial/0
@@ -55,8 +62,12 @@ jobs:
             --model-save-format glb \
             --output-dir build/forge_triposr_trial
       - name: Independently reload and audit AI-generated GLB
-        run: python tools/ai_forge_triposr_trial.py audit
+        id: audit
+        run: |
+          exec > >(tee "$RUNNER_TEMP/forge_audit.log") 2>&1
+          python tools/ai_forge_triposr_trial.py audit
       - name: Export experimental inspection package
+        id: artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -64,3 +75,59 @@ jobs:
           path: build/forge_triposr_trial/
           retention-days: 14
           if-no-files-found: warn
+      - name: Record bounded diagnostic on experiment branch
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const nodePath = require('path');
+            const stageResults = {
+              prepare: '${{ steps.prepare.outcome }}',
+              dependencies: '${{ steps.dependencies.outcome }}',
+              inference: '${{ steps.inference.outcome }}',
+              audit: '${{ steps.audit.outcome }}',
+              artifact: '${{ steps.artifact.outcome }}'
+            };
+            const safeErrorLines = (stage) => {
+              const p = nodePath.join(process.env.RUNNER_TEMP || '/tmp', 'forge_' + stage + '.log');
+              if (!fs.existsSync(p)) return [];
+              return fs.readFileSync(p, 'utf8')
+                .split(/\r?\n/)
+                .filter(line => /error|exception|fatal|traceback|failed|killed|timed out|out of memory|no module named|could not|terminated/i.test(line))
+                .slice(-12)
+                .map(line => line.slice(0, 400).replace(/(?:ghp_|github_pat_|hf_)[A-Za-z0-9_-]+/g, '[REDACTED]'));
+            };
+            const report = {
+              schema: 'forge-triposr-trial-diagnostic-v1',
+              run_id: context.runId,
+              attempt: process.env.GITHUB_RUN_ATTEMPT,
+              run_url: 'https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId,
+              commit: context.sha,
+              job_status: '${{ job.status }}',
+              stages: stageResults,
+              error_excerpts: {
+                prepare: safeErrorLines('prepare'),
+                dependencies: safeErrorLines('dependencies'),
+                inference: safeErrorLines('inference'),
+                audit: safeErrorLines('audit')
+              },
+              note: 'Experiment-only diagnostic. No model promoted to the game.'
+            };
+            const p = 'art/hero_01/experiments/forge_triposr_last_run.json';
+            const {owner, repo} = context.repo;
+            const branch = context.ref.replace(/^refs\/heads\//, '');
+            let sha;
+            try {
+              const existing = await github.rest.repos.getContent({owner,repo,path:p,ref:branch});
+              sha = existing.data.sha;
+            } catch (e) {
+              if (e.status !== 404) throw e;
+            }
+            await github.rest.repos.createOrUpdateFileContents({
+              owner, repo, path:p, branch,
+              message: 'ci: record isolated Forge TripoSR trial diagnostics',
+              content: Buffer.from(JSON.stringify(report,null,2)+'\n').toString('base64'),
+              ...(sha ? {sha} : {})
+            });
+            core.info('Forge trial diagnostics saved: ' + p);
