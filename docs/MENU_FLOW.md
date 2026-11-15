@@ -103,3 +103,16 @@ The user-provided Stage 01 wall screenshot showed 103 FPS but severe repetitive 
 - Export validation: `tools/validate_shell_pbr.py` inspects the binary GLB and verifies the four real albedo, packed ORM and normal materials, and ensures the AO and metallic/roughness share the exact same GLB image source.
 
 Do not advance to girders and interior wall until this shell appearance and real phone FPS are approved.
+
+## Stage 01 — Two-thumb Android garage navigation
+
+Double analog joysticks replace the earlier four-button walk panel:
+- Left cyan joystick: analog forward/backward **and** left/right strafe relative to the current camera heading.
+- Right amber joystick: independent yaw and up/down head pitch, with limits to avoid camera flipping.
+- Godot receives distinct touch IDs for each finger; releasing either stick resets that axis without releasing the other. Both sticks have a dead zone, move/turn responsiveness, and follow the fingertip only within a bounded circular travel region.
+- Dynamic, landscape-relative joystick positions are in the lower left and right above the bottom navigation bar; the camera return button and FPS readout remain available. Desktop mouse-look plus WASD/arrows remain supported.
+- Stage 01 room shell remains visible with all original equipment hidden. Existing visual quality settings, packed ORM textures, and geometry are unchanged; no new expensive rendering effects.
+- In the current empty shell, the player can walk freely across the center. The previous turntable collision perimeter is applied again only when the original interior equipment is made visible.
+- The menu smoke test explicitly simulates two simultaneous finger IDs and verifies independent axes, actual world translation, yaw/pitch, release isolation, and reset on exit.
+
+The user-supplied floor-plan blueprint is a **future placement guide**, not a direction to add props in this Stage 01 control pass. See `docs/GARAGE_SITE_ZONES.md`.
