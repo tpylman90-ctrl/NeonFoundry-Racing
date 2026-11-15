@@ -44,10 +44,14 @@ var _quality_detail: bool = false
 var _quality_button: Button
 var _hero_key: SpotLight3D
 var _accent_lights: Array[OmniLight3D] = []
+var _garage_environment: Environment
+var _reflection_probe: ReflectionProbe
+var _contact_shadow_material: ShaderMaterial
 
 func _ready() -> void:
 	_build_3d_stage()
 	_build_overlay()
+	_set_graphics_detail(false)
 	_refresh_camera(0.016)
 	set_process(true)
 
@@ -130,6 +134,8 @@ func _build_3d_stage() -> void:
 	viewport.name = "GarageViewport"
 	viewport.size = Vector2i(1280, 720)
 	viewport.scaling_3d_scale = 0.72
+	viewport.msaa_3d = Viewport.MSAA_2X
+	viewport.anisotropic_filtering_level = Viewport.ANISOTROPY_4X
 	_garage_viewport = viewport
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	viewport_frame.add_child(viewport)
@@ -143,10 +149,24 @@ func _build_3d_stage() -> void:
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = Color("0a1622")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("a8c3d1")
-	environment.ambient_light_energy = 0.84
+	environment.ambient_light_color = Color("b4c5d0")
+	environment.ambient_light_energy = 0.48
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_BG
-	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
+	environment.tonemap_exposure = 0.96
+	environment.tonemap_white = 1.6
+	environment.fog_enabled = true
+	environment.fog_mode = Environment.FOG_MODE_DEPTH
+	environment.fog_light_color = Color("1a2c3c")
+	environment.fog_density = 0.15
+	environment.fog_depth_begin = 13.0
+	environment.fog_depth_end = 47.0
+	environment.fog_depth_curve = 1.25
+	environment.glow_enabled = true
+	environment.glow_hdr_threshold = 0.92
+	environment.glow_intensity = 0.70
+	environment.glow_bloom = 0.05
+	_garage_environment = environment
 	environment_node.environment = environment
 	_world.add_child(environment_node)
 
@@ -200,6 +220,10 @@ func _build_3d_stage() -> void:
 	_vehicle_holder.position.y = 0.33
 	_world.add_child(_vehicle_holder)
 	_load_craft_preview()
+	_add_contact_shadow("ChassisContactShadow", Vector3(0, 0.333, 0),
+		Vector2(8.7, 7.4), 0.34)
+	_add_contact_shadow("PlatformContactShadow", Vector3(0, -0.042, 0),
+		Vector2(15.7, 15.7), 0.25)
 	_workshop = Node3D.new()
 	_workshop.name = "LiveWorkshopEquipment"
 	_workshop.set_script(WorkshopScript)
@@ -215,7 +239,7 @@ func _build_3d_stage() -> void:
 
 	var sunlight := DirectionalLight3D.new()
 	sunlight.rotation_degrees = Vector3(-58, -22, 0)
-	sunlight.light_energy = 1.43
+	sunlight.light_energy = 0.83
 	sunlight.light_color = Color("d2e6ff")
 	_world.add_child(sunlight)
 	# One focused shadow-casting key light: real mesh-to-ground and self shadows.
@@ -226,10 +250,10 @@ func _build_3d_stage() -> void:
 	hero_key.rotation_degrees = Vector3(-90, 0, 0)
 	hero_key.spot_range = 17.5
 	hero_key.spot_angle = 67.0
-	hero_key.light_energy = 2.4
-	hero_key.light_color = Color("cbeeff")
+	hero_key.light_energy = 2.2
+	hero_key.light_color = Color("e5efff")
 	hero_key.shadow_enabled = false
-	hero_key.visible = false
+	hero_key.visible = true
 	_hero_key = hero_key
 	_world.add_child(hero_key)
 	for light_spec in [
@@ -246,6 +270,34 @@ func _build_3d_stage() -> void:
 		omni.visible = _accent_lights.size() == 0
 		_accent_lights.append(omni)
 		_world.add_child(omni)
+	# One-shot box projected reflections only in Detail (never per-frame).
+	_reflection_probe = ReflectionProbe.new()
+	_reflection_probe.name = "InspectionBayReflection"
+	_reflection_probe.position = Vector3(0, 5.6, -2.0)
+	_reflection_probe.size = Vector3(19, 11, 20)
+	_reflection_probe.box_projection = true
+	_reflection_probe.update_mode = ReflectionProbe.UPDATE_ONCE
+	_reflection_probe.intensity = 0.48
+	_reflection_probe.visible = false
+	_world.add_child(_reflection_probe)
+
+func _add_contact_shadow(name: String, location: Vector3,
+		dimensions: Vector2, darkness: float) -> void:
+	# Mobile lacks SSAO; a single small radial alpha plane is inexpensive.
+	if _contact_shadow_material == null:
+		_contact_shadow_material = ShaderMaterial.new()
+		_contact_shadow_material.shader = load("res://shaders/garage_contact_shadow.gdshader")
+	var instance := MeshInstance3D.new()
+	instance.name = name
+	var plane := PlaneMesh.new()
+	plane.size = dimensions
+	instance.mesh = plane
+	var mat: ShaderMaterial = _contact_shadow_material.duplicate() as ShaderMaterial
+	mat.set_shader_parameter("strength", darkness)
+	instance.material_override = mat
+	instance.position = location
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_world.add_child(instance)
 
 func _load_craft_preview() -> void:
 	if not ResourceLoader.exists(PREVIEW_PATH):
@@ -555,9 +607,20 @@ func _set_graphics_detail(enabled: bool) -> void:
 	_quality_detail = enabled
 	if _garage_viewport != null:
 		_garage_viewport.scaling_3d_scale = 1.0 if enabled else 0.72
+		_garage_viewport.msaa_3d = Viewport.MSAA_2X
+		_garage_viewport.anisotropic_filtering_level = (
+			Viewport.ANISOTROPY_8X if enabled else Viewport.ANISOTROPY_4X
+		)
+	if _garage_environment != null:
+		_garage_environment.ambient_light_energy = 0.40 if enabled else 0.48
+		_garage_environment.glow_intensity = 1.08 if enabled else 0.70
+		_garage_environment.glow_bloom = 0.09 if enabled else 0.05
+		_garage_environment.fog_density = 0.25 if enabled else 0.15
 	if _hero_key != null:
-		_hero_key.visible = enabled
+		_hero_key.visible = true
 		_hero_key.shadow_enabled = enabled
+	if _reflection_probe != null:
+		_reflection_probe.visible = enabled
 	for index in range(_accent_lights.size()):
 		_accent_lights[index].visible = enabled or index == 0
 		_accent_lights[index].omni_range = 15.0 if enabled else 13.0
