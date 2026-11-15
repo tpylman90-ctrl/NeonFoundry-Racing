@@ -218,11 +218,13 @@ def write_image(dest, name: str, pixels: np.ndarray, color_space: str):
     rgba = np.ones((n, n, 4), dtype=np.float32)
     rgba[:, :, :3] = pixels
     image = bpy.data.images.new(name, width=n, height=n, alpha=True)
+    # Non-Color MUST be assigned before saving normals and packed ORM;
+    # otherwise Blender's sRGB transfer would corrupt numeric channels.
+    image.colorspace_settings.name = color_space
     image.pixels.foreach_set(rgba.reshape(-1))
     image.filepath_raw = str(dest / (name + ".png"))
     image.file_format = "PNG"
     image.save()
-    image.colorspace_settings.name = color_space
     image.pack()
     return image
 
