@@ -33,13 +33,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.2.2' 'torchvision==0.17.2'
-          python -m pip install 'numpy<2' 'omegaconf==2.3.0' 'Pillow==10.1.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0'
-          # torchmcubes interrogates PyTorch at PEP 517 metadata/build time.
-          # Build isolation hides the already installed torch; disable it.
-          python -c "import torch; print('PYTORCH_AVAILABLE_FOR_EXTENSION_BUILD', torch.__version__)"
-          CMAKE_BUILD_PARALLEL_LEVEL=2 python -m pip install --no-build-isolation 'git+https://github.com/tatsy/torchmcubes.git'
+          python -m pip install 'numpy<2' 'omegaconf==2.3.0' 'Pillow==10.1.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0' 'scikit-image==0.22.0'
+          # Avoid the upstream torchmcubes native build on CPU-only runners.
+          # Patch the experimental TripoSR checkout to use scipy/skimage CPU marching cubes.
           git clone --depth 1 https://github.com/VAST-AI-Research/TripoSR.git /tmp/triposr
-          PYTHONPATH=/tmp/triposr python -c "import torch; import torchmcubes; import moderngl; from tsr.system import TSR; from PIL import Image; print('TRIPOSR_CPU_DEPENDENCIES_READY', torch.__version__)"
+          cp tools/triposr_cpu_marching_cubes.py /tmp/triposr/tsr/models/mc_cpu_fallback.py
+          python tools/triposr_cpu_marching_cubes.py
+          python -c "from pathlib import Path; p=Path('/tmp/triposr/tsr/models/isosurface.py'); s=p.read_text(); old='from torchmcubes import marching_cubes'; assert s.count(old)==1, 'Unexpected upstream TripoSR import'; p.write_text(s.replace(old, 'from .mc_cpu_fallback import marching_cubes'))"
+          PYTHONPATH=/tmp/triposr python -c "import torch; import moderngl; from tsr.system import TSR; print('TRIPOSR_CPU_IMPORTS_OK', torch.__version__)"
       - name: Run actual pretrained TripoSR on Forge reference
         run: |
           # TripoSR only creates output/0 for background-removal mode.
