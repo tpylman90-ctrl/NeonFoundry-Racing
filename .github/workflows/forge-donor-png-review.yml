@@ -1,0 +1,94 @@
+name: FORGE / Free Donor Candidate PNG Review
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-donor-png-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download genuine published reference previews from original authors
+        run: |
+          set -euo pipefail
+          mkdir -p build/donor_previews
+          curl --location --retry 3 --fail --silent --show-error \
+            https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/screenshot/screenshot_Large.jpg \
+            -o build/donor_previews/khronos_original.jpg
+          curl --location --retry 3 --fail --silent --show-error \
+            https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/screenshot/naming_hierarchy_pivots.jpg \
+            -o build/donor_previews/khronos_detail.jpg
+          curl --location --retry 3 --fail --silent --show-error \
+            https://raw.githubusercontent.com/JaronKBragg7337/spectral-gt-rs/main/spectral_gt_beauty.png \
+            -o build/donor_previews/spectral_original.png
+          curl --location --retry 3 --fail --silent --show-error \
+            https://raw.githubusercontent.com/JaronKBragg7337/spectral-gt-rs/main/spectral_gt_profile.png \
+            -o build/donor_previews/spectral_detail.png
+      - name: Install lightweight image formatter
+        run: python -m pip install --disable-pip-version-check "Pillow>=10,<13"
+      - name: Create real-source PNG shortlist and two individual cards
+        run: |
+          python - <<'PY'
+          from PIL import Image,ImageOps,ImageDraw,ImageFont
+          from pathlib import Path
+          root=Path('build/donor_previews')
+          fontpath='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+          def f(size,bold=False):
+              path='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else fontpath
+              return ImageFont.truetype(path,size)
+          samples=[
+              ('01','KHRONOS / CAR CONCEPT','CC BY 4.0   |   professionally cleaned / real body panels',
+               'khronos_original.jpg','khronos_detail.jpg',
+               'https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept'),
+              ('02','SPECTRAL GT RS','CC0   |   authored editable body / windshield / separate panels',
+               'spectral_original.png','spectral_detail.png',
+               'https://github.com/JaronKBragg7337/spectral-gt-rs')
+          ]
+          def card(entry):
+              no,title,subtitle,hero,detail,url=entry
+              w,h=1500,1060
+              img=Image.new('RGB',(w,h),(20,25,33))
+              draw=ImageDraw.Draw(img)
+              draw.rectangle((0,0,w,12),fill=(38,209,216))
+              draw.text((45,40),no+'   '+title,font=f(52,True),fill='#fafafa')
+              draw.text((45,113),subtitle,font=f(24),fill='#c5d4db')
+              # Preserve upstream model imagery. Do not generate a substitute.
+              def paste_frame(file,rect):
+                  source=Image.open(root/file).convert('RGB')
+                  assert source.width>=400 and source.height>=250,(file,source.size)
+                  shot=ImageOps.contain(source,(rect[2]-rect[0],rect[3]-rect[1]),Image.Resampling.LANCZOS)
+                  ix=rect[0]+(rect[2]-rect[0]-shot.width)//2
+                  iy=rect[1]+(rect[3]-rect[1]-shot.height)//2
+                  draw.rounded_rectangle(rect,radius=16,fill=(43,49,58))
+                  img.paste(shot,(ix,iy))
+              paste_frame(hero,(40,185,1460,770))
+              paste_frame(detail,(40,805,610,1015))
+              draw.text((645,825),'ORIGINAL MODEL PREVIEW',font=f(25,True),fill='#efeff0')
+              draw.text((645,866),'Secondary image shows geometry / surface',font=f(22),fill='#c4cfd3')
+              draw.text((645,901),'construction from the original source.',font=f(22),fill='#c4cfd3')
+              draw.text((645,972),'No modifications or AI-generated images.',font=f(18),fill='#a7b3bc')
+              img.save(root/('Candidate_'+no+'.png'))
+              return img
+          a,b=[card(s) for s in samples]
+          sheet=Image.new('RGB',(3000,1060),(17,21,27))
+          sheet.paste(a,(0,0));sheet.paste(b,(1500,0))
+          sheet.save(root/'FORGE_Donor_Candidates_01_02.png',optimize=True)
+          print('NFR_REAL_DONOR_PNGS_CREATED',[(p.name,p.stat().st_size) for p in sorted(root.glob('*.png'))])
+          PY
+      - name: Upload genuine preview PNG files
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-Free-Donor-Candidate-PNGs
+          path: |
+            build/donor_previews/Candidate_01.png
+            build/donor_previews/Candidate_02.png
+            build/donor_previews/FORGE_Donor_Candidates_01_02.png
+          retention-days: 30
