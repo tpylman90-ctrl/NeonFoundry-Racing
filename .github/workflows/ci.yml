@@ -51,7 +51,20 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq libegl1 libgl1 libx11-6 libxrender1 libxi6
-          curl --fail --location --retry 6 --retry-all-errors --retry-delay 5 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender-shell.tar.xz
+          # Use Blender's official mirror first; the original download host
+          # intermittently responds with HTTP 403 from GitHub runners.
+          for url in \
+            https://mirror.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz \
+            https://debian.sbor.net/mirrors/blender/Blender5.2/blender-5.2.4-linux-x64.tar.xz \
+            https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz
+          do
+            rm -f /tmp/blender-shell.tar.xz
+            if curl --fail --location --retry 2 --retry-all-errors --retry-delay 4 "$url" -o /tmp/blender-shell.tar.xz; then
+              break
+            fi
+          done
+          test -s /tmp/blender-shell.tar.xz
+          tar -tJf /tmp/blender-shell.tar.xz >/dev/null
           tar -xf /tmp/blender-shell.tar.xz -C /tmp
           mkdir -p build game/assets/garage/shell
           /tmp/blender-5.2.4-linux-x64/blender --background --threads 4 --python tools/build_garage_shell.py 2>&1 | tee build/garage-shell-generator.log
