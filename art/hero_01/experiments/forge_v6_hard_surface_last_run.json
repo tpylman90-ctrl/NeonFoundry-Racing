@@ -1,18 +1,24 @@
 {
-  "run_id": 43776983092,
-  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43776983092",
-  "commit": "457d908ec59509e0cddebad2c5b16975688dcb98",
-  "status": "failure",
+  "run_id": 43777132348,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43777132348",
+  "commit": "81e526969343cfb15a432ea7d8c4fd00ebb8b1c6",
+  "status": "success",
   "stages": {
-    "prepare": "failure",
-    "native": "skipped",
-    "inference": "skipped",
-    "audit": "skipped",
+    "prepare": "success",
+    "native": "success",
+    "inference": "success",
+    "audit": "success",
     "artifact": "success"
   },
   "errors": {
     "prepare": [],
-    "native": [],
+    "native": [
+      "Collecting exceptiongroup>=1.0 (from scikit-build-core>=1.0)",
+      "  Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)",
+      "Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)",
+      "Installing collected packages: tomli, pybind11, pathspec, ninja, exceptiongroup, scikit-build-core",
+      "Successfully installed exceptiongroup-1.3.1 ninja-1.13.2 pathspec-1.1.1 pybind11-3.1.0 scikit-build-core-1.1.2 tomli-2.5.0"
+    ],
     "inference": [],
     "audit": []
   },
