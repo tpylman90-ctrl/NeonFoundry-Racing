@@ -137,9 +137,65 @@ func _run() -> void:
 	menu._garage_page._toggle_walk()
 	assert(menu._garage_page._walk_mode)
 	assert(not menu._garage_page._tools_panel.visible)
-	assert(menu._garage_page._walk_pad.visible)
+	assert(menu._garage_page._walk_joysticks.visible)
+	var pad: Control = menu._garage_page._walk_joysticks
+	assert(pad.get_node_or_null(".") != null)
+	var radius: float = float(pad.call("get_radius"))
+	var origin: Vector2 = pad.get_global_rect().position
+	var left_center: Vector2 = origin + Vector2(pad.call("get_stick_center", false))
+	var right_center: Vector2 = origin + Vector2(pad.call("get_stick_center", true))
+	# Both fingers start neutral, then independently move and look.
+	var left_down := InputEventScreenTouch.new()
+	left_down.index = 11
+	left_down.position = left_center
+	left_down.pressed = true
+	menu._garage_page._input(left_down)
+	assert(int(pad.get("move_finger")) == 11)
+	var right_down := InputEventScreenTouch.new()
+	right_down.index = 12
+	right_down.position = right_center
+	right_down.pressed = true
+	menu._garage_page._input(right_down)
+	assert(int(pad.get("look_finger")) == 12)
+	var left_drag := InputEventScreenDrag.new()
+	left_drag.index = 11
+	left_drag.position = left_center + Vector2(0.55 * radius, -0.81 * radius)
+	menu._garage_page._input(left_drag)
+	var right_drag := InputEventScreenDrag.new()
+	right_drag.index = 12
+	right_drag.position = right_center + Vector2(0.62 * radius, -0.61 * radius)
+	menu._garage_page._input(right_drag)
+	var movement: Vector2 = pad.get("move_axis")
+	var viewing: Vector2 = pad.get("look_axis")
+	assert(movement.x > 0.3 and movement.y < -0.4)
+	assert(viewing.x > 0.3 and viewing.y < -0.3)
+	var old_pos: Vector3 = menu._garage_page._walk_position
+	var old_yaw: float = menu._garage_page._walk_yaw
+	menu._garage_page._process(0.12)
+	assert(menu._garage_page._walk_position.distance_to(old_pos) > 0.1)
+	assert(menu._garage_page._walk_yaw < old_yaw)
+	assert(menu._garage_page._walk_pitch > 0.03)
+	# Releasing one finger must NOT kill the other stick's tracking.
+	var left_up := InputEventScreenTouch.new()
+	left_up.index = 11
+	left_up.position = left_center
+	left_up.pressed = false
+	menu._garage_page._input(left_up)
+	assert(Vector2(pad.get("move_axis")) == Vector2.ZERO)
+	assert(int(pad.get("look_finger")) == 12)
+	assert(Vector2(pad.get("look_axis")).length() > 0.3)
+	var right_up := InputEventScreenTouch.new()
+	right_up.index = 12
+	right_up.position = right_center
+	right_up.pressed = false
+	menu._garage_page._input(right_up)
+	assert(Vector2(pad.get("look_axis")) == Vector2.ZERO)
+	# Back navigation resets all input states and hides both controls.
 	menu._garage_page._toggle_walk()
 	assert(not menu._garage_page._walk_mode)
+	assert(not pad.visible)
+	assert(int(pad.get("move_finger")) == -1)
+	assert(int(pad.get("look_finger")) == -1)
 	assert(not menu._garage_page._tools_panel.visible)
 	menu._garage_page._show_tuning()
 	assert(menu._garage_page._bay_state == "tuning")
