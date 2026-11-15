@@ -252,3 +252,4 @@ print("NEON_FOUNDRY_SHELL_STAGE01_OK meshes=6 assets=original_ORM_bakedNormals b
 # independent of the original user-approved room.
 import runpy
 runpy.run_path(str(ROOT / "tools/build_garage_observation_deck.py"), run_name="__main__")
+runpy.run_path(str(ROOT / "tools/build_garage_partitions.py"), run_name="__main__")

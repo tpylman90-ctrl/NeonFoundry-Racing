@@ -110,10 +110,12 @@ jobs:
           path: |
             game/assets/garage/shell/shell_stage01.glb
             game/assets/garage/shell/observation_deck_stage02.glb
+            game/assets/garage/shell/interior_partitions_stage02c.glb
             build/garage_shell_stage01.blend
             build/garage_observation_deck_stage02.blend
+            build/garage_interior_partitions_stage02c.blend
             build/shell_source/
-          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py', 'tools/build_garage_observation_deck.py') }}
+          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py', 'tools/build_garage_observation_deck.py', 'tools/build_garage_partitions.py') }}
       - name: Build isolated Blender Stage 01 hangar shell
         if: steps.shell-cache.outputs.cache-hit != 'true'
         timeout-minutes: 12
@@ -145,7 +147,10 @@ jobs:
           test -s build/garage_shell_stage01.blend
           test -s game/assets/garage/shell/observation_deck_stage02.glb
           test -s build/garage_observation_deck_stage02.blend
+          test -s game/assets/garage/shell/interior_partitions_stage02c.glb
+          test -s build/garage_interior_partitions_stage02c.blend
           grep -q NEON_FOUNDRY_DECK_STAGE02_OK build/garage-shell-generator.log
+          grep -q NEON_FOUNDRY_PARTITIONS_STAGE02C_OK build/garage-shell-generator.log
       - name: Verify Stage 01 shell artifact and preserve GLB for viewer
         run: |
           set -euo pipefail
@@ -154,6 +159,8 @@ jobs:
           cp game/assets/garage/shell/shell_stage01.glb build/NeonFoundry-Shell-Stage01.glb
           cp game/assets/garage/shell/observation_deck_stage02.glb build/NeonFoundry-ObservationDeck-Stage02.glb
           cp build/garage_observation_deck_stage02.blend build/NeonFoundry-ObservationDeck-Stage02.blend
+          cp game/assets/garage/shell/interior_partitions_stage02c.glb build/NeonFoundry-InteriorPartitions-Stage02C.glb
+          cp build/garage_interior_partitions_stage02c.blend build/NeonFoundry-InteriorPartitions-Stage02C.blend
           python3 - <<'PY'
           from pathlib import Path
           data=Path("build/NeonFoundry-Shell-Stage01.glb").read_bytes()
@@ -170,6 +177,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/validate_observation_deck.py
+      - name: Verify separate Stage 02C partition GLB geometry
+        run: |
+          set -euo pipefail
+          python3 tools/validate_garage_partitions.py
       - name: Import and smoke-test project
         run: |
           set -euo pipefail

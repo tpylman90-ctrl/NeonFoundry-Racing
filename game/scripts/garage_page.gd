@@ -12,6 +12,7 @@ const WorkshopScript = preload("res://scripts/garage_workshop.gd")
 const DualJoystickScript = preload("res://scripts/garage_dual_joystick.gd")
 const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
 const DECK_STAGE02_PATH: String = "res://assets/garage/shell/observation_deck_stage02.glb"
+const PARTITIONS_STAGE02C_PATH: String = "res://assets/garage/shell/interior_partitions_stage02c.glb"
 # The viewing deck is above the front-left diagnostics and cell-swap zone.
 const DECK_X0: float = -25.65
 const DECK_X1: float = -12.05
@@ -23,6 +24,7 @@ const DECK_STAIR_X1: float = -22.6
 const DECK_STAIR_TOP_Z: float = 11.55
 const DECK_STAIR_BOTTOM_Z: float = 19.05
 const WALK_EYE_HEIGHT: float = 1.75
+const INTERNAL_PARTITION_HEIGHT: float = 7.2
 const STAGE01_REVIEW: bool = true
 const SHELL_HALF_WIDTH: float = 27.0
 const SHELL_REAR: float = -23.75
@@ -68,6 +70,7 @@ var _contact_shadow_material: ShaderMaterial
 var _legacy_room: Node3D
 var _shell_stage: Node3D
 var _observation_deck: Node3D
+var _interior_partitions: Node3D
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -120,6 +123,7 @@ func _process(delta: float) -> void:
 				_walk_position.x = safe.x
 				_walk_position.z = safe.y
 		_resolve_deck_walk(old_walk_position)
+		_resolve_partition_walk(old_walk_position)
 	_refresh_camera(delta)
 
 func _point_inside_horizontal(pos: Vector3, xlo: float, xhi: float,
@@ -378,6 +382,7 @@ func _build_3d_stage() -> void:
 	_world.add_child(_reflection_probe)
 	_activate_stage01_shell()
 	_activate_stage02_deck()
+	_activate_stage02c_partitions()
 
 func _activate_stage01_shell() -> void:
 	if not STAGE01_REVIEW:
@@ -425,6 +430,72 @@ func _activate_stage02_deck() -> void:
 	_observation_deck.name = "PowerCellSwapObservationDeck"
 	_world.add_child(_observation_deck)
 	print("NEON_FOUNDRY_STAGE02_DECK_LOADED height=5.20 location=power-cell-swap")
+
+func _activate_stage02c_partitions() -> void:
+	# Internal zone walls are a separate GLB so the authored perimeter shell
+	# and its surface materials remain independently rebuildable.
+	if not STAGE01_REVIEW:
+		return
+	if not ResourceLoader.exists(PARTITIONS_STAGE02C_PATH):
+		push_error("STAGE02C_PARTITIONS_MISSING: " + PARTITIONS_STAGE02C_PATH)
+		return
+	var packed: PackedScene = load(PARTITIONS_STAGE02C_PATH) as PackedScene
+	if packed == null:
+		push_error("STAGE02C_PARTITIONS_INVALID_GLTF")
+		return
+	_interior_partitions = packed.instantiate() as Node3D
+	_interior_partitions.name = "GarageZonePartitionsStage02C"
+	_world.add_child(_interior_partitions)
+	print("NEON_FOUNDRY_STAGE02C_PARTITIONS_LOADED zones=6 height=7.20 vehicle_portals=8")
+
+func _partition_blocks_crossing(previous: Vector3, current: Vector3,
+		axis: String, fixed: float, start: float, finish: float,
+		portals: PackedVector2Array) -> bool:
+	var from_axis: float = previous.x if axis == "x" else previous.z
+	var to_axis: float = current.x if axis == "x" else current.z
+	var crossed: bool = (from_axis < fixed and to_axis >= fixed) or (
+		from_axis > fixed and to_axis <= fixed
+	)
+	if not crossed or is_equal_approx(from_axis, to_axis):
+		return false
+	var t: float = (fixed - from_axis) / (to_axis - from_axis)
+	var intersection: Vector3 = previous.lerp(current, t)
+	var along: float = intersection.z if axis == "x" else intersection.x
+	if along < start or along > finish:
+		return false
+	for opening: Vector2 in portals:
+		if along >= opening.x and along <= opening.y:
+			return false
+	return true
+
+func _resolve_partition_walk(previous: Vector3) -> void:
+	if _interior_partitions == null:
+		return
+	if _walk_position.y >= INTERNAL_PARTITION_HEIGHT + WALK_EYE_HEIGHT:
+		return
+	var current: Vector3 = _walk_position
+	var barriers: Array[Dictionary] = [
+		{"axis": "z", "fixed": -5.75, "start": -27.0, "end": 27.0,
+			"portals": PackedVector2Array([
+				Vector2(-25.9, -20.1), Vector2(-17.9, -12.1), Vector2(-9.9, -4.1),
+				Vector2(2.0, 10.0), Vector2(18.0, 24.0)])},
+		{"axis": "z", "fixed": 1.25, "start": -27.0, "end": 27.0,
+			"portals": PackedVector2Array([
+				Vector2(-22.0, -16.0), Vector2(-7.0, 2.0), Vector2(12.0, 19.0)])},
+		{"axis": "x", "fixed": -3.0, "start": -23.75, "end": -5.75,
+			"portals": PackedVector2Array([Vector2(-12.3, -7.7)])},
+		{"axis": "x", "fixed": 15.0, "start": -23.75, "end": -5.75,
+			"portals": PackedVector2Array([Vector2(-11.6, -8.4)])},
+		{"axis": "x", "fixed": -11.0, "start": 1.25, "end": 20.25,
+			"portals": PackedVector2Array([Vector2(10.9, 13.1)])},
+		{"axis": "x", "fixed": 6.0, "start": 1.25, "end": 20.25,
+			"portals": PackedVector2Array([Vector2(10.9, 13.1)])}
+	]
+	for wall: Dictionary in barriers:
+		if _partition_blocks_crossing(previous, current, wall["axis"],
+				wall["fixed"], wall["start"], wall["end"], wall["portals"]):
+			_walk_position = previous
+			return
 
 
 func _add_contact_shadow(name: String, location: Vector3,

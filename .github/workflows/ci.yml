@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/check_repository.py
-          python3 -m py_compile tools/build_garage_shell.py tools/garage_shell_pbr.py tools/validate_shell_pbr.py tools/build_garage_observation_deck.py tools/validate_observation_deck.py
+          python3 -m py_compile tools/build_garage_shell.py tools/garage_shell_pbr.py tools/validate_shell_pbr.py tools/build_garage_observation_deck.py tools/validate_observation_deck.py tools/build_garage_partitions.py tools/validate_garage_partitions.py
           python3 tools/validate_hero_workflow.py
           python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
       - name: Install pinned Godot
@@ -40,10 +40,12 @@ jobs:
           path: |
             game/assets/garage/shell/shell_stage01.glb
             game/assets/garage/shell/observation_deck_stage02.glb
+            game/assets/garage/shell/interior_partitions_stage02c.glb
             build/garage_shell_stage01.blend
             build/garage_observation_deck_stage02.blend
+            build/garage_interior_partitions_stage02c.blend
             build/shell_source/
-          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py', 'tools/build_garage_observation_deck.py') }}
+          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py', 'tools/build_garage_observation_deck.py', 'tools/build_garage_partitions.py') }}
       - name: Generate isolated Blender hangar shell (Stage 01)
         if: steps.shell-cache.outputs.cache-hit != 'true'
         timeout-minutes: 12
@@ -73,6 +75,8 @@ jobs:
           test -s build/garage_shell_stage01.blend
           test -s game/assets/garage/shell/observation_deck_stage02.glb
           test -s build/garage_observation_deck_stage02.blend
+          test -s game/assets/garage/shell/interior_partitions_stage02c.glb
+          test -s build/garage_interior_partitions_stage02c.blend
           python3 - <<'PY'
           from pathlib import Path
           import struct
@@ -95,6 +99,10 @@ jobs:
           set -euo pipefail
           python3 tools/validate_observation_deck.py
           test -s build/garage_observation_deck_stage02.blend
+      - name: Verify Stage 02C partition GLB geometry
+        run: |
+          set -euo pipefail
+          python3 tools/validate_garage_partitions.py
       - name: Godot import and startup smoke
         run: |
           set -euo pipefail
