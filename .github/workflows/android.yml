@@ -2,7 +2,7 @@ name: Android APK
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces']
     paths:
       - 'game/**'
       - 'tools/**'
@@ -103,6 +103,21 @@ jobs:
           assert Path('build/menu_hero.blend').stat().st_size>100000
           print('NEON_FOUNDRY_RENDERED_ART_OK 1600x900')
           PY
+      - name: Build isolated Blender Stage 01 hangar shell
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          if [[ ! -x /tmp/blender-5.2.4-linux-x64/blender ]]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq libegl1 libgl1 libx11-6 libxrender1 libxi6
+            curl --fail --location --retry 3 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender-shell.tar.xz
+            tar -xf /tmp/blender-shell.tar.xz -C /tmp
+          fi
+          mkdir -p build game/assets/garage/shell
+          /tmp/blender-5.2.4-linux-x64/blender --background --threads 4 --python tools/build_garage_shell.py 2>&1 | tee build/garage-shell-generator.log
+          grep -q NEON_FOUNDRY_SHELL_STAGE01_OK build/garage-shell-generator.log
+          test -s game/assets/garage/shell/shell_stage01.glb
+          test -s build/garage_shell_stage01.blend
       - name: Import and smoke-test project
         run: |
           set -euo pipefail

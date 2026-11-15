@@ -2,7 +2,7 @@ name: Repository checks
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces']
   pull_request:
   workflow_dispatch:
 
@@ -15,13 +15,14 @@ env:
 jobs:
   foundation:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Repository validation
         run: |
           set -euo pipefail
           python3 tools/check_repository.py
+          python3 -m py_compile tools/build_garage_shell.py
           python3 tools/validate_hero_workflow.py
           python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
       - name: Install pinned Godot
@@ -32,6 +33,27 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp
           sudo install "/tmp/Godot_v$GODOT_VERSION-stable_linux.x86_64" /usr/local/bin/godot
           godot --version
+      - name: Generate isolated Blender hangar shell (Stage 01)
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libegl1 libgl1 libx11-6 libxrender1 libxi6
+          curl --fail --location --retry 3 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender-shell.tar.xz
+          tar -xf /tmp/blender-shell.tar.xz -C /tmp
+          mkdir -p build game/assets/garage/shell
+          /tmp/blender-5.2.4-linux-x64/blender --background --threads 4 --python tools/build_garage_shell.py 2>&1 | tee build/garage-shell-generator.log
+          grep -q NEON_FOUNDRY_SHELL_STAGE01_OK build/garage-shell-generator.log
+          test -s game/assets/garage/shell/shell_stage01.glb
+          test -s build/garage_shell_stage01.blend
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          asset = Path('game/assets/garage/shell/shell_stage01.glb')
+          assert asset.read_bytes()[:4] == b'glTF'
+          assert struct.unpack('<I', asset.read_bytes()[8:12])[0] == asset.stat().st_size
+          print('NEON_FOUNDRY_SHELL_GLB_VALID', asset.stat().st_size)
+          PY
       - name: Godot import and startup smoke
         run: |
           set -euo pipefail
