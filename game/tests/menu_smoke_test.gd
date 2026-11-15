@@ -29,25 +29,119 @@ func _run() -> void:
 	assert(menu.current_page == "garage")
 	assert(menu._garage_page != null)
 	assert(menu._garage_page._performance_label != null)
-	assert(menu._garage_page._garage_viewport.msaa_3d == Viewport.MSAA_2X)
+	assert(menu._garage_page._garage_viewport.msaa_3d == Viewport.MSAA_DISABLED)
 	assert(menu._garage_page._garage_environment.tonemap_mode == Environment.TONE_MAPPER_ACES)
-	assert(menu._garage_page._garage_environment.glow_enabled)
-	assert(menu._garage_page._garage_environment.fog_enabled)
+	assert(menu._garage_page._garage_environment.glow_enabled == false)
+	assert(menu._garage_page._garage_environment.fog_enabled == false)
+	assert(menu._garage_page._shell_stage != null)
+	assert(menu._garage_page._shell_stage.visible)
+	assert(not menu._garage_page._legacy_room.visible)
+	assert(not menu._garage_page._workshop.visible)
+	assert(not menu._garage_page._vehicle_holder.visible)
+	assert(menu._garage_page._shell_stage.find_children("*", "MeshInstance3D", true, false).size() >= 6)
+	# Verify actual imported world orientation, not just scene presence.
+	var meshes: Array[Node] = menu._garage_page._shell_stage.find_children(
+		"SHELL_01_*", "MeshInstance3D", true, false
+	)
+	assert(meshes.size() == 6)
+	var horizontal_surfaces: int = 0
+	var vertical_surfaces: int = 0
+	for candidate in meshes:
+		var node: MeshInstance3D = candidate as MeshInstance3D
+		var world_aabb: AABB = node.global_transform * node.get_aabb()
+		if node.name == "SHELL_01_FLOOR":
+			assert(world_aabb.size.x > 53.0 and world_aabb.size.x < 55.0)
+			assert(world_aabb.size.z > 43.0 and world_aabb.size.z < 45.0)
+			assert(world_aabb.size.y < 1.0)
+			assert(absf(world_aabb.position.y) < 0.8)
+			horizontal_surfaces += 1
+		elif node.name == "SHELL_01_CEILING":
+			assert(world_aabb.size.x > 53.0 and world_aabb.size.x < 55.0)
+			assert(world_aabb.size.z > 43.0 and world_aabb.size.z < 45.0)
+			assert(world_aabb.size.y < 1.0)
+			assert(world_aabb.position.y > 15.2)
+			horizontal_surfaces += 1
+		else:
+			assert(world_aabb.size.y > 15.5)
+			vertical_surfaces += 1
+	assert(horizontal_surfaces == 2)
+	assert(vertical_surfaces == 4)
+	# New Stage 02 mezzanine is a distinct glTF, not added to the shell.
+	assert(menu._garage_page._observation_deck != null)
+	var deck: Node3D = menu._garage_page._observation_deck
+	assert(deck.visible)
+	var deck_meshes: Array[Node] = deck.find_children(
+		"OBS_DECK_*", "MeshInstance3D", true, false
+	)
+	assert(deck_meshes.size() == 4)
+	# Front-left mezzanine at about 5.2m overlooks lift bays; top of
+	# guard rails at about 6.37m. Stairs extend to z ~= 19.05m.
+	var deck_bounds: AABB = (
+		(deck_meshes[0] as MeshInstance3D).global_transform *
+		(deck_meshes[0] as MeshInstance3D).get_aabb()
+	)
+	for candidate in deck_meshes.slice(1):
+		var node: MeshInstance3D = candidate as MeshInstance3D
+		deck_bounds = deck_bounds.merge(node.global_transform * node.get_aabb())
+	assert(deck_bounds.position.x < -25.0)
+	assert(deck_bounds.end.x > -12.6)
+	assert(deck_bounds.position.z < 2.8)
+	assert(deck_bounds.end.z > 18.8)
+	assert(deck_bounds.end.y > 6.1)
+	assert(deck_bounds.end.y < 6.7)
+	# Floor can be traversed UNDER the deck without snapping upstairs.
+	var old_under: Vector3 = Vector3(-18.0, 1.75, 8.0)
+	menu._garage_page._walk_position = old_under + Vector3(0.4, 0, 0.2)
+	menu._garage_page._resolve_deck_walk(old_under)
+	assert(is_equal_approx(menu._garage_page._walk_position.y, 1.75))
+	# Stair height is continuous; entering from the lower landing works.
+	var foot: Vector3 = Vector3(-24.0, 1.75, 19.12)
+	menu._garage_page._walk_position = Vector3(-24.0, 1.75, 18.96)
+	menu._garage_page._resolve_deck_walk(foot)
+	assert(menu._garage_page._walk_position.y > 1.75)
+	assert(menu._garage_page._walk_position.y < 2.0)
+	var stair_mid: Vector3 = Vector3(-24.0, 4.1, 14.6)
+	menu._garage_page._walk_position = Vector3(-24.0, 4.1, 14.4)
+	menu._garage_page._resolve_deck_walk(stair_mid)
+	assert(menu._garage_page._walk_position.y > 3.5)
+	assert(menu._garage_page._walk_position.y < 5.5)
+	# Reaching upper landing grants actual 3D viewing level.
+	var upper_stair: Vector3 = Vector3(-24.0, 6.88, 10.72)
+	menu._garage_page._walk_position = Vector3(-24.0, 6.88, 10.54)
+	menu._garage_page._resolve_deck_walk(upper_stair)
+	assert(is_equal_approx(
+		menu._garage_page._walk_position.y, 1.75 + menu._garage_page.DECK_SURFACE_Y
+	))
+	# Do not walk through guardrails or fall from the elevated platform.
+	var upper_deck: Vector3 = Vector3(-18.0, 6.95, 4.0)
+	menu._garage_page._walk_position = Vector3(-11.0, 6.95, 4.0)
+	menu._garage_page._resolve_deck_walk(upper_deck)
+	assert(menu._garage_page._walk_position.is_equal_approx(upper_deck))
+	menu._garage_page._walk_position = Vector3(0, 1.75, 11.0)
+	# The enlarged empty shell must be navigable near the new perimeter,
+	# without allowing a thumbstick to push the camera through its walls.
+	menu._garage_page._walk_position = Vector3(99.0, 1.75, -99.0)
+	menu._garage_page._toggle_walk()
+	menu._garage_page._process(0.016)
+	assert(menu._garage_page._walk_position.x < 25.0)
+	assert(menu._garage_page._walk_position.z > -22.0)
+	menu._garage_page._toggle_walk()
+	menu._garage_page._walk_position = Vector3(0.0, 1.75, 11.0)
 	assert(menu._garage_page._world.get_node("ChassisContactShadow") != null)
 	assert(menu._garage_page._world.get_node("PlatformContactShadow") != null)
 	assert(menu._garage_page._reflection_probe.update_mode == ReflectionProbe.UPDATE_ONCE)
 	assert(menu._garage_page._reflection_probe.box_projection)
-	assert(menu._garage_page._hero_key.visible)
-	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 0.72))
+	assert(not menu._garage_page._hero_key.visible)
+	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 0.85))
 	menu._garage_page._set_graphics_detail(true)
 	assert(menu._garage_page._quality_detail)
 	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 1.0))
-	assert(menu._garage_page._hero_key.shadow_enabled)
-	assert(menu._garage_page._reflection_probe.visible)
+	assert(not menu._garage_page._hero_key.shadow_enabled)
+	assert(not menu._garage_page._reflection_probe.visible)
 	assert(menu._garage_page._garage_viewport.anisotropic_filtering_level == Viewport.ANISOTROPY_8X)
 	menu._garage_page._set_graphics_detail(false)
 	assert(not menu._garage_page._hero_key.shadow_enabled)
-	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 0.72))
+	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 0.85))
 	assert(menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot") != null)
 	var workshop: Node3D = menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot/LiveWorkshopEquipment")
 	assert(workshop != null)
@@ -104,10 +198,66 @@ func _run() -> void:
 	menu._garage_page._toggle_walk()
 	assert(menu._garage_page._walk_mode)
 	assert(not menu._garage_page._tools_panel.visible)
-	assert(menu._garage_page._walk_pad.visible)
+	assert(menu._garage_page._walk_joysticks.visible)
+	var pad: Control = menu._garage_page._walk_joysticks
+	assert(pad.get_node_or_null(".") != null)
+	var radius: float = float(pad.call("get_radius"))
+	var origin: Vector2 = pad.get_global_rect().position
+	var left_center: Vector2 = origin + Vector2(pad.call("get_stick_center", false))
+	var right_center: Vector2 = origin + Vector2(pad.call("get_stick_center", true))
+	# Both fingers start neutral, then independently move and look.
+	var left_down := InputEventScreenTouch.new()
+	left_down.index = 11
+	left_down.position = left_center
+	left_down.pressed = true
+	menu._garage_page._input(left_down)
+	assert(int(pad.get("move_finger")) == 11)
+	var right_down := InputEventScreenTouch.new()
+	right_down.index = 12
+	right_down.position = right_center
+	right_down.pressed = true
+	menu._garage_page._input(right_down)
+	assert(int(pad.get("look_finger")) == 12)
+	var left_drag := InputEventScreenDrag.new()
+	left_drag.index = 11
+	left_drag.position = left_center + Vector2(0.55 * radius, -0.81 * radius)
+	menu._garage_page._input(left_drag)
+	var right_drag := InputEventScreenDrag.new()
+	right_drag.index = 12
+	right_drag.position = right_center + Vector2(0.62 * radius, -0.61 * radius)
+	menu._garage_page._input(right_drag)
+	var movement: Vector2 = pad.get("move_axis")
+	var viewing: Vector2 = pad.get("look_axis")
+	assert(movement.x > 0.3 and movement.y < -0.4)
+	assert(viewing.x > 0.3 and viewing.y < -0.3)
+	var old_pos: Vector3 = menu._garage_page._walk_position
+	var old_yaw: float = menu._garage_page._walk_yaw
+	menu._garage_page._process(0.12)
+	assert(menu._garage_page._walk_position.distance_to(old_pos) > 0.1)
+	assert(menu._garage_page._walk_yaw < old_yaw)
+	assert(menu._garage_page._walk_pitch > 0.03)
+	# Releasing one finger must NOT kill the other stick's tracking.
+	var left_up := InputEventScreenTouch.new()
+	left_up.index = 11
+	left_up.position = left_center
+	left_up.pressed = false
+	menu._garage_page._input(left_up)
+	assert(Vector2(pad.get("move_axis")) == Vector2.ZERO)
+	assert(int(pad.get("look_finger")) == 12)
+	assert(Vector2(pad.get("look_axis")).length() > 0.3)
+	var right_up := InputEventScreenTouch.new()
+	right_up.index = 12
+	right_up.position = right_center
+	right_up.pressed = false
+	menu._garage_page._input(right_up)
+	assert(Vector2(pad.get("look_axis")) == Vector2.ZERO)
+	# Back navigation resets all input states and hides both controls.
 	menu._garage_page._toggle_walk()
 	assert(not menu._garage_page._walk_mode)
-	assert(menu._garage_page._tools_panel.visible)
+	assert(not pad.visible)
+	assert(int(pad.get("move_finger")) == -1)
+	assert(int(pad.get("look_finger")) == -1)
+	assert(not menu._garage_page._tools_panel.visible)
 	menu._garage_page._show_tuning()
 	assert(menu._garage_page._bay_state == "tuning")
 	menu._garage_page._show_cosmetic()

@@ -73,3 +73,46 @@ For visual QA, Android Actions captures `NeonFoundry-WorkbenchQC.png` from a tar
 The garage scene now uses ACES (Godot 4.7), reduced flat ambient/directional fill and a focused, unshadowed hero spot in both modes. Godot Mobile-supported glow and depth fog are conservatively enabled, and a single lightweight shader grounds the vehicle and platform with soft radial alpha contact shadows rather than unsupported SSAO. The dedicated 3D SubViewport explicitly uses 2× MSAA and 4× anisotropic filtering (8× in Detail). The existing Balanced profile retains 0.72 render scale and no dynamic shadow maps; Detail also enables one shadowed spotlight and a box-projected UPDATE_ONCE ReflectionProbe. Probe update is not per-frame, and it is not planar floor reflection. These are rendering targets pending actual device profiling.
 
 **LightmapGI is not yet baked.** The current room is procedurally generated without dedicated editor-baked UV2 charts; simply inserting a LightmapGI node does nothing useful. The next Blender stage must export coherent static-room meshes with UV2 and bevel/weighted normals, bake lighting in the Godot editor, and keep moving lift arms, the robotic scanner and the car outside the static bake. Do not claim GI benefits before a visible verified lightmap exists.
+
+## Stage 01 — six-surface architectural shell, isolated for visual review
+
+Source of truth: `tools/build_garage_shell.py` generates an editable `build/garage_shell_stage01.blend` and the corresponding embedded-PBR `game/assets/garage/shell/shell_stage01.glb`. The scene contains exactly 4 walls, 1 floor, and 1 ceiling (six mesh objects). Dimensions/coordinates match the existing Foundry Lot (~39.8 m wide, 32.3 m long, 14.7 m tall); physical panel cladding and floor/ceiling cassettes create genuine surface seams and small bevel highlights without girders or decorative machinery. Blender creates original albedo, shallow OpenGL normal, and separate physically varying roughness maps. All texture rights are original project work; no CC0 package dependency is needed for this shell.
+
+For this **single-stage review build only**, the previous turntable, Forge vehicle, robot, lifts, props, old room and neon furniture are preserved but hidden; this is intentional so the user can inspect geometry and materials in isolation. Garage navigation and first-person walking remain available. Lighting was reset to a modest one-key, one-fill arrangement; fog, glow, live shadow maps, and repeated texture overlays are disabled. The surface GLB must be generated before Godot imports project resources in CI/Android. Mesh is intended to be reused when subsequent milestones add girders, interior walls, and equipment one at a time.
+
+**Stage 02 is NOT implemented:** no structural girders or partitions are added here. The next construction step requires explicit visual approval of the wall, floor and ceiling material quality and FPS.
+
+### Axis correction discovered by visual inspection
+
+The first Vulkan screenshot exposed a Blender-to-Godot coordinate error: the floor appeared as a giant wall. The Blender generator now pre-rotates its Godot-oriented coordinates by +90° about Blender X before glTF export, compensating for Blender Z-up to Godot Y-up. Added bounding-box assertions for the six imported meshes, including the floor horizontal dimensions and ceiling Y height. The initial Build 96 is NOT approved.
+
+### Surface-material refinement after Android visual capture
+
+The second Android review revealed too much block-like procedural variation in Stage 01's floor/wall finishes. The generator used repeated nearest-neighbor noise cells and incomplete smoothing. It now uses continuous, smooth, periodic bilinear interpolated noise; the epoxy floor is a largely matte, neutral gray, the walls have restrained ceramic/paint grain, and the ceiling uses a subtle dark powder coat. Roughness modulation and micro-normal amplitudes were reduced, with physical panel seams left as distinct Blender geometry. No new machinery or girders were introduced.
+
+## Stage 01 — PBR material correction based on Android 103 FPS screenshot
+
+The user-provided Stage 01 wall screenshot showed 103 FPS but severe repetitive vertical corrugation. The culprit was a high-frequency sinusoidal striae pattern and independent local UVs on each tile. The construction geometry was sound, so the new material pass changes **only the six shell meshes' source texture data and world-space atlas UVs**, leaving every lift/girder/partition absent for this stage.
+
+- Floor: one deterministic 2048×2048 original atlas spanning ~39.8×32.3m, with mostly matte epoxy/concrete roughness, soft glossy oil streaks, understated thruster scuffs, physically painted graphite/amber clearance stripes around the future turntable, and subtle grooves aligned to existing panel junctions. This is a paint marking, not a turntable object.
+- Long walls and side walls: separate 1024 atlases with no hard-frequency vertical line pattern. Surface geometry remains broad satin-composite panels with mild color/roughness variation.
+- Ceiling: independent 1024 rough powder-coated acoustic-steel atlas.
+- All four surfaces: **glTF packed ORM** R=baked cavity occlusion, G=roughness, B=metallic, created offline by Blender and connected to Principled BSDF and Blender's glTF Material Output node. Panel seams, rivet dimples and subtle microroughness are **precomputed high-resolution signed height relief converted into Y+ OpenGL tangent-space normal maps**, not extra meshes or runtime displacement. This is a procedural relief-map bake, not yet a Cycles high-poly-to-low-poly mesh bake.
+- UVs: contiguous atlas coordinates derived from the world-space panel positions before Blender's axis conversion, eliminating identical repeated patches on every segment.
+- Performance: no additional runtime geometry, no reintroduced dynamic fog/glow/shadows, still a six-surface material review. Original shell .blend, GLB and image maps are retained for inspection.
+- Export validation: `tools/validate_shell_pbr.py` inspects the binary GLB and verifies the four real albedo, packed ORM and normal materials, and ensures the AO and metallic/roughness share the exact same GLB image source.
+
+Do not advance to girders and interior wall until this shell appearance and real phone FPS are approved.
+
+## Stage 01 — Two-thumb Android garage navigation
+
+Double analog joysticks replace the earlier four-button walk panel:
+- Left cyan joystick: analog forward/backward **and** left/right strafe relative to the current camera heading.
+- Right amber joystick: independent yaw and up/down head pitch, with limits to avoid camera flipping.
+- Godot receives distinct touch IDs for each finger; releasing either stick resets that axis without releasing the other. Both sticks have a dead zone, move/turn responsiveness, and follow the fingertip only within a bounded circular travel region.
+- Dynamic, landscape-relative joystick positions are in the lower left and right above the bottom navigation bar; the camera return button and FPS readout remain available. Desktop mouse-look plus WASD/arrows remain supported.
+- Stage 01 room shell remains visible with all original equipment hidden. Existing visual quality settings, packed ORM textures, and geometry are unchanged; no new expensive rendering effects.
+- In the current empty shell, the player can walk freely across the center. The previous turntable collision perimeter is applied again only when the original interior equipment is made visible.
+- The menu smoke test explicitly simulates two simultaneous finger IDs and verifies independent axes, actual world translation, yaw/pitch, release isolation, and reset on exit.
+
+The user-supplied floor-plan blueprint is a **future placement guide**, not a direction to add props in this Stage 01 control pass. See `docs/GARAGE_SITE_ZONES.md`.

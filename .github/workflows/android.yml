@@ -2,7 +2,7 @@ name: Android APK
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass', 'garage/stage01-shell-surfaces', 'garage/stage01-pbr-orm-bake', 'garage/dual-thumb-walk-controls', 'garage/stage01-expanded-footprint', 'garage/stage02-observation-deck']
     paths:
       - 'game/**'
       - 'tools/**'
@@ -103,6 +103,60 @@ jobs:
           assert Path('build/menu_hero.blend').stat().st_size>100000
           print('NEON_FOUNDRY_RENDERED_ART_OK 1600x900')
           PY
+      - name: Restore Stage 01 shell cache
+        uses: actions/cache@v4
+        id: shell-cache
+        with:
+          path: |
+            game/assets/garage/shell/shell_stage01.glb
+            game/assets/garage/shell/observation_deck_stage02.glb
+            build/garage_shell_stage01.blend
+            build/garage_observation_deck_stage02.blend
+            build/shell_source/
+          key: foundry-shell-blender52-${{ hashFiles('tools/build_garage_shell.py', 'tools/garage_shell_pbr.py', 'tools/build_garage_observation_deck.py') }}
+      - name: Build isolated Blender Stage 01 hangar shell
+        if: steps.shell-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          if [[ ! -x /tmp/blender-5.2.4-linux-x64/blender ]]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq libegl1 libgl1 libx11-6 libxrender1 libxi6
+            curl --fail --location --retry 6 --retry-all-errors --retry-delay 5 https://download.blender.org/release/Blender5.2/blender-5.2.4-linux-x64.tar.xz -o /tmp/blender-shell.tar.xz
+            tar -xf /tmp/blender-shell.tar.xz -C /tmp
+          fi
+          mkdir -p build game/assets/garage/shell
+          /tmp/blender-5.2.4-linux-x64/blender --background --threads 4 --python tools/build_garage_shell.py 2>&1 | tee build/garage-shell-generator.log
+          grep -q NEON_FOUNDRY_SHELL_STAGE01_OK build/garage-shell-generator.log
+          test -s game/assets/garage/shell/shell_stage01.glb
+          test -s build/garage_shell_stage01.blend
+          test -s game/assets/garage/shell/observation_deck_stage02.glb
+          test -s build/garage_observation_deck_stage02.blend
+          grep -q NEON_FOUNDRY_DECK_STAGE02_OK build/garage-shell-generator.log
+      - name: Verify Stage 01 shell artifact and preserve GLB for viewer
+        run: |
+          set -euo pipefail
+          test -s game/assets/garage/shell/shell_stage01.glb
+          test -s build/garage_shell_stage01.blend
+          cp game/assets/garage/shell/shell_stage01.glb build/NeonFoundry-Shell-Stage01.glb
+          cp game/assets/garage/shell/observation_deck_stage02.glb build/NeonFoundry-ObservationDeck-Stage02.glb
+          cp build/garage_observation_deck_stage02.blend build/NeonFoundry-ObservationDeck-Stage02.blend
+          python3 - <<'PY'
+          from pathlib import Path
+          data=Path("build/NeonFoundry-Shell-Stage01.glb").read_bytes()
+          assert data[:4] == b"glTF"
+          print("NEON_FOUNDRY_STAGE01_GLTF_INCLUDED")
+          PY
+      - name: Verify Stage 01 packed ORM and normal bake
+        run: |
+          set -euo pipefail
+          python3 tools/validate_shell_pbr.py
+          test -s build/shell_source/NF_SHELL_floor_ORM.png
+          test -s build/shell_source/NF_SHELL_floor_bakedNormalGL.png
+      - name: Verify separate deck GLB geometry
+        run: |
+          set -euo pipefail
+          python3 tools/validate_observation_deck.py
       - name: Import and smoke-test project
         run: |
           set -euo pipefail
@@ -127,7 +181,7 @@ jobs:
           ICD="$(find /usr/share/vulkan/icd.d -name 'lvp_icd*.json' -print -quit)"
           test -n "$ICD"
           export VK_ICD_FILENAMES="$ICD"
-          for screen in title menu settings garage workshop workbench store mode lobby results; do
+          for screen in title menu settings garage workshop workbench deck deckwalk store mode lobby results; do
             timeout 120 xvfb-run -a godot --audio-driver Dummy --path game --rendering-method mobile --rendering-driver vulkan --resolution 1280x720 res://scenes/title_menu.tscn -- --capture-"$screen" 2>&1 | tee "build/menu-capture-$screen.log"
             if grep -E 'SCRIPT ERROR:|ERROR:' "build/menu-capture-$screen.log"; then exit 1; fi
             grep -q NEON_FOUNDRY_MENU_CAPTURE_OK "build/menu-capture-$screen.log"
@@ -137,6 +191,8 @@ jobs:
           test -s build/NeonFoundry-Settings.png
           test -s build/NeonFoundry-WorkshopWalk.png
           test -s build/NeonFoundry-WorkbenchQC.png
+          test -s build/NeonFoundry-ObservationDeck.png
+          test -s build/NeonFoundry-ObservationOverlook.png
           for png in Garage Store RaceMode RaceLobby RaceResults; do
             test -s "build/NeonFoundry-$png.png"
           done

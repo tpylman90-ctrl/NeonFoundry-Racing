@@ -24,145 +24,35 @@ SOURCE.mkdir(parents=True, exist_ok=True)
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
 # Match the established Godot Foundry Lot. Units are metres (not centimetres).
-LEFT, RIGHT = -19.9, 19.9
-BACK, FRONT = -17.9, 14.4
-FLOOR_Y, CEILING_Y = -0.08, 14.70
+# Enlarged for a three-bay garage plus assembly, diagnostics and showroom.
+# Maintain X=0 and the original -1.75m longitudinal center so the camera
+# spawn and existing (currently hidden) equipment do not shift unexpectedly.
+LEFT, RIGHT = -27.0, 27.0
+BACK, FRONT = -23.75, 20.25
+FLOOR_Y, CEILING_Y = -0.08, 16.20
+W = RIGHT - LEFT
+D = FRONT - BACK
+CENTER_Z = (BACK + FRONT) * 0.5
+FLOOR_BAYS_X, FLOOR_BAYS_Z = 14, 11
+WALL_BAYS_LONG, WALL_BAYS_SIDE = 14, 11
+WALL_TIERS = 4
 
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
 bpy.context.scene.unit_settings.system = "METRIC"
 bpy.context.scene.unit_settings.scale_length = 1.0
 
-rng = np.random.default_rng(20261114)
+# Stage-01 materials have their own offline high-resolution PBR bake.
+# This keeps mesh layout independent of visual detailing.
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from garage_shell_pbr import shell_material
 
+MAT_FLOOR = shell_material("NF/Shell/Floor • oil-streaked epoxy", "floor", 1.0, SOURCE)
+MAT_WALL_LONG = shell_material("NF/Shell/Wall • matte composite long", "wall_long", 1.0, SOURCE)
+MAT_WALL_SIDE = shell_material("NF/Shell/Wall • matte composite side", "wall_side", 1.0, SOURCE)
+MAT_CEILING = shell_material("NF/Shell/Ceiling • acoustic steel", "ceiling", 1.0, SOURCE)
 
-def smooth_noise(w: int, seed: int, scale: int) -> np.ndarray:
-    # Periodic multiscale field: no visible seams after texture wrap.
-    random = np.random.default_rng(seed)
-    base = random.random((scale, scale)).astype(np.float32)
-    rep = max(1, w // scale)
-    up = np.repeat(np.repeat(base, rep, axis=0), rep, axis=1)
-    up = up[:w, :w]
-    # Periodic low-pass, flat and cheap to generate in Blender's NumPy.
-    for n in (3, 6, 12):
-        up = (
-            up + np.roll(up, n, axis=0) + np.roll(up, -n, axis=0)
-            + np.roll(up, n, axis=1) + np.roll(up, -n, axis=1)
-        ) / 5.0
-    up -= up.mean()
-    up /= max(float(up.std()), 0.0001)
-    return up
-
-
-def save_map(name: str, rgb: np.ndarray, colorspace: str):
-    size = rgb.shape[0]
-    pixels = np.ones((size, size, 4), dtype=np.float32)
-    pixels[:, :, 0:3] = np.clip(rgb, 0.0, 1.0).astype(np.float32)
-    image = bpy.data.images.new(name=name, width=size, height=size, alpha=True)
-    image.pixels.foreach_set(pixels.reshape(-1))
-    image.filepath_raw = str(SOURCE / f"{name}.png")
-    image.file_format = "PNG"
-    image.save()
-    image.colorspace_settings.name = colorspace
-    image.pack()
-    return image
-
-
-def make_maps(kind: str, count: int) -> tuple:
-    x, y = np.meshgrid(
-        np.linspace(0, math.tau, count, endpoint=False, dtype=np.float32),
-        np.linspace(0, math.tau, count, endpoint=False, dtype=np.float32),
-    )
-    low = smooth_noise(count, 173 + len(kind), 16)
-    med = smooth_noise(count, 749 + len(kind), 64)
-    fine = smooth_noise(count, 951 + len(kind), 128)
-    if kind == "floor":
-        # Oil-tinted industrial epoxy with subtle, physically plausible patches.
-        base = np.array([0.27, 0.315, 0.334], dtype=np.float32)
-        rough = 0.64 + 0.065 * low + 0.03 * med
-        height = 0.13 * low + 0.055 * med + 0.01 * fine
-        stains = np.clip(0.13 * low + 0.035 * med, -0.16, 0.13)
-        color = base + stains[..., None] * np.array([0.12, 0.16, 0.16])
-        # Hairline abrasion, not black rust blotches.
-        scuff = (np.sin(37.0 * x + 3.0 * np.sin(2.0 * y)) > 0.986).astype(np.float32)
-        color += scuff[..., None] * 0.010
-        rough += scuff * 0.035
-    elif kind == "wall":
-        # Brushed painted industrial sheet/ceramic-finished concrete panels.
-        base = np.array([0.39, 0.435, 0.454], dtype=np.float32)
-        striae = 0.045 * np.sin(53.0 * x + np.sin(3.0 * y))
-        color = base + (0.012 * low + 0.009 * med + striae * 0.18)[..., None]
-        rough = 0.71 + 0.026 * med + 0.012 * fine
-        height = 0.035 * low + 0.028 * med + 0.008 * striae
-    else:
-        # Powder-coated steel acoustic ceiling cassettes.
-        base = np.array([0.265, 0.30, 0.323], dtype=np.float32)
-        ribs = 0.025 * np.cos(12.0 * x)
-        color = base + (0.015 * low + ribs)[..., None]
-        rough = 0.73 + 0.034 * low + 0.017 * fine
-        height = 0.025 * low + 0.02 * med + 0.016 * np.sin(12.0 * x)
-
-    rough = np.clip(rough, 0.43, 0.91)
-    rough_rgb = np.repeat(rough[..., None], 3, axis=2)
-    # Shallow OpenGL (+Y) tangent-space normals, no exaggerated raised bumps.
-    d_y, d_x = np.gradient(height.astype(np.float32))
-    strength = 0.18 if kind == "floor" else 0.15
-    nx = -d_x * strength
-    ny = -d_y * strength
-    nz = np.ones_like(nx)
-    normal = np.stack([nx, ny, nz], axis=-1)
-    normal /= np.sqrt(np.sum(normal ** 2, axis=-1))[..., None]
-    normal = normal * 0.5 + 0.5
-    return (
-        save_map(f"NF_SHELL_{kind}_albedo", color, "sRGB"),
-        save_map(f"NF_SHELL_{kind}_roughness", rough_rgb, "Non-Color"),
-        save_map(f"NF_SHELL_{kind}_normalGL", normal, "Non-Color"),
-    )
-
-
-def material(name: str, kind: str, metal: float, texture_meters: float):
-    size = 1024 if kind == "floor" else 512
-    albedo, roughness, normal = make_maps(kind, size)
-    mat = bpy.data.materials.new(name)
-    mat.diffuse_color = (0.55, 0.6, 0.62, 1)
-    mat.use_nodes = True
-    n = mat.node_tree.nodes
-    n.clear()
-    links = mat.node_tree.links
-    out = n.new("ShaderNodeOutputMaterial")
-    out.location = (650, 0)
-    bsdf = n.new("ShaderNodeBsdfPrincipled")
-    bsdf.location = (320, 0)
-    bsdf.inputs["Metallic"].default_value = metal
-    bsdf.inputs["Roughness"].default_value = 0.65
-    bsdf.inputs["IOR"].default_value = 1.45
-    links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
-    def tex(image, yy):
-        node = n.new("ShaderNodeTexImage")
-        node.image = image
-        node.interpolation = "Linear"
-        node.extension = "REPEAT"
-        node.location = (-420, yy)
-        return node
-    t_color = tex(albedo, 250)
-    t_rough = tex(roughness, 0)
-    t_normal = tex(normal, -240)
-    normal_map = n.new("ShaderNodeNormalMap")
-    normal_map.space = "TANGENT"
-    normal_map.inputs["Strength"].default_value = 0.40
-    normal_map.location = (-70, -240)
-    links.new(t_color.outputs["Color"], bsdf.inputs["Base Color"])
-    links.new(t_rough.outputs["Color"], bsdf.inputs["Roughness"])
-    links.new(t_normal.outputs["Color"], normal_map.inputs["Color"])
-    links.new(normal_map.outputs["Normal"], bsdf.inputs["Normal"])
-    mat["surface"] = kind
-    mat["uv_texel_metres"] = texture_meters
-    return mat
-
-
-MAT_WALL = material("NF/Shell/Wall — satin ceramic", "wall", 0.17, 3.0)
-MAT_FLOOR = material("NF/Shell/Floor — epoxy", "floor", 0.07, 3.5)
-MAT_CEILING = material("NF/Shell/Ceiling — powder coated", "ceiling", 0.23, 3.0)
 MAT_GAP = bpy.data.materials.new("NF/Shell/Panel joints — matte graphite")
 MAT_GAP.diffuse_color = (0.095, 0.116, 0.133, 1)
 MAT_GAP.use_nodes = True
@@ -171,20 +61,34 @@ MAT_GAP.node_tree.nodes.get("Principled BSDF").inputs["Roughness"].default_value
 
 
 def uv_metric(obj, density: float) -> None:
-    # Every texture repeats in metres. No box-face stretching.
+    # World-space atlas UVs ensure each cladding panel samples a DIFFERENT
+    # part of the original packed maps (no repeated wallpaper/marble).
+    # Coordinates are evaluated before our Blender->Godot export transform.
+    surface = str(obj.data.materials[0].get("surface", ""))
     uv = obj.data.uv_layers.active or obj.data.uv_layers.new(name="UVMap")
+    loc = obj.location
     for poly in obj.data.polygons:
         normal = poly.normal
         axis = max(range(3), key=lambda k: abs(normal[k]))
         for loop_index in poly.loop_indices:
             vertex = obj.data.vertices[obj.data.loops[loop_index].vertex_index].co
-            if axis == 0:
-                coords = (vertex.y, vertex.z)
+            wx, wy, wz = vertex.x + loc.x, vertex.y + loc.y, vertex.z + loc.z
+            if surface in ("floor", "ceiling"):
+                coords = ((wx - LEFT) / (RIGHT - LEFT),
+                          (wz - BACK) / (FRONT - BACK))
+            elif surface.startswith("wall"):
+                if obj.name.startswith(("LEFT/", "RIGHT/")):
+                    along = (wz - BACK) / (FRONT - BACK)
+                else:
+                    along = (wx - LEFT) / (RIGHT - LEFT)
+                coords = (along, (wy - FLOOR_Y) / (CEILING_Y - FLOOR_Y))
+            elif axis == 0:
+                coords = (vertex.y / density, vertex.z / density)
             elif axis == 1:
-                coords = (vertex.x, vertex.z)
+                coords = (vertex.x / density, vertex.z / density)
             else:
-                coords = (vertex.x, vertex.y)
-            uv.data[loop_index].uv = (coords[0] / density, coords[1] / density)
+                coords = (vertex.x / density, vertex.y / density)
+            uv.data[loop_index].uv = coords
 
 
 def box(name: str, center: tuple, size: tuple, mat, bevel: float = 0.025):
@@ -222,15 +126,15 @@ def merge(name: str, objects: list):
 items: list[bpy.types.Object] = []
 
 # 1. Main floor panels; all geometry is real, not a texture over the old floor.
-floor_bits = [box("Floor/base slab", (0, -0.235, -1.75),
-                  (39.8, 0.27, 32.3), MAT_GAP, 0.035)]
-for i in range(10):
-    for j in range(8):
-        x = LEFT + (i + 0.5) * ((RIGHT - LEFT) / 10)
-        z = BACK + (j + 0.5) * ((FRONT - BACK) / 8)
+floor_bits = [box("Floor/base slab", (0, -0.235, CENTER_Z),
+                  (W, 0.27, D), MAT_GAP, 0.035)]
+for i in range(FLOOR_BAYS_X):
+    for j in range(FLOOR_BAYS_Z):
+        x = LEFT + (i + 0.5) * (W / FLOOR_BAYS_X)
+        z = BACK + (j + 0.5) * (D / FLOOR_BAYS_Z)
         floor_bits.append(box(f"Floor/epoxy bay {i}_{j}", (x, -0.076, z),
-            ((RIGHT - LEFT) / 10 - 0.045, 0.052,
-             (FRONT - BACK) / 8 - 0.045), MAT_FLOOR, 0.018))
+            (W / FLOOR_BAYS_X - 0.045, 0.052,
+             D / FLOOR_BAYS_Z - 0.045), MAT_FLOOR, 0.018))
 items.append(merge("SHELL_01_FLOOR", floor_bits))
 
 # 2. Fully enclosed walls, partitioned into physical panels with narrow
@@ -241,48 +145,58 @@ for side, along_x, sign in (
     ("LEFT", False, -1), ("RIGHT", False, +1),
 ):
     if along_x:
-        center = (0, HEIGHT / 2, BACK if sign < 0 else FRONT)
-        size = (RIGHT - LEFT, HEIGHT, 0.31)
-        n_bays = 10
+        center = (0, FLOOR_Y + HEIGHT / 2, BACK if sign < 0 else FRONT)
+        size = (W, HEIGHT, 0.31)
+        n_bays = WALL_BAYS_LONG
     else:
-        center = (LEFT if sign < 0 else RIGHT, HEIGHT / 2, -1.75)
-        size = (0.31, HEIGHT, FRONT - BACK)
-        n_bays = 8
+        center = (LEFT if sign < 0 else RIGHT, FLOOR_Y + HEIGHT / 2, CENTER_Z)
+        size = (0.31, HEIGHT, D)
+        n_bays = WALL_BAYS_SIDE
     bits = [box(f"{side}/backing", center, size, MAT_GAP, 0.045)]
     width = (RIGHT - LEFT) / n_bays if along_x else (FRONT - BACK) / n_bays
     for i in range(n_bays):
-        for tier in range(3):
+        for tier in range(WALL_TIERS):
             coord = ((LEFT if along_x else BACK) + (i + 0.5) * width)
-            y = FLOOR_Y + (tier + 0.5) * (HEIGHT / 3)
+            y = FLOOR_Y + (tier + 0.5) * (HEIGHT / WALL_TIERS)
             if along_x:
                 z = center[2] - sign * 0.17
                 loc = (coord, y, z)
-                dims = (width - 0.057, HEIGHT / 3 - 0.073, 0.045)
+                dims = (width - 0.057, HEIGHT / WALL_TIERS - 0.073, 0.045)
             else:
                 x = center[0] - sign * 0.17
                 loc = (x, y, coord)
-                dims = (0.045, HEIGHT / 3 - 0.073, width - 0.057)
+                dims = (0.045, HEIGHT / WALL_TIERS - 0.073, width - 0.057)
             bits.append(box(f"{side}/satin cladding {tier}_{i}", loc, dims,
-                            MAT_WALL, 0.017))
+                            (MAT_WALL_LONG if along_x else MAT_WALL_SIDE), 0.017))
     items.append(merge(f"SHELL_01_{side}_WALL", bits))
 
 # 3. Ceiling, separately tiled in a dark non-reflective architectural finish.
-roof_bits = [box("Ceiling/backing", (0, CEILING_Y + 0.15, -1.75),
-                 (39.8, 0.30, 32.3), MAT_GAP, 0.030)]
-for i in range(10):
-    for j in range(8):
-        x = LEFT + (i + 0.5) * ((RIGHT - LEFT) / 10)
-        z = BACK + (j + 0.5) * ((FRONT - BACK) / 8)
+roof_bits = [box("Ceiling/backing", (0, CEILING_Y + 0.15, CENTER_Z),
+                 (W, 0.30, D), MAT_GAP, 0.030)]
+for i in range(FLOOR_BAYS_X):
+    for j in range(FLOOR_BAYS_Z):
+        x = LEFT + (i + 0.5) * (W / FLOOR_BAYS_X)
+        z = BACK + (j + 0.5) * (D / FLOOR_BAYS_Z)
         roof_bits.append(box(f"Ceiling/acoustic cassette {i}_{j}",
             (x, CEILING_Y - 0.077, z),
-            ((RIGHT - LEFT) / 10 - 0.070, 0.060,
-             (FRONT - BACK) / 8 - 0.070), MAT_CEILING, 0.022))
+            (W / FLOOR_BAYS_X - 0.070, 0.060,
+             D / FLOOR_BAYS_Z - 0.070), MAT_CEILING, 0.022))
 items.append(merge("SHELL_01_CEILING", roof_bits))
 
 bpy.context.scene["nf_stage"] = 1
 bpy.context.scene["shell_wall_count"] = 4
-bpy.context.scene["shell_dimensions"] = "39.8m x 32.3m x 14.78m"
-bpy.context.scene["static_bake_status"] = "UV1 only - UV2 and LightmapGI next stage"
+bpy.context.scene["shell_dimensions"] = f"{W:.1f}m x {D:.1f}m x {CEILING_Y - FLOOR_Y:.2f}m"
+bpy.context.scene["floor_tile_counts"] = f"{FLOOR_BAYS_X} x {FLOOR_BAYS_Z}"
+bpy.context.scene["static_bake_status"] = "PBR/ORM microdetails texture-baked on UV1; UV2 GI next milestone"
+bpy.context.scene["pbr_packing"] = "Occlusion R, Roughness G, Metallic B"
+bpy.context.scene["normal_source"] = "Procedural high-resolution relief prebake, OpenGL tangent space"
+
+# The scene above uses Godot-style X/Y/Z coordinates intentionally.
+# Blender exports from Z-up to glTF Y-up, so pre-rotate +90 degrees around
+# Blender X. The combined transform preserves Godot Y as physical height.
+from mathutils import Matrix
+for node in items:
+    node.matrix_world = Matrix.Rotation(math.pi / 2.0, 4, "X") @ node.matrix_world
 
 # Preserve editable Blender source, including source image datablocks.
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "build/garage_shell_stage01.blend"))
@@ -292,8 +206,15 @@ for obj in items:
 bpy.context.view_layer.objects.active = items[0]
 bpy.ops.export_scene.gltf(filepath=str(OUTPUT), export_format="GLB",
     use_selection=True, export_apply=True, export_cameras=False,
-    export_lights=False)
+    export_lights=False, export_tangents=True)
 assert OUTPUT.stat().st_size > 20_000, "GLB is unexpectedly small"
 assert len(items) == 6, "Expected exactly four walls, one ceiling, one floor"
-print("NEON_FOUNDRY_SHELL_STAGE01_OK meshes=6 assets=original_pbr blend=editable glb=%d" %
+print("NEON_FOUNDRY_SHELL_STAGE01_OK meshes=6 assets=original_ORM_bakedNormals blend=editable glb=%d" %
       OUTPUT.stat().st_size)
+
+# Generate the independent architectural mezzanine from the same pinned
+# Blender installation and cache, after saving the approved six-mesh shell.
+# This keeps the expensive shell PBR bake stable and makes deck removal/review
+# independent of the original user-approved room.
+import runpy
+runpy.run_path(str(ROOT / "tools/build_garage_observation_deck.py"), run_name="__main__")

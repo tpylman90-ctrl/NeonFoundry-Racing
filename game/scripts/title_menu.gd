@@ -65,6 +65,21 @@ func _ready() -> void:
 		_garage_page.set("_walk_position", Vector3(-4.0, 1.75, -10.9))
 		_garage_page.set("_walk_yaw", 0.12)
 		_capture_screen("NeonFoundry-WorkbenchQC.png", "garage")
+	elif "--capture-deck" in OS.get_cmdline_user_args():
+		_open_section("garage")
+		_garage_page.call("_toggle_walk")
+		# From the central aisle, facing west into the raised observation
+		# structure. Under-deck clearance and handrails are both visible.
+		_garage_page.set("_walk_position", Vector3(-6.5, 1.75, 5.6))
+		_garage_page.set("_walk_yaw", 1.57)
+		_garage_page.set("_walk_pitch", 0.26)
+		_capture_screen("NeonFoundry-ObservationDeck.png", "garage")
+	elif "--capture-deckwalk" in OS.get_cmdline_user_args():
+		_open_section("garage")
+		_garage_page.call("_toggle_walk")
+		_garage_page.set("_walk_position", Vector3(-19.0, 6.95, 5.2))
+		_garage_page.set("_walk_yaw", 0.0)
+		_capture_screen("NeonFoundry-ObservationOverlook.png", "garage")
 	elif "--capture-store" in OS.get_cmdline_user_args():
 		_open_section("store")
 		_capture_screen("NeonFoundry-Store.png", "module")

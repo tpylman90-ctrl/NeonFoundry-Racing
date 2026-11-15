@@ -9,6 +9,25 @@ const WHITE: Color = Color("eef4f6")
 const MUTED: Color = Color("9aafc0")
 const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
 const WorkshopScript = preload("res://scripts/garage_workshop.gd")
+const DualJoystickScript = preload("res://scripts/garage_dual_joystick.gd")
+const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
+const DECK_STAGE02_PATH: String = "res://assets/garage/shell/observation_deck_stage02.glb"
+# The viewing deck is above the front-left diagnostics and cell-swap zone.
+const DECK_X0: float = -25.65
+const DECK_X1: float = -12.05
+const DECK_Z0: float = 2.35
+const DECK_Z1: float = 10.65
+const DECK_SURFACE_Y: float = 5.20
+const DECK_STAIR_X0: float = -25.3
+const DECK_STAIR_X1: float = -22.6
+const DECK_STAIR_TOP_Z: float = 10.65
+const DECK_STAIR_BOTTOM_Z: float = 19.05
+const WALK_EYE_HEIGHT: float = 1.75
+const STAGE01_REVIEW: bool = true
+const SHELL_HALF_WIDTH: float = 27.0
+const SHELL_REAR: float = -23.75
+const SHELL_FRONT: float = 20.25
+const WALL_WALK_CLEARANCE: float = 2.2
 
 var _world: Node3D
 var _camera: Camera3D
@@ -28,9 +47,8 @@ var _stage_status: Label
 var _walk_mode: bool = false
 var _walk_position: Vector3 = Vector3(0, 1.75, 11)
 var _walk_yaw: float = 0.0
-var _walk_forward: float = 0.0
-var _walk_turn: float = 0.0
-var _walk_pad: PanelContainer
+var _walk_pitch: float = 0.0
+var _walk_joysticks: Control
 var _walk_toggle: Button
 var _workshop: Node3D
 var _equipment_panel: PanelContainer
@@ -47,6 +65,9 @@ var _accent_lights: Array[OmniLight3D] = []
 var _garage_environment: Environment
 var _reflection_probe: ReflectionProbe
 var _contact_shadow_material: ShaderMaterial
+var _legacy_room: Node3D
+var _shell_stage: Node3D
+var _observation_deck: Node3D
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -60,18 +81,88 @@ func _process(delta: float) -> void:
 	if _performance_label != null and _performance_samples % 18 == 0:
 		_performance_label.text = "MOBILE VULKAN  /  FPS %d" % Engine.get_frames_per_second()
 	if _walk_mode:
-		_walk_yaw += _walk_turn * delta * 1.75
-		_walk_position += Vector3(-sin(_walk_yaw), 0, -cos(_walk_yaw)) * _walk_forward * delta * 4.6
-		_walk_position.x = clampf(_walk_position.x, -17.0, 17.0)
-		_walk_position.z = clampf(_walk_position.z, -15.0, 14.0)
-		var ground_radius: float = Vector2(_walk_position.x, _walk_position.z).length()
-		if ground_radius < 6.35:
-			var safe: Vector2 = Vector2(_walk_position.x, _walk_position.z).normalized() * 6.35
-			if ground_radius < 0.01:
-				safe = Vector2(0, 6.35)
-			_walk_position.x = safe.x
-			_walk_position.z = safe.y
+		var move_axis: Vector2 = _walk_joysticks.get("move_axis")
+		var look_axis: Vector2 = _walk_joysticks.get("look_axis")
+		# WASD/arrow keys remain useful in the Godot editor and desktop CI.
+		var keyboard: Vector2 = Vector2.ZERO
+		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+			keyboard.y -= 1.0
+		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+			keyboard.y += 1.0
+		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+			keyboard.x -= 1.0
+		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+			keyboard.x += 1.0
+		var direction: Vector2 = (move_axis + keyboard).limit_length(1.0)
+		# Independent right thumb changes yaw AND vertical eye angle.
+		_walk_yaw -= look_axis.x * delta * 2.30
+		_walk_pitch = clampf(_walk_pitch - look_axis.y * delta * 1.55, -1.10, 1.10)
+		var forward: Vector3 = Vector3(-sin(_walk_yaw), 0.0, -cos(_walk_yaw))
+		var strafe: Vector3 = Vector3(cos(_walk_yaw), 0.0, -sin(_walk_yaw))
+		var old_walk_position: Vector3 = _walk_position
+		_walk_position += (strafe * direction.x - forward * direction.y) * delta * 4.6
+		_walk_position.x = clampf(
+			_walk_position.x, -SHELL_HALF_WIDTH + WALL_WALK_CLEARANCE,
+			SHELL_HALF_WIDTH - WALL_WALK_CLEARANCE
+		) if STAGE01_REVIEW else clampf(_walk_position.x, -17.0, 17.0)
+		_walk_position.z = clampf(
+			_walk_position.z, SHELL_REAR + WALL_WALK_CLEARANCE,
+			SHELL_FRONT - WALL_WALK_CLEARANCE
+		) if STAGE01_REVIEW else clampf(_walk_position.z, -15.0, 13.8)
+		# The old showroom turntable is hidden during Stage 01. Let testers
+		# walk freely across the empty floor. Restore its radius guard later.
+		if not STAGE01_REVIEW:
+			var ground_radius: float = Vector2(_walk_position.x, _walk_position.z).length()
+			if ground_radius < 6.35:
+				var safe: Vector2 = Vector2(_walk_position.x, _walk_position.z).normalized() * 6.35
+				if ground_radius < 0.01:
+					safe = Vector2(0, 6.35)
+				_walk_position.x = safe.x
+				_walk_position.z = safe.y
+		_resolve_deck_walk(old_walk_position)
 	_refresh_camera(delta)
+
+func _point_inside_horizontal(pos: Vector3, xlo: float, xhi: float,
+		zlo: float, zhi: float) -> bool:
+	return pos.x >= xlo and pos.x <= xhi and pos.z >= zlo and pos.z <= zhi
+
+
+func _resolve_deck_walk(previous: Vector3) -> void:
+	# Floor-level player can pass underneath the mezzanine. No teleport
+	# to its platform when crossing the same X/Z from below.
+	if _observation_deck == null or not STAGE01_REVIEW:
+		return
+	var on_stairs: bool = _point_inside_horizontal(_walk_position,
+		DECK_STAIR_X0, DECK_STAIR_X1, DECK_STAIR_TOP_Z, DECK_STAIR_BOTTOM_Z)
+	var was_on_stairs: bool = _point_inside_horizontal(previous,
+		DECK_STAIR_X0, DECK_STAIR_X1, DECK_STAIR_TOP_Z, DECK_STAIR_BOTTOM_Z)
+	var on_deck: bool = _point_inside_horizontal(_walk_position,
+		DECK_X0, DECK_X1, DECK_Z0, DECK_Z1)
+	var from_upper: bool = previous.y > WALK_EYE_HEIGHT + 0.2
+	if on_stairs:
+		# Guard against entering halfway up from a side: stairs can be
+		# mounted from the lower landing or crossed from the upper deck.
+		if not from_upper and not was_on_stairs and (
+				_walk_position.z < DECK_STAIR_BOTTOM_Z - 0.7):
+			_walk_position = previous
+			return
+		var fraction: float = clampf(
+			(DECK_STAIR_BOTTOM_Z - _walk_position.z) /
+			(DECK_STAIR_BOTTOM_Z - DECK_STAIR_TOP_Z), 0.0, 1.0
+		)
+		_walk_position.y = WALK_EYE_HEIGHT + fraction * DECK_SURFACE_Y
+	elif on_deck:
+		# Stay below the platform unless the player actually climbed up.
+		_walk_position.y = WALK_EYE_HEIGHT + (
+			DECK_SURFACE_Y if previous.y > WALK_EYE_HEIGHT + DECK_SURFACE_Y - 0.45
+			else 0.0
+		)
+	elif from_upper:
+		# Handrail collision proxy: do not step off a five-metre deck.
+		_walk_position = previous
+	else:
+		_walk_position.y = WALK_EYE_HEIGHT
+
 
 func _material(color: Color, metal: float = 0.0, rough: float = 0.55, glow: bool = false) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -133,8 +224,8 @@ func _build_3d_stage() -> void:
 	var viewport := SubViewport.new()
 	viewport.name = "GarageViewport"
 	viewport.size = Vector2i(1280, 720)
-	viewport.scaling_3d_scale = 0.72
-	viewport.msaa_3d = Viewport.MSAA_2X
+	viewport.scaling_3d_scale = 0.85 if STAGE01_REVIEW else 0.72
+	viewport.msaa_3d = Viewport.MSAA_DISABLED if STAGE01_REVIEW else Viewport.MSAA_2X
 	viewport.anisotropic_filtering_level = Viewport.ANISOTROPY_4X
 	_garage_viewport = viewport
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -150,19 +241,19 @@ func _build_3d_stage() -> void:
 	environment.background_color = Color("0a1622")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("b4c5d0")
-	environment.ambient_light_energy = 0.48
+	environment.ambient_light_energy = 0.56 if STAGE01_REVIEW else 0.48
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_BG
 	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
 	environment.tonemap_exposure = 0.96
 	environment.tonemap_white = 1.6
-	environment.fog_enabled = true
+	environment.fog_enabled = not STAGE01_REVIEW
 	environment.fog_mode = Environment.FOG_MODE_DEPTH
 	environment.fog_light_color = Color("1a2c3c")
 	environment.fog_density = 0.15
 	environment.fog_depth_begin = 13.0
 	environment.fog_depth_end = 47.0
 	environment.fog_depth_curve = 1.25
-	environment.glow_enabled = true
+	environment.glow_enabled = not STAGE01_REVIEW
 	environment.glow_hdr_threshold = 0.92
 	environment.glow_intensity = 0.70
 	environment.glow_bloom = 0.05
@@ -170,6 +261,11 @@ func _build_3d_stage() -> void:
 	environment_node.environment = environment
 	_world.add_child(environment_node)
 
+	# Retain old equipment and placements under a separate hidden root.
+	# Stage 01 displays only the six new Blender-authored shell surfaces.
+	_legacy_room = Node3D.new()
+	_legacy_room.name = "LegacyRoomReservedForFutureStages"
+	_world.add_child(_legacy_room)
 	var graphite := _material(Color("304354"), 0.37, 0.44)
 	var tile := _material(Color("384e5e"), 0.44, 0.43)
 	var beams := _material(Color("516675"), 0.55, 0.34)
@@ -178,42 +274,42 @@ func _build_3d_stage() -> void:
 	var black := _material(Color("0b141e"), 0.3, 0.6)
 	var glass := _material(Color("103c4c"), 0.6, 0.22)
 
-	_box(_world, "WorkshopFloor", Vector3(0, -0.36, -3), Vector3(46, 0.5, 34), graphite)
-	_box(_world, "BackWall", Vector3(0, 7.4, -18), Vector3(46, 15, 0.8), tile)
-	_box(_world, "LeftWall", Vector3(-20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
-	_box(_world, "RightWall", Vector3(20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
-	_box(_world, "Ceiling", Vector3(0, 14.9, -3), Vector3(46, 0.6, 34), graphite)
+	_box(_legacy_room, "WorkshopFloor", Vector3(0, -0.36, -3), Vector3(46, 0.5, 34), graphite)
+	_box(_legacy_room, "BackWall", Vector3(0, 7.4, -18), Vector3(46, 15, 0.8), tile)
+	_box(_legacy_room, "LeftWall", Vector3(-20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
+	_box(_legacy_room, "RightWall", Vector3(20, 7.4, -3), Vector3(0.8, 15, 34), graphite)
+	_box(_legacy_room, "Ceiling", Vector3(0, 14.9, -3), Vector3(46, 0.6, 34), graphite)
 	for i in range(9):
 		var grid_z: float = -17.0 + float(i) * 4.0
-		_box(_world, "FloorGuide_%02d" % i, Vector3(0, -0.094, grid_z), Vector3(44, 0.015, 0.035), beams)
-		_box(_world, "CeilingRib_%02d" % i, Vector3(0, 14.4, grid_z), Vector3(43, 0.4, 0.5), beams)
+		_box(_legacy_room, "FloorGuide_%02d" % i, Vector3(0, -0.094, grid_z), Vector3(44, 0.015, 0.035), beams)
+		_box(_legacy_room, "CeilingRib_%02d" % i, Vector3(0, 14.4, grid_z), Vector3(43, 0.4, 0.5), beams)
 	for i in range(11):
 		var grid_x: float = -20.0 + float(i) * 4.0
-		_box(_world, "Crossfloor_%02d" % i, Vector3(grid_x, -0.083, -3.5), Vector3(0.035, 0.016, 31), beams)
+		_box(_legacy_room, "Crossfloor_%02d" % i, Vector3(grid_x, -0.083, -3.5), Vector3(0.035, 0.016, 31), beams)
 	for side in [-1, 1]:
 		var x: float = float(side) * 13.2
 		for segment in range(5):
 			var z: float = -15.0 + float(segment) * 6.2
-			_box(_world, "Support_%d_%d" % [side, segment], Vector3(x, 7.3, z), Vector3(0.65, 14, 0.65), beams)
-			_box(_world, "SupportStrip_%d_%d" % [side, segment], Vector3(x - float(side) * 0.35, 4.7, z), Vector3(0.08, 8.2, 0.12), cyan)
-		_box(_world, "UpperCatwalk_%d" % side, Vector3(x + float(side) * 2.8, 6.0, -6.6), Vector3(5.1, 0.45, 18), tile)
-		_box(_world, "CatwalkRail_%d" % side, Vector3(x + float(side) * 0.3, 7.0, -6.6), Vector3(0.12, 1.8, 18), beams)
+			_box(_legacy_room, "Support_%d_%d" % [side, segment], Vector3(x, 7.3, z), Vector3(0.65, 14, 0.65), beams)
+			_box(_legacy_room, "SupportStrip_%d_%d" % [side, segment], Vector3(x - float(side) * 0.35, 4.7, z), Vector3(0.08, 8.2, 0.12), cyan)
+		_box(_legacy_room, "UpperCatwalk_%d" % side, Vector3(x + float(side) * 2.8, 6.0, -6.6), Vector3(5.1, 0.45, 18), tile)
+		_box(_legacy_room, "CatwalkRail_%d" % side, Vector3(x + float(side) * 0.3, 7.0, -6.6), Vector3(0.12, 1.8, 18), beams)
 
 	for index in range(6):
 		var x: float = -15.0 + float(index) * 6.0
-		_box(_world, "WallLightBase_%d" % index, Vector3(x, 9.2, -17.45), Vector3(2.3, 3.2, 0.1), glass)
-		_box(_world, "WallLight_%d" % index, Vector3(x, 9.2, -17.37), Vector3(0.1, 2.8, 0.07), cyan)
-	_box(_world, "BackWallBanner", Vector3(0, 12, -17.5), Vector3(17.4, 1.1, 0.12), black)
-	_box(_world, "BackWallAccent", Vector3(0, 11.3, -17.4), Vector3(17.4, 0.07, 0.12), orange)
+		_box(_legacy_room, "WallLightBase_%d" % index, Vector3(x, 9.2, -17.45), Vector3(2.3, 3.2, 0.1), glass)
+		_box(_legacy_room, "WallLight_%d" % index, Vector3(x, 9.2, -17.37), Vector3(0.1, 2.8, 0.07), cyan)
+	_box(_legacy_room, "BackWallBanner", Vector3(0, 12, -17.5), Vector3(17.4, 1.1, 0.12), black)
+	_box(_legacy_room, "BackWallAccent", Vector3(0, 11.3, -17.4), Vector3(17.4, 0.07, 0.12), orange)
 
-	_cylinder(_world, "TurntableFoundation", Vector3(0, -0.06, 0), 6.2, 0.34, black)
-	_cylinder(_world, "TurntableDeck", Vector3(0, 0.17, 0), 5.8, 0.22, tile)
-	_ring(_world, "InspectionLightRing", Vector3(0, 0.31, 0), 5.55, 5.75, cyan)
-	_ring(_world, "OuterGuideRing", Vector3(0, -0.015, 0), 6.55, 6.62, orange)
+	_cylinder(_legacy_room, "TurntableFoundation", Vector3(0, -0.06, 0), 6.2, 0.34, black)
+	_cylinder(_legacy_room, "TurntableDeck", Vector3(0, 0.17, 0), 5.8, 0.22, tile)
+	_ring(_legacy_room, "InspectionLightRing", Vector3(0, 0.31, 0), 5.55, 5.75, cyan)
+	_ring(_legacy_room, "OuterGuideRing", Vector3(0, -0.015, 0), 6.55, 6.62, orange)
 	for i in range(24):
 		var angle: float = TAU * float(i) / 24.0
 		var point := Vector3(cos(angle) * 5.98, 0.27, sin(angle) * 5.98)
-		var marker := _box(_world, "DeckMarker_%02d" % i, point, Vector3(0.12, 0.02, 0.39), orange if i % 6 == 0 else beams)
+		var marker := _box(_legacy_room, "DeckMarker_%02d" % i, point, Vector3(0.12, 0.02, 0.39), orange if i % 6 == 0 else beams)
 		marker.rotation.y = -angle
 	_vehicle_holder = Node3D.new()
 	_vehicle_holder.name = "VehicleDisplay"
@@ -280,6 +376,56 @@ func _build_3d_stage() -> void:
 	_reflection_probe.intensity = 0.48
 	_reflection_probe.visible = false
 	_world.add_child(_reflection_probe)
+	_activate_stage01_shell()
+	_activate_stage02_deck()
+
+func _activate_stage01_shell() -> void:
+	if not STAGE01_REVIEW:
+		return
+	if not ResourceLoader.exists(SHELL_STAGE01_PATH):
+		push_error("STAGE_01_SHELL_MISSING: " + SHELL_STAGE01_PATH)
+		return
+	var pack: PackedScene = load(SHELL_STAGE01_PATH) as PackedScene
+	if pack == null:
+		push_error("STAGE_01_SHELL_INVALID_GLTF")
+		return
+	_shell_stage = pack.instantiate() as Node3D
+	_shell_stage.name = "ArchitecturalShell_Stage01"
+	_world.add_child(_shell_stage)
+	_legacy_room.visible = false
+	_vehicle_holder.visible = false
+	_workshop.visible = false
+	# The previous dramatic grade/post effects caused the last FPS regression;
+	# this comparison isolates material and bevel quality only.
+	_garage_environment.glow_enabled = false
+	_garage_environment.fog_enabled = false
+	_garage_environment.ambient_light_energy = 0.56
+	_hero_key.visible = false
+	_hero_key.shadow_enabled = false
+	_reflection_probe.visible = false
+	for index in range(_accent_lights.size()):
+		_accent_lights[index].visible = index == 0
+		_accent_lights[index].omni_range = 25.0
+		_accent_lights[index].light_energy = 2.8
+	print("NEON_FOUNDRY_STAGE01_SHELL_OK visible=6 surfaces props=hidden")
+
+func _activate_stage02_deck() -> void:
+	# Deck is a separately exported glTF scene so our six-wall shell
+	# remains immutable, and equipment stays hidden in this stage.
+	if not STAGE01_REVIEW:
+		return
+	if not ResourceLoader.exists(DECK_STAGE02_PATH):
+		push_error("STAGE02_VIEWING_DECK_MISSING: " + DECK_STAGE02_PATH)
+		return
+	var packed: PackedScene = load(DECK_STAGE02_PATH) as PackedScene
+	if packed == null:
+		push_error("STAGE02_VIEWING_DECK_INVALID_GLTF")
+		return
+	_observation_deck = packed.instantiate() as Node3D
+	_observation_deck.name = "DiagnosticsObservationDeck"
+	_world.add_child(_observation_deck)
+	print("NEON_FOUNDRY_STAGE02_DECK_LOADED height=5.20 diagnostics=front-left")
+
 
 func _add_contact_shadow(name: String, location: Vector3,
 		dimensions: Vector2, darkness: float) -> void:
@@ -346,7 +492,12 @@ func _refresh_camera(delta: float) -> void:
 		return
 	if _walk_mode:
 		_camera.position = _walk_position
-		_camera.look_at(_walk_position + Vector3(-sin(_walk_yaw), -0.09, -cos(_walk_yaw)), Vector3.UP)
+		var eye: Vector3 = Vector3(
+			-sin(_walk_yaw) * cos(_walk_pitch),
+			sin(_walk_pitch),
+			-cos(_walk_yaw) * cos(_walk_pitch)
+		)
+		_camera.look_at(_walk_position + eye, Vector3.UP)
 		return
 	var blend: float = clampf(delta * 9.0, 0.0, 1.0)
 	_yaw = lerp_angle(_yaw, _target_yaw, blend)
@@ -356,15 +507,27 @@ func _refresh_camera(delta: float) -> void:
 	_camera.position = aim + Vector3(sin(_yaw) * cos(_pitch), sin(_pitch), cos(_yaw) * cos(_pitch)) * _distance
 	_camera.look_at(aim, Vector3.UP)
 
+func _input(event: InputEvent) -> void:
+	if not visible or not _walk_mode or _walk_joysticks == null:
+		return
+	# ScreenTouch/ScreenDrag events carry independent finger IDs, so using
+	# one thumb never steals or releases the other thumb's joystick.
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		if bool(_walk_joysticks.call("handle_screen_event", event)):
+			_dragging = false
+			get_viewport().set_input_as_handled()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event is InputEventScreenDrag:
+		# First-person touch-look is now owned by the right joystick, NOT
+		# arbitrary swipes which previously conflicted with move touches.
 		if _walk_mode:
-			_walk_yaw -= event.relative.x * 0.006
-		else:
-			_target_yaw -= event.relative.x * 0.007
-			_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
+			return
+		_target_yaw -= event.relative.x * 0.007
+		_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -375,7 +538,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			_target_distance = minf(20.0, _target_distance + 1.0)
 	elif event is InputEventMouseMotion and _dragging:
 		if _walk_mode:
+			if _walk_joysticks != null and (
+					int(_walk_joysticks.get("move_finger")) >= 0 or
+					int(_walk_joysticks.get("look_finger")) >= 0):
+				return
 			_walk_yaw -= event.relative.x * 0.006
+			_walk_pitch = clampf(_walk_pitch - event.relative.y * 0.004, -1.10, 1.10)
 		else:
 			_target_yaw -= event.relative.x * 0.007
 			_target_pitch = clampf(_target_pitch + event.relative.y * 0.005, -0.15, 1.1)
@@ -441,8 +609,13 @@ func _build_overlay() -> void:
 	head.add_theme_constant_override("separation", 2)
 	title_panel.add_child(head)
 	head.add_child(_label("N / F  MOTORSPORT DIVISION   //   FOUNDRY LOT", 15, CYAN))
-	head.add_child(_label("GARAGE  /  VEHICLE INSPECTION", 30, WHITE))
-	head.add_child(_label("FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT", 14, MUTED))
+	head.add_child(_label(
+		"STAGE 01  /  ARCHITECTURAL SHELL" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
+		28, WHITE))
+	head.add_child(_label(
+		"FOUR WALLS  •  FLOOR  •  CEILING   /   TEXTURE REVIEW" if STAGE01_REVIEW
+		else "FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT",
+		14, MUTED))
 
 	var tools_panel := _panel(0.025, 0.19, 0.305, 0.89)
 	_tools_panel = tools_panel
@@ -509,39 +682,14 @@ func _build_overlay() -> void:
 	equipment.add_child(_equipment_status)
 	_refresh_equipment_status()
 
-	_walk_pad = _panel(0.753, 0.545, 0.974, 0.855)
-	var walk_content := VBoxContainer.new()
-	walk_content.add_theme_constant_override("separation", 6)
-	_walk_pad.add_child(walk_content)
-	walk_content.add_child(_label("FIRST-PERSON WALKAROUND", 15, ORANGE))
-	var motion_row := HBoxContainer.new()
-	motion_row.add_theme_constant_override("separation", 7)
-	walk_content.add_child(motion_row)
-	var forwards: Button = _button("▲  FWD", func() -> void: pass)
-	var backwards: Button = _button("▼  BACK", func() -> void: pass)
-	forwards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	backwards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	motion_row.add_child(forwards)
-	motion_row.add_child(backwards)
-	forwards.button_down.connect(func() -> void: _walk_forward = 1.0)
-	forwards.button_up.connect(func() -> void: _walk_forward = 0.0)
-	backwards.button_down.connect(func() -> void: _walk_forward = -1.0)
-	backwards.button_up.connect(func() -> void: _walk_forward = 0.0)
-	var turn_row := HBoxContainer.new()
-	turn_row.add_theme_constant_override("separation", 7)
-	walk_content.add_child(turn_row)
-	var left: Button = _button("◀  TURN", func() -> void: pass)
-	var right: Button = _button("TURN  ▶", func() -> void: pass)
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	turn_row.add_child(left)
-	turn_row.add_child(right)
-	left.button_down.connect(func() -> void: _walk_turn = -1.0)
-	left.button_up.connect(func() -> void: _walk_turn = 0.0)
-	right.button_down.connect(func() -> void: _walk_turn = 1.0)
-	right.button_up.connect(func() -> void: _walk_turn = 0.0)
-	walk_content.add_child(_label("HOLD TO MOVE  /  DRAG TO LOOK", 13, MUTED))
-	_walk_pad.visible = false
+	# Minimal draw-only overlay: two thumbsticks rather than four buttons.
+	# They sit above the bottom navigation bar and outside camera controls.
+	_walk_joysticks = DualJoystickScript.new() as Control
+	_walk_joysticks.name = "DualThumbWalkControls"
+	_walk_joysticks.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_walk_joysticks.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_walk_joysticks)
+	_walk_joysticks.visible = false
 
 	var bottom := _panel(0.327, 0.89, 0.977, 0.978)
 	var action_row := HBoxContainer.new()
@@ -554,6 +702,9 @@ func _build_overlay() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		action_row.add_child(b)
 	_inspect()
+	if STAGE01_REVIEW:
+		_tools_panel.visible = false
+		_equipment_panel.visible = false
 
 func _inspect() -> void:
 	_bay_state = "inspect"
@@ -580,14 +731,16 @@ func _move_view(yaw: float, pitch: float, distance: float) -> void:
 
 func _toggle_walk() -> void:
 	_walk_mode = not _walk_mode
-	_walk_forward = 0.0
-	_walk_turn = 0.0
-	_walk_pad.visible = _walk_mode
-	_equipment_panel.visible = not _walk_mode
+	_walk_joysticks.call("release_all")
+	_walk_joysticks.visible = _walk_mode
+	_dragging = false
+	if _walk_mode:
+		_walk_pitch = 0.0
+	_equipment_panel.visible = not _walk_mode and not STAGE01_REVIEW
 	_title_panel.visible = not _walk_mode
-	_tools_panel.visible = not _walk_mode
+	_tools_panel.visible = not _walk_mode and not STAGE01_REVIEW
 	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
-	_detail.text = "WALKAROUND MODE\nHold the movement and turn buttons to tour the Foundry Lot. Drag across the open 3D view to turn the camera." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
+	_detail.text = "WALKAROUND MODE\nLeft thumb moves/strafe; right thumb pans and looks up/down. Both sticks support independent fingers." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
 
 func _refresh_equipment_status() -> void:
 	if _workshop != null and _equipment_status != null:
@@ -606,8 +759,11 @@ func _toggle_scanner() -> void:
 func _set_graphics_detail(enabled: bool) -> void:
 	_quality_detail = enabled
 	if _garage_viewport != null:
-		_garage_viewport.scaling_3d_scale = 1.0 if enabled else 0.72
-		_garage_viewport.msaa_3d = Viewport.MSAA_2X
+		_garage_viewport.scaling_3d_scale = 1.0 if enabled else (0.85 if STAGE01_REVIEW else 0.72)
+		_garage_viewport.msaa_3d = (
+			Viewport.MSAA_2X if enabled or not STAGE01_REVIEW
+			else Viewport.MSAA_DISABLED
+		)
 		_garage_viewport.anisotropic_filtering_level = (
 			Viewport.ANISOTROPY_8X if enabled else Viewport.ANISOTROPY_4X
 		)
@@ -616,14 +772,17 @@ func _set_graphics_detail(enabled: bool) -> void:
 		_garage_environment.glow_intensity = 1.08 if enabled else 0.70
 		_garage_environment.glow_bloom = 0.09 if enabled else 0.05
 		_garage_environment.fog_density = 0.25 if enabled else 0.15
+		if STAGE01_REVIEW:
+			_garage_environment.glow_enabled = false
+			_garage_environment.fog_enabled = false
 	if _hero_key != null:
-		_hero_key.visible = true
-		_hero_key.shadow_enabled = enabled
+		_hero_key.visible = not STAGE01_REVIEW
+		_hero_key.shadow_enabled = enabled and not STAGE01_REVIEW
 	if _reflection_probe != null:
-		_reflection_probe.visible = enabled
+		_reflection_probe.visible = enabled and not STAGE01_REVIEW
 	for index in range(_accent_lights.size()):
-		_accent_lights[index].visible = enabled or index == 0
-		_accent_lights[index].omni_range = 15.0 if enabled else 13.0
+		_accent_lights[index].visible = index == 0 if STAGE01_REVIEW else enabled or index == 0
+		_accent_lights[index].omni_range = 25.0 if STAGE01_REVIEW else (15.0 if enabled else 13.0)
 	if _workshop != null:
 		_workshop.call("set_material_detail", enabled)
 		_workshop.call("set_mobile_quality", enabled)
