@@ -1,0 +1,75 @@
+{
+  "source": "Khronos Car Concept (CC BY 4.0, logo excluded)",
+  "parts": {
+    "quarter_fins_0": {
+      "slot": "front_quarter_fins",
+      "meshes": 10,
+      "triangles": 400
+    },
+    "fins_0_v2": {
+      "slot": "rear_fins",
+      "meshes": 10,
+      "triangles": 296
+    },
+    "quarter_fins_1": {
+      "slot": "front_quarter_fins",
+      "meshes": 16,
+      "triangles": 784
+    },
+    "fins_1_v2": {
+      "slot": "rear_fins",
+      "meshes": 12,
+      "triangles": 488
+    },
+    "quarter_fins_2": {
+      "slot": "front_quarter_fins",
+      "meshes": 18,
+      "triangles": 640
+    },
+    "fins_2_v2": {
+      "slot": "rear_fins",
+      "meshes": 16,
+      "triangles": 536
+    },
+    "engine_stock_v2": {
+      "slot": "rear_engine",
+      "meshes": 39,
+      "triangles": 3476
+    },
+    "engine_vortex_v2": {
+      "slot": "rear_engine",
+      "meshes": 41,
+      "triangles": 3860
+    },
+    "engine_titan_v2": {
+      "slot": "rear_engine",
+      "meshes": 51,
+      "triangles": 4340
+    },
+    "engine_nova_v2": {
+      "slot": "rear_engine",
+      "meshes": 59,
+      "triangles": 5516
+    }
+  },
+  "previews": {
+    "preview_street_stage02": [
+      188,
+      154511
+    ],
+    "preview_aero_stage02": [
+      206,
+      155855
+    ],
+    "preview_industrial_stage02": [
+      232,
+      157511
+    ]
+  },
+  "new_slot": [
+    0,
+    0.86,
+    1.3
+  ],
+  "preserves_donor_surfaces": true
+}
