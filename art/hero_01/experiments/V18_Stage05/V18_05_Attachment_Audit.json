@@ -1,0 +1,25 @@
+{
+  "result": "PASS",
+  "original_meshes_unchanged": 557,
+  "new_modular_meshes": 140,
+  "total_meshes": 697,
+  "triangles": 43444,
+  "roof_z_span_m": [
+    -3.9,
+    -2.28
+  ],
+  "verified_mount_overlap": {
+    "PORT": {
+      "sill_mount_box_overlap_m3": 0.006107,
+      "aft_roof_support_contact_m3": 0.001282,
+      "panel_outer_x_m": 1.35
+    },
+    "STBD": {
+      "sill_mount_box_overlap_m3": 0.006107,
+      "aft_roof_support_contact_m3": 0.001282,
+      "panel_outer_x_m": 1.35
+    }
+  },
+  "approval": "owner visual inspection pending",
+  "limitation": "mount overlap validates joined box profiles but not crashworthiness, aerodynamics or all panel tolerances"
+}
