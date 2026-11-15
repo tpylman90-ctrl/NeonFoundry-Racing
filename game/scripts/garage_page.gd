@@ -34,12 +34,12 @@ const WALL_WALK_CLEARANCE: float = 2.2
 var _world: Node3D
 var _camera: Camera3D
 var _vehicle_holder: Node3D
-var _yaw: float = 0.68
+var _yaw: float = 2.78
 var _pitch: float = 0.21
-var _distance: float = 14.5
-var _target_yaw: float = 0.68
+var _distance: float = 15.0
+var _target_yaw: float = 2.78
 var _target_pitch: float = 0.21
-var _target_distance: float = 14.5
+var _target_distance: float = 15.0
 var _dragging: bool = false
 var _vehicle_loaded: bool = false
 var _detail: Label
@@ -681,10 +681,10 @@ func _build_overlay() -> void:
 	title_panel.add_child(head)
 	head.add_child(_label("N / F  MOTORSPORT DIVISION   //   FOUNDRY LOT", 15, CYAN))
 	head.add_child(_label(
-		"STAGE 01  /  ARCHITECTURAL SHELL" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
+		"STAGE 02C  /  SIX-ZONE INTERIOR" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
 		28, WHITE))
 	head.add_child(_label(
-		"FOUR WALLS  •  FLOOR  •  CEILING   /   TEXTURE REVIEW" if STAGE01_REVIEW
+		"ZONE WALLS  •  VEHICLE PORTALS  •  CLEAR AISLES" if STAGE01_REVIEW
 		else "FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT",
 		14, MUTED))
 
@@ -718,7 +718,7 @@ func _build_overlay() -> void:
 	angle_row.add_theme_constant_override("separation", 6)
 	views.add_child(angle_row)
 	for spec in [
-		{"text": "3/4", "a": 0.68, "p": 0.21, "d": 14.5},
+		{"text": "3/4", "a": 2.78, "p": 0.21, "d": 15.0},
 		{"text": "SIDE", "a": 1.57, "p": 0.15, "d": 12.3},
 		{"text": "TOP", "a": 0.0, "p": 1.22, "d": 15.4}
 	]:
@@ -767,7 +767,7 @@ func _build_overlay() -> void:
 	action_row.add_theme_constant_override("separation", 12)
 	bottom.add_child(action_row)
 	var back := _button("‹   MAIN HUB", func() -> void: return_to_hub.emit())
-	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(0.68, 0.21, 14.5))
+	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(2.78, 0.21, 15.0))
 	var race := _button("RACE CONTROL   ›", func() -> void: request_race_control.emit())
 	for b in [back, spin, race]:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
