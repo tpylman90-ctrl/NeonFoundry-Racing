@@ -29,6 +29,14 @@ func _run() -> void:
 	assert(menu.current_page == "garage")
 	assert(menu._garage_page != null)
 	assert(menu._garage_page._performance_label != null)
+	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 0.72))
+	menu._garage_page._set_graphics_detail(true)
+	assert(menu._garage_page._quality_detail)
+	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 1.0))
+	assert(menu._garage_page._hero_key.shadow_enabled)
+	menu._garage_page._set_graphics_detail(false)
+	assert(not menu._garage_page._hero_key.shadow_enabled)
+	assert(is_equal_approx(menu._garage_page._garage_viewport.scaling_3d_scale, 0.72))
 	assert(menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot") != null)
 	var workshop: Node3D = menu.get_node("ImmersiveGarage/Garage3D/GarageViewport/FoundryLot/LiveWorkshopEquipment")
 	assert(workshop != null)
@@ -41,8 +49,9 @@ func _run() -> void:
 	var staged_cc0: String = "res://assets/garage/pbr/steel_color.jpg"
 	if ResourceLoader.exists(staged_cc0):
 		var material: StandardMaterial3D = steel_mesh.material_override as StandardMaterial3D
-		assert(material.normal_enabled)
+			assert(not material.normal_enabled)
 		assert(material.normal_texture != null)
+		assert(steel_mesh.mesh.surface_get_format(0) & Mesh.ARRAY_FORMAT_TANGENT != 0)
 	var imported_cc0: String = "res://assets/garage/kenney_factory/machine-window.obj"
 	if ResourceLoader.exists(imported_cc0):
 		assert(workshop.get_node_or_null("Kenney_machine_window") != null)

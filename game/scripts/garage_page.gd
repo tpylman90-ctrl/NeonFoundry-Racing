@@ -39,6 +39,11 @@ var _title_panel: PanelContainer
 var _tools_panel: PanelContainer
 var _performance_label: Label
 var _performance_samples: int = 0
+var _garage_viewport: SubViewport
+var _quality_detail: bool = false
+var _quality_button: Button
+var _hero_key: SpotLight3D
+var _accent_lights: Array[OmniLight3D] = []
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -124,6 +129,8 @@ func _build_3d_stage() -> void:
 	var viewport := SubViewport.new()
 	viewport.name = "GarageViewport"
 	viewport.size = Vector2i(1280, 720)
+	viewport.scaling_3d_scale = 0.72
+	_garage_viewport = viewport
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	viewport_frame.add_child(viewport)
 
@@ -221,7 +228,9 @@ func _build_3d_stage() -> void:
 	hero_key.spot_angle = 67.0
 	hero_key.light_energy = 2.4
 	hero_key.light_color = Color("cbeeff")
-	hero_key.shadow_enabled = true
+	hero_key.shadow_enabled = false
+	hero_key.visible = false
+	_hero_key = hero_key
 	_world.add_child(hero_key)
 	for light_spec in [
 		{"pos": Vector3(-5, 9, 6), "color": Color("e3f1ff"), "energy": 4.0},
@@ -232,7 +241,10 @@ func _build_3d_stage() -> void:
 		omni.position = light_spec["pos"]
 		omni.light_color = light_spec["color"]
 		omni.light_energy = light_spec["energy"]
-		omni.omni_range = 23.0
+		omni.omni_range = 13.0
+		omni.shadow_enabled = false
+		omni.visible = _accent_lights.size() == 0
+		_accent_lights.append(omni)
 		_world.add_child(omni)
 
 func _load_craft_preview() -> void:
@@ -430,13 +442,16 @@ func _build_overlay() -> void:
 	_walk_toggle = _button("WALK THE GARAGE", _toggle_walk)
 	views.add_child(_walk_toggle)
 
-	_equipment_panel = _panel(0.753, 0.545, 0.974, 0.845)
+	_equipment_panel = _panel(0.753, 0.515, 0.974, 0.877)
 	var equipment := VBoxContainer.new()
 	equipment.add_theme_constant_override("separation", 7)
 	_equipment_panel.add_child(equipment)
 	equipment.add_child(_label("SERVICE BAY  /  EQUIPMENT", 15, ORANGE))
 	equipment.add_child(_button("OPERATE LIFT ARMS", _operate_lifts))
 	equipment.add_child(_button("ROBOT SCANNER  /  TOGGLE", _toggle_scanner))
+	_quality_button = _button("GRAPHICS  /  BALANCED", _toggle_graphics_quality)
+	_quality_button.custom_minimum_size.y = 40
+	equipment.add_child(_quality_button)
 	_equipment_status = _label("AUTO SERVICE  /  STANDBY", 13, MUTED)
 	_equipment_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	equipment.add_child(_equipment_status)
@@ -535,6 +550,29 @@ func _toggle_scanner() -> void:
 	if _workshop != null:
 		_workshop.call("set_scanner_active", not bool(_workshop.get("_scanner_enabled")))
 		_refresh_equipment_status()
+
+func _set_graphics_detail(enabled: bool) -> void:
+	_quality_detail = enabled
+	if _garage_viewport != null:
+		_garage_viewport.scaling_3d_scale = 1.0 if enabled else 0.72
+	if _hero_key != null:
+		_hero_key.visible = enabled
+		_hero_key.shadow_enabled = enabled
+	for index in range(_accent_lights.size()):
+		_accent_lights[index].visible = enabled or index == 0
+		_accent_lights[index].omni_range = 15.0 if enabled else 13.0
+	if _workshop != null:
+		_workshop.call("set_material_detail", enabled)
+		_workshop.call("set_mobile_quality", enabled)
+	if _quality_button != null:
+		_quality_button.text = "GRAPHICS  /  DETAIL" if enabled else "GRAPHICS  /  BALANCED"
+	print("NEON_FOUNDRY_GARAGE_GRAPHICS profile=%s scale=%.2f" % [
+		"detail" if enabled else "balanced",
+		_garage_viewport.scaling_3d_scale
+	])
+
+func _toggle_graphics_quality() -> void:
+	_set_graphics_detail(not _quality_detail)
 
 func _zoom(amount: float) -> void:
 	_target_distance = clampf(_target_distance + amount, 6.8, 20.0)

@@ -31,6 +31,7 @@ var _lift_height: float = 0.0
 var _lift_target: float = 0.0
 var _scanner_enabled: bool = true
 var _light_rigs: Array[OmniLight3D] = []
+var _task_lights: Array[OmniLight3D] = []
 var _detail_quality: bool = false
 var _pbr_surfaces: Array[StandardMaterial3D] = []
 
@@ -74,6 +75,10 @@ func set_scanner_active(enabled: bool) -> void:
 
 func toggle_lifts() -> void:
 	_lift_target = 1.6 if _lift_target < 0.8 else 0.0
+
+func set_mobile_quality(detail: bool) -> void:
+	for index in range(_task_lights.size()):
+		_task_lights[index].visible = detail or index == 0
 
 func reset_equipment() -> void:
 	_lift_target = 0.0
@@ -713,6 +718,8 @@ func _build_task_lights() -> void:
 		lamp.light_energy = spec["power"]
 		lamp.omni_range = spec["range"]
 		lamp.shadow_enabled = false
+		lamp.visible = _task_lights.is_empty()
+		_task_lights.append(lamp)
 		add_child(lamp)
 
 func _add_label(text: String, location: Vector3, font_size: int,
