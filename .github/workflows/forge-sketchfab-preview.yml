@@ -1,0 +1,74 @@
+name: FORGE / Sketchfab Donor Thumbnail Shortlist
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forge-sketchfab-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  previews:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --disable-pip-version-check "Pillow>=10,<13"
+      - name: Retrieve real public Sketchfab thumbnails and build PNG cards
+        run: |
+          python - <<'PY'
+          import urllib.request,json,io,hashlib
+          from PIL import Image,ImageOps,ImageDraw,ImageFont
+          from pathlib import Path
+          out=Path('build/shortlist');out.mkdir(parents=True,exist_ok=True)
+          models=[
+            ('A','Concept Car 037','646a3a31b0224379b6e767abc34d58dd','Creator CC0 / site Free Standard','198k triangles'),
+            ('B','ConceptCar 051','b1dd9c762c5a4d1c8441525d808125eb','Creator CC0 / site Free Standard','331k triangles'),
+            ('C','Lancia Stratos Zero HF','d5bdf66e08a747a29756421ae69c1830','CC BY 4.0; real-car inspiration','20.7k triangles'),
+            ('D','Concept Car / Glory Hunter','9d6e9c15116d455ebc72ca574f32ce29','CC BY 4.0','688k triangles')
+          ]
+          font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+          bold='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+          f=lambda s,b=False:ImageFont.truetype(bold if b else font,s)
+          sheet=Image.new('RGB',(2000,1350),(14,19,26))
+          draw=ImageDraw.Draw(sheet)
+          log=[]
+          for index,(key,title,uid,license,triangles) in enumerate(models):
+            req=urllib.request.Request('https://api.sketchfab.com/v3/models/'+uid,
+              headers={'User-Agent':'NeonFoundryRacing/1.0 (public model review)'})
+            with urllib.request.urlopen(req,timeout=30) as response:
+              metadata=json.loads(response.read(150000))
+            previews=metadata['thumbnails']['images']
+            thumb=max(previews,key=lambda x:(x['width']>=600, x['width']))
+            req=urllib.request.Request(thumb['url'],headers={'User-Agent':'Mozilla/5.0'})
+            with urllib.request.urlopen(req,timeout=30) as response:
+              data=response.read(6*1024*1024)
+            image=Image.open(io.BytesIO(data)).convert('RGB')
+            if min(image.size)<250: raise RuntimeError('Low quality thumbnail '+title+str(image.size))
+            thumbpic=ImageOps.contain(image,(920,460),Image.Resampling.LANCZOS)
+            ix=index%2;iy=index//2
+            x=ix*1000;y=iy*675
+            draw.rounded_rectangle((x+10,y+10,x+990,y+665),radius=18,fill=(25,30,39))
+            draw.text((x+35,y+24),key+'  '+title,font=f(31,True),fill='white')
+            draw.text((x+35,y+69),license,font=f(19),fill=(184,208,211))
+            imgx=x+40+(920-thumbpic.width)//2
+            imgy=y+114+(460-thumbpic.height)//2
+            sheet.paste(thumbpic,(imgx,imgy))
+            draw.text((x+35,y+600),triangles,font=f(22),fill=(124,233,241))
+            entry={'id':key,'name':title,'uid':uid,'source':'https://sketchfab.com/3d-models/'+uid,'declared_license':license,'thumbnail_original_size':list(image.size),'image_sha256':hashlib.sha256(data).hexdigest(),'api_license':metadata.get('license',{})}
+            log.append(entry)
+            card=sheet.crop((x,y,x+1000,y+675));card.save(out/f'Candidate_{key}.png')
+            print('NFR_SKETCHFAB_PNG_OK',key,title,image.size,flush=True)
+          sheet.save(out/'FORGE_Sketchfab_Donor_Choices.png',optimize=True)
+          (out/'SOURCE_INFO.json').write_text(json.dumps(log,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: FORGE-Sketchfab-Donor-Preview-PNG
+          path: build/shortlist/
+          if-no-files-found: warn
+          retention-days: 14
