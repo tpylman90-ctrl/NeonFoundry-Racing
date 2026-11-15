@@ -34,6 +34,7 @@ jobs:
           python tools/ai_forge_triposr_trial.py prepare
       - name: Install open-source TripoSR CPU inference dependencies
         id: dependencies
+        timeout-minutes: 30
         run: |
           exec > >(tee "$RUNNER_TEMP/forge_dependencies.log") 2>&1
           python -m pip install --upgrade pip wheel setuptools
@@ -48,6 +49,7 @@ jobs:
           PYTHONPATH=/tmp/triposr python -c "import torch; import moderngl; from tsr.system import TSR; print('TRIPOSR_CPU_IMPORTS_OK', torch.__version__)"
       - name: Run actual pretrained TripoSR on Forge reference
         id: inference
+        timeout-minutes: 65
         run: |
           exec > >(tee "$RUNNER_TEMP/forge_inference.log") 2>&1
           # TripoSR only creates output/0 for background-removal mode.
