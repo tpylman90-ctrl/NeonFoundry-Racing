@@ -2,7 +2,7 @@ name: Repository checks
 
 on:
   push:
-    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4']
+    branches: [main, 'upgrade/godot-4.7.2-blender-5.2.4', 'graphics/garage-cinematic-lighting-pass']
   pull_request:
   workflow_dispatch:
 

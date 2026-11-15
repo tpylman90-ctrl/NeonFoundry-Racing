@@ -149,7 +149,7 @@ func _apply_cc0_pbr() -> void:
 			continue
 		var mat: StandardMaterial3D = _materials[material_id]
 		mat.albedo_texture = load(color_path)
-		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 		if material_id == FLOOR:
 			mat.roughness = 0.78
 			mat.metallic = 0.08
