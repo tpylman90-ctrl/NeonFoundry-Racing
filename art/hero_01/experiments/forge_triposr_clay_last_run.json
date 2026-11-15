@@ -1,23 +1,18 @@
 {
-  "run_id": 43732330267,
-  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43732330267",
-  "commit": "85c00d4f262de1196081194f311dd6117cf89ff7",
-  "status": "failure",
+  "run_id": 43732528345,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43732528345",
+  "commit": "362efe99dcc2ff1b78b833aa307be76e6e5fbb6b",
+  "status": "success",
   "stages": {
     "prepare": "success",
-    "dependencies": "failure",
-    "inference": "skipped",
-    "audit": "skipped",
+    "dependencies": "success",
+    "inference": "success",
+    "audit": "success",
     "artifact": "success"
   },
   "errors": {
     "prepare": [],
-    "dependencies": [
-      "Traceback (most recent call last):  File \"/home/runner/work/NeonFoundry-Racing/NeonFoundry-Racing/tools/triposr_cpu_marching_cubes.py\", line 9, in <module>",
-      "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/torch/nn/modules/transformer.py:20: UserWarning: Failed to initialize NumPy: _ARRAY_API not found (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:84.)",
-      "Traceback (most recent call last):",
-      "ValueError: numpy.dtype size changed, may indicate binary incompatibility. Expected 96 from C header, got 88 from PyObject"
-    ],
+    "dependencies": [],
     "inference": [],
     "audit": []
   },
