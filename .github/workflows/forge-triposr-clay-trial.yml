@@ -5,6 +5,9 @@ on:
     branches: [experiments/forge-triposr-trial]
     paths:
       - art/hero_01/references/forge_clay_only_square_gray.png
+      - .github/workflows/forge-triposr-clay-trial.yml
+      - tools/ai_forge_triposr_clay_trial.py
+      - tools/triposr_cpu_marching_cubes.py
   workflow_dispatch:
     inputs:
       mc_resolution:
@@ -44,7 +47,13 @@ jobs:
           exec > >(tee "$RUNNER_TEMP/forge_clay_dependencies.log") 2>&1
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.2.2' 'torchvision==0.17.2'
-          python -m pip install 'omegaconf==2.3.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'onnxruntime==1.19.2' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0' 'scikit-image==0.22.0'
+          python -m pip install 'omegaconf==2.3.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'onnxruntime==1.19.2' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0' 'scikit-image==0.22.0' 'numpy==1.26.4'
+          # Some indirect dependencies may select NumPy 2.x; PyTorch 2.2.2 and
+          # the scikit-image 0.22 binary used here require a NumPy 1.x ABI.
+          # Re-pin *after* the full dependency installation, then fail early
+          # if either compiled extension cannot use the final NumPy version.
+          python -m pip install --force-reinstall --no-deps 'numpy==1.26.4'
+          python -c "import numpy, torch, skimage, scipy; from skimage.measure import marching_cubes; from PIL import Image; assert numpy.__version__=='1.26.4', numpy.__version__; print('FORGE_NUMPY_ABI_PREFLIGHT_OK numpy=',numpy.__version__, 'torch=',torch.__version__, 'skimage=',skimage.__version__)"
           git clone --depth 1 https://github.com/VAST-AI-Research/TripoSR.git /tmp/triposr
           cp tools/triposr_cpu_marching_cubes.py /tmp/triposr/tsr/models/mc_cpu_fallback.py
           python tools/triposr_cpu_marching_cubes.py
