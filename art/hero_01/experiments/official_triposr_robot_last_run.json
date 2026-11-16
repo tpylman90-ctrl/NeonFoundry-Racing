@@ -1,0 +1,28 @@
+{
+  "run_id": 43804232938,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43804232938",
+  "commit": "8066ed23a5d7f6a6b215947d8bbfb059be772abb",
+  "status": "success",
+  "stages": {
+    "deps": "success",
+    "infer": "success",
+    "verify": "success",
+    "artifact": "success"
+  },
+  "errors": {
+    "deps": [
+      "Collecting exceptiongroup>=1.0 (from scikit-build-core>=1.0)",
+      "  Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)",
+      "Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)",
+      "Installing collected packages: tomli, pybind11, pathspec, ninja, exceptiongroup, scikit-build-core",
+      "Successfully installed exceptiongroup-1.3.1 ninja-1.13.2 pathspec-1.1.1 pybind11-3.1.0 scikit-build-core-1.1.2 tomli-2.5.0",
+      "OFFICIAL_ROBOT_CPU_DEPS_OK"
+    ],
+    "infer": [
+      "OFFICIAL_ROBOT_INFERENCE_OK",
+      "OFFICIAL_ROBOT_NEURAL_RENDER_OK",
+      "OFFICIAL_ROBOT_NATIVE_MESH_OK 106008",
+      "OFFICIAL_ROBOT_UV_BAKE_OK"
+    ]
+  }
+}
