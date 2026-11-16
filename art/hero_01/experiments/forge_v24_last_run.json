@@ -1,14 +1,14 @@
 {
-  "run_id": 43801938196,
-  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43801938196",
-  "commit": "c54fbbf657919664cc240398959cf2e88595485b",
-  "status": "\failure",
+  "run_id": 43801989875,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43801989875",
+  "commit": "894bd21f841a64e8e58be53e8a6f3d75e1546e09",
+  "status": "success",
   "steps": {
     "prepare": "success",
     "install": "success",
     "inference": "success",
     "verify": "success",
-    "artifact": "\failure"
+    "artifact": "success"
   },
   "errors": {
     "prepare": [
@@ -34,7 +34,7 @@
       "V24_MC_BEGIN contrast 15",
       "V24_MC_OK contrast 15 117920",
       "V24_MC_BEGIN contrast 20",
-      "V24_MC_OK contrast 20 117976",
+      "V24_MC_OK contrast 20 117972",
       "V24_MC_BEGIN contrast 25",
       "V24_MC_OK contrast 25 118040",
       "V24_MC_BEGIN contrast 30",
@@ -43,7 +43,7 @@
       "V24_MC_OK contrast 35 118156",
       "V24_BAKE_BEGIN contrast",
       "V24_BAKE_FAILED contrast (standalone) XOpenDisplay: cannot open display",
-      "V24_SUCCESS {\"flat\": {\"render\": {\"status\": \"ok\", \"views\": 4, \"resolution\": [144, 144]}, \"meshes\": {\"15\": 108800, \"20\": 108872, \"25\": 108964, \"30\": 108972, \"35\": 108952}, \"bake\": \"failed\"}, \"contrast\": {\"render\": {\"status\": \"ok\", \"views\": 4, \"resolution\": [144,"
+      "V24_SUCCESS {\"flat\": {\"render\": {\"status\": \"ok\", \"views\": 4, \"resolution\": [144, 144]}, \"meshes\": {\"15\": 108804, \"20\": 108872, \"25\": 108964, \"30\": 108972, \"35\": 108952}, \"bake\": \"failed\"}, \"contrast\": {\"render\": {\"status\": \"ok\", \"views\": 4, \"resolution\": [144,"
     ]
   },
   "note": "V24 two-input single-view reconstruction + direct neural renders + density-threshold sweep. Production untouched."
