@@ -1,0 +1,30 @@
+{
+  "title": "Original TripoSR 2024 demonstration reproduction — official robot",
+  "original_input": "https://github.com/VAST-AI-Research/TripoSR/blob/main/examples/robot.png",
+  "original_publisher_example": "https://stability.ai/news-updates/triposr-3d-generation",
+  "source_sha256": "092ee61f1729ac9ed516c8d031d071f44dfa6e79f6ece04f32c988721b2b657a",
+  "workflow_run": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43804232938",
+  "workflow_status": "success",
+  "exact_demo_preprocessing": "The official gradio_app.run_example uses preprocess(image, False, 0.9). Any input alpha is composited onto neutral 0.5 gray; no rembg and no foreground resize.",
+  "reconstruction": {
+    "model": "stabilityai/TripoSR",
+    "trained_encoder": "facebook/dino-vitb16",
+    "native_extraction": "torchmcubes original",
+    "mc_resolution": 256,
+    "device": "CPU",
+    "meshes": 1,
+    "vertices": 53095,
+    "triangles": 106008,
+    "watertight": false,
+    "neural_previews": 4,
+    "baked_texture_512": "Generated and exported validated GLB, but preview shows speckled/atlas artifacts; not established as visually superior to vertex colors"
+  },
+  "findings": [
+    "Original robot reconstructed with recognizably accurate front-facing face, headphone masses and body; produced much more persuasive result than Forge V23.",
+    "Direct neural rendering appears smoother than identical isosurface extraction; raw mesh still contains visible rippling and shape imprecision.",
+    "Predicted vertex colors improve perceived visual fidelity without modifying polygon geometry.",
+    "Published 2024 illustration is a visual comparison, not accessible original mesh: no exact shape-to-shape distance vs the publisher's output can be computed.",
+    "Full production Forge geometry unchanged; original V23 remains better editable baseline."
+  ],
+  "recommendation": "Keep the verified inference code; prioritize separating model inference from mesh refinement, and use original V23 for actual hard-surface design. Optional texture baking merits padding/resolution validation on 3D viewer before promotion."
+}
