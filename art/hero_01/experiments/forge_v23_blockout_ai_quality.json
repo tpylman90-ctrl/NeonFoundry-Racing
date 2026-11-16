@@ -1,0 +1,38 @@
+{
+  "experiment": "TripoSR official native CPU reconstruction of actual Forge V23 11-mesh macro blockout",
+  "run_id": 43790516243,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43790516243",
+  "status": "success",
+  "input_reference": "Rendered original V23 geometry, clean 512x512 neutral gray, front three-quarter",
+  "input_sha256": "f01171f4c8c76da5b550dcd7e8d00b3242af9dacb1949ee0578381b2e407e41a",
+  "original": {
+    "mesh_count": 11,
+    "triangles": 884,
+    "extents_m": [
+      4.5,
+      2.6,
+      8.4
+    ],
+    "width_to_length": 0.5357,
+    "height_to_length": 0.3095
+  },
+  "tripo": {
+    "mesh_count": 1,
+    "triangles": 108964,
+    "watertight": false,
+    "original_sha256": "26446106458d36eba84767dc900fc1377ec183c7f6a74109b00374e456378f68",
+    "width_to_length": 0.7423,
+    "height_to_length": 0.5399
+  },
+  "pipeline": {
+    "model": "stabilityai/TripoSR",
+    "extractor": "native torchmcubes",
+    "mc_resolution": 256,
+    "chunk_size": 2048,
+    "pre_removed_background": true,
+    "automatic_rembg": false
+  },
+  "assessment": "Recognizable vehicle massing, raised cockpit, and paired front structures, but serious organic wrinkling and incorrect proportions. Separate original hard-surface assemblies are collapsed into one approximate reconstruction.",
+  "production_geometry_changed": false,
+  "artifacts": "FORGE-V23-Blockout-TripoSR-1, downloadable from run page until 2026-11-30"
+}
