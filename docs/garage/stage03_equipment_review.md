@@ -13,6 +13,10 @@ The exchange cell has a twin-tower service gantry, guided lift head, blind-mate 
 - Keep the 7 m transverse aisle (Z=-5.75..1.25 m) clear.
 - Preserve the stair approach and all previously built walls, doors, mezzanine geometry, and partitions.
 
+## Opening view
+
+The opening 3/4 camera now targets the zone 04 battery exchange and zone 05 upgrade bay from the south/front side of the mezzanine, so the new work cells are visible immediately when Garage opens. The HUD identifies this build as Stage 03.
+
 ## Review state
 
 The equipment is wired into the existing garage scene as a separate Stage 03 node. This pass has not been captured in the production runtime or on Android. It is an in-progress equipment layout, not a packaged or released build. The separate prop review catalog remains intact; the two hero stations here are custom meshes so their silhouette and scale fit this garage rather than relying on generic sourced workshop props.

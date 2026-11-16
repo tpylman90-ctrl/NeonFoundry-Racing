@@ -75,6 +75,8 @@
     "review_catalog": "CC0 sources and custom GLBs remain in art/garage_prop_review_library and are not yet staged into runtime",
     "paid_generation_services": 0
   },
+  "review_camera_target": [-14.5, 2.45, 8.3],
+  "review_camera_note": "Initial orbit camera frames the zone 04 battery exchange and zone 05 upgrade bay beneath the elevated observation deck.",
   "review_status": {
     "function": "composition follows zones 04/05 and preserves the marked vehicle ingress and cross-aisle",
     "form": "code-authored preview meshes added; no production render captured yet",

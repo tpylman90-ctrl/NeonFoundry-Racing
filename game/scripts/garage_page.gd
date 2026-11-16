@@ -7,6 +7,7 @@ const CYAN: Color = Color("62d8e8")
 const ORANGE: Color = Color("ff8059")
 const WHITE: Color = Color("eef4f6")
 const MUTED: Color = Color("9aafc0")
+# Opening camera frames the Stage 03 power-cell exchange and upgrade stations.
 const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
 const WorkshopScript = preload("res://scripts/garage_workshop.gd")
 const Stage03EquipmentScript = preload("res://scripts/garage_stage03_equipment.gd")
@@ -35,12 +36,13 @@ const WALL_WALK_CLEARANCE: float = 2.2
 var _world: Node3D
 var _camera: Camera3D
 var _vehicle_holder: Node3D
-var _yaw: float = 2.78
-var _pitch: float = 0.21
-var _distance: float = 15.0
-var _target_yaw: float = 2.78
-var _target_pitch: float = 0.21
-var _target_distance: float = 15.0
+var _yaw: float = 0.14
+var _pitch: float = 0.18
+var _distance: float = 10.5
+var _target_yaw: float = 0.14
+var _target_pitch: float = 0.18
+var _target_distance: float = 10.5
+var _inspection_target: Vector3 = Vector3(-14.5, 2.45, 8.3)
 var _dragging: bool = false
 var _vehicle_loaded: bool = false
 var _detail: Label
@@ -599,7 +601,7 @@ func _refresh_camera(delta: float) -> void:
 	_yaw = lerp_angle(_yaw, _target_yaw, blend)
 	_pitch = lerpf(_pitch, _target_pitch, blend)
 	_distance = lerpf(_distance, _target_distance, blend)
-	var aim := Vector3(0, 2.45, 0)
+	var aim := _inspection_target
 	_camera.position = aim + Vector3(sin(_yaw) * cos(_pitch), sin(_pitch), cos(_yaw) * cos(_pitch)) * _distance
 	_camera.look_at(aim, Vector3.UP)
 
@@ -706,10 +708,10 @@ func _build_overlay() -> void:
 	title_panel.add_child(head)
 	head.add_child(_label("N / F  MOTORSPORT DIVISION   //   FOUNDRY LOT", 15, CYAN))
 	head.add_child(_label(
-		"STAGE 02C  /  SIX-ZONE INTERIOR" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
+		"STAGE 03  /  POWER & UPGRADE CELLS" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
 		28, WHITE))
 	head.add_child(_label(
-		"ZONE WALLS  •  VEHICLE PORTALS  •  CLEAR AISLES" if STAGE01_REVIEW
+		"POWER-CELL EXCHANGE  •  UPGRADE / CALIBRATION" if STAGE01_REVIEW
 		else "FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT",
 		14, MUTED))
 
