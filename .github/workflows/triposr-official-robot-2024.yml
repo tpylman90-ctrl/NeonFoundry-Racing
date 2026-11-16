@@ -1,0 +1,117 @@
+name: Official TripoSR 2024 robot reproduction
+
+on:
+  push:
+    branches: [experiments/forge-triposr-trial]
+    paths:
+      - .github/workflows/triposr-official-robot-2024.yml
+      - tools/triposr_official_2024_robot.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  official-robot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      MESA_GL_VERSION_OVERRIDE: "3.3"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install exact official-model CPU dependencies and native extractor
+        id: deps
+        timeout-minutes: 35
+        run: |
+          exec > >(tee "$RUNNER_TEMP/triposr_robot_deps.log") 2>&1
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.2.2' 'torchvision==0.17.2'
+          python -m pip install 'numpy==1.26.4' 'Pillow==10.1.0' 'omegaconf==2.3.0' 'einops==0.7.0' 'transformers==4.35.0' 'trimesh==4.0.5' 'huggingface-hub<1' 'rembg==2.0.60' 'onnxruntime==1.19.2' 'imageio[ffmpeg]' 'xatlas==0.0.9' 'moderngl==5.10.0' 'scikit-image==0.22.0' 'scipy==1.15.3'
+          python -m pip install --force-reinstall --no-deps 'numpy==1.26.4'
+          python -m pip install 'scikit-build-core>=1.0' 'pybind11>=2.10' ninja
+          CMAKE_BUILD_PARALLEL_LEVEL=2 python -m pip install --no-build-isolation 'git+https://github.com/tatsy/torchmcubes.git'
+          python -c "import torch,numpy,torchmcubes,moderngl,trimesh; assert numpy.__version__=='1.26.4'; print('OFFICIAL_ROBOT_CPU_DEPS_OK')"
+          git clone --depth 1 https://github.com/VAST-AI-Research/TripoSR.git /tmp/triposr
+          test -f /tmp/triposr/examples/robot.png
+          PYTHONPATH=/tmp/triposr python -c "from tsr.system import TSR; from tsr.bake_texture import bake_texture; print('OFFICIAL_UNMODIFIED_TRIPOSR_OK')"
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb libgl1-mesa-dri libegl1 libglx-mesa0
+
+      - name: Reconstruct official 2024 demo robot and render neural views
+        id: infer
+        timeout-minutes: 75
+        run: |
+          exec > >(tee "$RUNNER_TEMP/triposr_robot_infer.log") 2>&1
+          xvfb-run -a -s '-screen 0 1024x768x24' env PYTHONPATH=/tmp/triposr python tools/triposr_official_2024_robot.py
+
+      - name: Validate source, actual mesh and neural output
+        id: verify
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("build/triposr_official_robot_2024/benchmark_report.json")
+          assert p.is_file(),"BENCHMARK_REPORT_MISSING"
+          r=json.loads(p.read_text())
+          assert r["status"]=="COMPLETED",r
+          assert r["official_2024_example"] is True
+          assert r["raw_glb"]["triangles"]>1000
+          assert r["neural_render"]["status"]=="success"
+          assert Path("build/triposr_official_robot_2024/"+r["demo_glb"]["file"]).is_file()
+          print("OFFICIAL_ROBOT_REPRO_VERIFIED",r["raw_glb"]["triangles"],"bake",r["texture_bake"]["status"])
+          PY
+
+      - name: Upload official image, GLBs, neural previews and report
+        id: artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TripoSR-2024-Official-Robot-${{ github.run_number }}
+          path: |
+            build/triposr_official_robot_2024/
+            ${{ runner.temp }}/triposr_robot_*.log
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publish final job and error diagnostics
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs'),path=require('path');
+            const stages={
+              deps:'${{ steps.deps.outcome }}',
+              infer:'${{ steps.infer.outcome }}',
+              verify:'${{ steps.verify.outcome }}',
+              artifact:'${{ steps.artifact.outcome }}'
+            };
+            const errors={};
+            for(const [key,logName] of Object.entries({deps:'deps',infer:'infer'})){
+              const f=path.join(process.env.RUNNER_TEMP||'/tmp','triposr_robot_'+logName+'.log');
+              errors[key]=fs.existsSync(f)?fs.readFileSync(f,'utf8').split(/\r?\n/)
+                .filter(s=>/Traceback|Error|Exception|fail|OFFICIAL_ROBOT|CUDA|Killed|out of memory/i.test(s))
+                .slice(-16).map(s=>s.slice(0,320)):[];
+            }
+            const {owner,repo}=context.repo;
+            const branch=context.ref.replace(/^refs\/heads\//,'');
+            const p='art/hero_01/experiments/official_triposr_robot_last_run.json';
+            const obj={run_id:context.runId,
+              run_url:'https://github.com/'+owner+'/'+repo+'/actions/runs/'+context.runId,
+              commit:context.sha,status:'${{ job.status }}',stages,errors};
+            let sha;
+            try{const old=await github.rest.repos.getContent({owner,repo,path:p,ref:branch});sha=old.data.sha;}
+            catch(e){if(e.status!==404)throw e;}
+            await github.rest.repos.createOrUpdateFileContents({
+              owner,repo,path:p,branch,message:'ci: record official TripoSR robot reproduction',
+              content:Buffer.from(JSON.stringify(obj,null,2)+'\n').toString('base64'),
+              ...(sha?{sha}:{})
+            });
