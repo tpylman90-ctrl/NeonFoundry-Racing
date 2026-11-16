@@ -1,0 +1,46 @@
+name: FORGE geometry correction - source audit and export
+on:
+  push:
+    branches: [experiments/forge-triposr-trial]
+    paths:
+      - .github/workflows/forge-correction-source-export.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify existing engineered meshes and owner reference
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          paths=[
+            'art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb',
+            'art/hero_01/experiments/V20/FORGE_V20_ReferenceShapeFit.glb',
+            'art/hero_01/references/forge_8view_original.jpg'
+          ]
+          report={}
+          for p in paths:
+              path=Path(p)
+              assert path.is_file(),p
+              data=path.read_bytes()
+              report[p]={'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)}
+          Path('forge_correction_sources').mkdir(exist_ok=True)
+          Path('forge_correction_sources/source_report.json').write_text(json.dumps(report,indent=2))
+          print('FORGE_CORRECTION_SOURCES_READY',json.dumps(report),flush=True)
+          PY
+      - name: Export for on-model correction
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORGE-Engineered-V20-ReferenceSources-${{ github.run_number }}
+          path: |
+            art/hero_01/experiments/V20/FORGE_V20_ReferenceShapeFit.glb
+            art/hero_01/experiments/V19/FORGE_V19_CurvatureStudy.glb
+            art/hero_01/references/forge_8view_original.jpg
+            forge_correction_sources/source_report.json
+          retention-days: 14
+          if-no-files-found: error
