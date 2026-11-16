@@ -109,7 +109,7 @@ func _run() -> void:
 	assert(menu._garage_page._walk_position.y < 6.0)
 	# Reaching upper landing grants actual 3D viewing level.
 	var upper_stair: Vector3 = Vector3(-24.0, 8.95, 12.05)
-	menu._garage_page._walk_position = Vector3(-24.0, 8.90, 12.08)
+	menu._garage_page._walk_position = upper_stair
 	menu._garage_page._resolve_deck_walk(upper_stair)
 	assert(is_equal_approx(
 		menu._garage_page._walk_position.y, 1.75 + menu._garage_page.DECK_SURFACE_Y
