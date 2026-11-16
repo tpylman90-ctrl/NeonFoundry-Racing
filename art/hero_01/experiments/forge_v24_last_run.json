@@ -1,0 +1,50 @@
+{
+  "run_id": 43801938196,
+  "run_url": "https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/43801938196",
+  "commit": "c54fbbf657919664cc240398959cf2e88595485b",
+  "status": "\failure",
+  "steps": {
+    "prepare": "success",
+    "install": "success",
+    "inference": "success",
+    "verify": "success",
+    "artifact": "\failure"
+  },
+  "errors": {
+    "prepare": [
+      "V24_PREPARE_OK f01171f4c8c76da5b550dcd7e8d00b3242af9dacb1949ee0578381b2e407e41a"
+    ],
+    "install": [
+      "Collecting exceptiongroup>=1.0 (from scikit-build-core>=1.0)",
+      "  Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)",
+      "Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)",
+      "Installing collected packages: tomli, pybind11, pathspec, ninja, exceptiongroup, scikit-build-core",
+      "Successfully installed exceptiongroup-1.3.1 ninja-1.13.2 pathspec-1.1.1 pybind11-3.1.0 scikit-build-core-1.1.2 tomli-2.5.0",
+      "V24_DEPS_READY 2.2.2+cpu",
+      "V24_OFFICIAL_TRIPOSR_IMPORTS_OK"
+    ],
+    "inference": [
+      "V24_MC_BEGIN flat 35",
+      "V24_MC_OK flat 35 108952",
+      "V24_BAKE_BEGIN flat",
+      "V24_BAKE_FAILED flat (standalone) XOpenDisplay: cannot open display",
+      "V24_BEGIN contrast",
+      "V24_NEURAL_RENDER_BEGIN contrast",
+      "V24_NEURAL_RENDER_OK contrast",
+      "V24_MC_BEGIN contrast 15",
+      "V24_MC_OK contrast 15 117920",
+      "V24_MC_BEGIN contrast 20",
+      "V24_MC_OK contrast 20 117976",
+      "V24_MC_BEGIN contrast 25",
+      "V24_MC_OK contrast 25 118040",
+      "V24_MC_BEGIN contrast 30",
+      "V24_MC_OK contrast 30 118096",
+      "V24_MC_BEGIN contrast 35",
+      "V24_MC_OK contrast 35 118156",
+      "V24_BAKE_BEGIN contrast",
+      "V24_BAKE_FAILED contrast (standalone) XOpenDisplay: cannot open display",
+      "V24_SUCCESS {\"flat\": {\"render\": {\"status\": \"ok\", \"views\": 4, \"resolution\": [144, 144]}, \"meshes\": {\"15\": 108800, \"20\": 108872, \"25\": 108964, \"30\": 108972, \"35\": 108952}, \"bake\": \"failed\"}, \"contrast\": {\"render\": {\"status\": \"ok\", \"views\": 4, \"resolution\": [144,"
+    ]
+  },
+  "note": "V24 two-input single-view reconstruction + direct neural renders + density-threshold sweep. Production untouched."
+}
