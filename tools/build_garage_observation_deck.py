@@ -23,12 +23,12 @@ SOURCE.parent.mkdir(parents=True, exist_ok=True)
 
 # The mezzanine sits flush against the diagnostics/depot partition. Its floor
 # is level with the 7.2m partition wall cap. Mirror these values in GaragePage.
-X0, X1 = -25.65, -11.18
+X0, X1 = -26.82, -11.14
 Z0, Z1 = 3.25, 12.05
 DECK_Y = 7.20
-STAIR_X0, STAIR_X1 = -25.3, -22.6
-STAIR_Z0, STAIR_Z1 = 12.05, 19.90  # upper landing -> ground landing
-STEPS = 34
+STAIR_X0, STAIR_X1 = -26.55, -23.85
+STAIR_Z0, STAIR_Z1 = 12.05, 19.95  # upper landing -> front landing
+STEPS = 38
 
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
@@ -107,7 +107,9 @@ for edge, segments in ((Z0, [edge_segments[0]]),
             (seg_width, .32, .105), STEEL)
         box("Deck/inner flange", (seg_cx, DECK_Y-.71, edge),
             (seg_width, .12, .34), STEEL)
-for x in (X0, X1-.135):
+# The shell walls carry the wall-side deck edges; keep crossmembers out of the
+# cladding so both long deck edges sit flush without a visible seam.
+for x in (X1-.135,):
     box("Deck/perimeter cross member", (x, DECK_Y-.36, cz),
         (.27, .35, Z1-Z0), STEEL)
 # Lower-cost secondary metal cross beams underneath.
@@ -116,8 +118,8 @@ for z in (4.5, 6.55, 8.65):
         (X1-X0-.5, .19, .20), STEEL)
 
 # Four columns at the perimeter preserve the power-cell swap footprint.
-for x, z in ((X0+.30, Z0+.25), (STAIR_X1+.35, Z1-.25),
-             (X1-.45, Z0+.25), (X1-.45, Z1-.25)):
+for x, z in ((X0+.52, Z0+.25), (STAIR_X1+.35, 9.55),
+             (X1-.45, Z0+.25), (X1-.45, 9.55)):
     box("Deck/support-column", (x, (DECK_Y-.75)/2, z),
         (.32, DECK_Y-.75, .32), STEEL, .035)
     box("Deck/anchor-shoe", (x, .12, z), (.66, .24, .66), TRIM)
@@ -145,21 +147,26 @@ def rail_run(axis: str, fixed: float, a: float, b: float):
 
 rail_run("x", Z0+.15, X0, X1)
 rail_run("x", Z1-.15, STAIR_X1+.16, X1)
-rail_run("z", X0+.12, Z0, Z1-.18)
-# The adjacent full-height wall replaces the railing on the east edge.
+# The perimeter and partition walls replace the railings on both long edges.
 box("Deck/amber edge indicating inspection outlook",
     (cx, DECK_Y+.008, Z0+.10), (X1-X0-.65, .016, .08), YELLOW, .008)
 
-# One clear 2.7m-wide stair rises from the front-left diagnostics. Both ends
-# meet level landings. Its lower landing stays clear of the perimeter wall;
-# the upper opening interrupts the edge beam so no structure blocks the stair.
+# One clear 2.7m-wide stair rises beside the left perimeter wall. The stairs
+# are closed-backed to read as a continuous flight; the floor itself serves as
+# the lower landing, ending just short of the front wall.
 STAIR_CX=(STAIR_X0+STAIR_X1)/2
 run=STAIR_Z1-STAIR_Z0
 for i in range(STEPS):
     y=(i+1)/STEPS*DECK_Y
     z=STAIR_Z1-(i+.5)/STEPS*run
-    box("Deck/stair-tread", (STAIR_CX, y-.060, z),
-        (STAIR_X1-STAIR_X0, .12, run/STEPS+.018), FLOOR, .012)
+    step_rise = DECK_Y/STEPS
+    step_run = run/STEPS
+    box("Deck/stair-tread", (STAIR_CX, y-.075, z),
+        (STAIR_X1-STAIR_X0, .15, step_run+.06), FLOOR, .012)
+    if i < STEPS - 1:
+        riser_z = STAIR_Z1-(i+1)*step_run
+        box("Deck/stair-riser", (STAIR_CX, y-step_rise*.5, riser_z),
+            (STAIR_X1-STAIR_X0, step_rise+.012, .06), STEEL, .008)
     if i % 3 == 0:
         box("Deck/stair-nosings", (STAIR_CX, y+.009, z-run/STEPS*.38),
             (STAIR_X1-STAIR_X0-.16, .018, .055), TRIM, .009)
@@ -176,10 +183,8 @@ for x in (STAIR_X0+.16, STAIR_X1-.16):
         box("Deck/stair-guard-post", (x, yy+.56, zz),
             (.07, 1.12, .07), STEEL, .01)
 # Floor marker for stairs access, not a partition.
-box("Deck/stair-entry-safety-marking", (STAIR_CX, .015, STAIR_Z1+.15),
+box("Deck/stair-entry-safety-marking", (STAIR_CX, -.045, STAIR_Z1-.75),
     (STAIR_X1-STAIR_X0+.25, .018, .085), YELLOW, .008)
-box("Deck/stair-ground-landing", (STAIR_CX, .075, STAIR_Z1-.52),
-    (STAIR_X1-STAIR_X0, .15, .70), FLOOR, .018)
 
 
 def batch(name, objs):
@@ -209,7 +214,7 @@ for obj in joined:
 bpy.context.scene["garage_stage"] = "02A / observation deck over power-cell swap"
 bpy.context.scene["deck_finished_y"] = DECK_Y
 bpy.context.scene["deck_footprint"] = f"x[{X0},{X1}], z[{Z0},{Z1}]"
-bpy.context.scene["deck_usable_access"] = "34-step stair, flush upper landing, clear ground landing; faces craft/lift bays"
+bpy.context.scene["deck_usable_access"] = "38-step closed stair; wall-flush deck, clear front landing"
 bpy.context.scene["licensing"] = "original generated project meshes and PBR colors"
 bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE))
 bpy.ops.object.select_all(action="DESELECT")

@@ -14,15 +14,15 @@ const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
 const DECK_STAGE02_PATH: String = "res://assets/garage/shell/observation_deck_stage02.glb"
 const PARTITIONS_STAGE02C_PATH: String = "res://assets/garage/shell/interior_partitions_stage02c.glb"
 # The viewing deck is above the front-left diagnostics and cell-swap zone.
-const DECK_X0: float = -25.65
-const DECK_X1: float = -11.18
+const DECK_X0: float = -26.82
+const DECK_X1: float = -11.14
 const DECK_Z0: float = 3.25
 const DECK_Z1: float = 12.05
 const DECK_SURFACE_Y: float = 7.20
-const DECK_STAIR_X0: float = -25.3
-const DECK_STAIR_X1: float = -22.6
+const DECK_STAIR_X0: float = -26.55
+const DECK_STAIR_X1: float = -23.85
 const DECK_STAIR_TOP_Z: float = 12.05
-const DECK_STAIR_BOTTOM_Z: float = 19.90
+const DECK_STAIR_BOTTOM_Z: float = 19.95
 const WALK_EYE_HEIGHT: float = 1.75
 const INTERNAL_PARTITION_HEIGHT: float = 7.2
 const STAGE01_REVIEW: bool = true
@@ -104,13 +104,27 @@ func _process(delta: float) -> void:
 		var strafe: Vector3 = Vector3(cos(_walk_yaw), 0.0, -sin(_walk_yaw))
 		var old_walk_position: Vector3 = _walk_position
 		_walk_position += (strafe * direction.x - forward * direction.y) * delta * 4.6
+		var in_stair_approach: bool = STAGE01_REVIEW and \
+			_walk_position.x >= DECK_STAIR_X0 - 0.25 and \
+			_walk_position.x <= DECK_STAIR_X1 + 0.25 and \
+			_walk_position.z >= DECK_STAIR_TOP_Z - 0.35 and \
+			_walk_position.z <= DECK_STAIR_BOTTOM_Z
+		var on_upper_deck: bool = STAGE01_REVIEW and old_walk_position.y > WALK_EYE_HEIGHT + 0.2
+		var min_x: float = -SHELL_HALF_WIDTH + WALL_WALK_CLEARANCE
+		var max_z: float = SHELL_FRONT - WALL_WALK_CLEARANCE
+		if in_stair_approach:
+			min_x = DECK_STAIR_X0 + 0.15
+			max_z = DECK_STAIR_BOTTOM_Z
+		elif on_upper_deck:
+			min_x = DECK_X0 + 0.35
+			max_z = DECK_Z1 - 0.20
 		_walk_position.x = clampf(
-			_walk_position.x, -SHELL_HALF_WIDTH + WALL_WALK_CLEARANCE,
+			_walk_position.x, min_x,
 			SHELL_HALF_WIDTH - WALL_WALK_CLEARANCE
 		) if STAGE01_REVIEW else clampf(_walk_position.x, -17.0, 17.0)
 		_walk_position.z = clampf(
 			_walk_position.z, SHELL_REAR + WALL_WALK_CLEARANCE,
-			SHELL_FRONT - WALL_WALK_CLEARANCE
+			max_z
 		) if STAGE01_REVIEW else clampf(_walk_position.z, -15.0, 13.8)
 		# The old showroom turntable is hidden during Stage 01. Let testers
 		# walk freely across the empty floor. Restore its radius guard later.
@@ -429,7 +443,7 @@ func _activate_stage02_deck() -> void:
 	_observation_deck = packed.instantiate() as Node3D
 	_observation_deck.name = "PowerCellSwapObservationDeck"
 	_world.add_child(_observation_deck)
-	print("NEON_FOUNDRY_STAGE02_DECK_LOADED height=7.20 wall_aligned=true location=power-cell-swap")
+	print("NEON_FOUNDRY_STAGE02_DECK_LOADED height=7.20 wall_flush=true door_clear=true location=power-cell-swap")
 
 func _activate_stage02c_partitions() -> void:
 	# Internal zone walls are a separate GLB so the authored perimeter shell

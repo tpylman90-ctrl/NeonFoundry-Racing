@@ -161,8 +161,8 @@
   "observation_deck": {
     "zone": "04 diagnostics / power-cell swap",
     "x": [
-      -25.65,
-      -11.18
+      -26.82,
+      -11.14
     ],
     "z": [
       3.25,
@@ -172,14 +172,14 @@
     "viewing_edge": "rear/north, facing lift bays across 7m aisle",
     "stairs": {
       "x": [
-        -25.3,
-        -22.6
+        -26.55,
+        -23.85
       ],
       "z": [
         12.05,
-        19.9
+        19.95
       ],
-      "steps": 34
+      "steps": 38
     }
   }
 }

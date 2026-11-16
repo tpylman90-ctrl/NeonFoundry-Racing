@@ -83,8 +83,8 @@ func _run() -> void:
 	for candidate in deck_meshes.slice(1):
 		var node: MeshInstance3D = candidate as MeshInstance3D
 		deck_bounds = deck_bounds.merge(node.global_transform * node.get_aabb())
-	assert(deck_bounds.position.x < -25.0)
-	assert(deck_bounds.end.x > -11.5)
+	assert(deck_bounds.position.x < -26.7)
+	assert(deck_bounds.end.x > -11.3)
 	assert(deck_bounds.position.z > 3.0)
 	assert(deck_bounds.position.z < 3.6)
 	assert(deck_bounds.end.z > 19.8)
@@ -97,8 +97,8 @@ func _run() -> void:
 	menu._garage_page._resolve_deck_walk(old_under)
 	assert(is_equal_approx(menu._garage_page._walk_position.y, 1.75))
 	# Stair height is continuous; entering from the lower landing works.
-	var foot: Vector3 = Vector3(-24.0, 1.75, 19.98)
-	menu._garage_page._walk_position = Vector3(-24.0, 1.75, 19.78)
+	var foot: Vector3 = Vector3(-24.8, 1.75, 19.85)
+	menu._garage_page._walk_position = Vector3(-24.8, 1.75, 19.65)
 	menu._garage_page._resolve_deck_walk(foot)
 	assert(menu._garage_page._walk_position.y > 1.75)
 	assert(menu._garage_page._walk_position.y < 2.0)
