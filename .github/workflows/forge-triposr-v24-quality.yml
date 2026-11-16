@@ -72,10 +72,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Forge-V24-Neural-Threshold-Sweep-\${{ github.run_number }}
+          name: Forge-V24-Neural-Threshold-Sweep-${{ github.run_number }}
           path: |
             build/triposr_v24_quality/
-            \${{ runner.temp }}/v24_*.log
+            ${{ runner.temp }}/v24_*.log
           if-no-files-found: warn
           retention-days: 14
       - name: Publish inspectable run diagnostic on experimental branch
@@ -85,11 +85,11 @@ jobs:
           script: |
             const fs=require('fs'),path=require('path');
             const steps={
-              prepare:'\${{ steps.prepare.outcome }}',
-              install:'\${{ steps.install.outcome }}',
-              inference:'\${{ steps.inference.outcome }}',
-              verify:'\${{ steps.verify.outcome }}',
-              artifact:'\${{ steps.artifact.outcome }}'
+              prepare:'${{ steps.prepare.outcome }}',
+              install:'${{ steps.install.outcome }}',
+              inference:'${{ steps.inference.outcome }}',
+              verify:'${{ steps.verify.outcome }}',
+              artifact:'${{ steps.artifact.outcome }}'
             };
             const errors={};
             for(const k of ['prepare','install','inference']){
@@ -104,7 +104,7 @@ jobs:
             const report={
               run_id:context.runId,
               run_url:'https://github.com/'+owner+'/'+repo+'/actions/runs/'+context.runId,
-              commit:context.sha,status:'\${{ job.status }}',steps,errors,
+              commit:context.sha,status:'${{ job.status }}',steps,errors,
               note:'V24 two-input single-view reconstruction + direct neural renders + density-threshold sweep. Production untouched.'
             };
             let sha;
