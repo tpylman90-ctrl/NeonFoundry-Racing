@@ -1,0 +1,83 @@
+{
+  "project": "Neon Foundry Racing",
+  "document": "Garage Stage 03 equipment placement manifest",
+  "version": "1.0",
+  "status": "in progress; procedural preview equipment is wired into the garage scene",
+  "unit": "m",
+  "coordinates": "Godot X right, Z front, Y up; floor finish Y=-0.05; deck finish Y=7.20",
+  "source": "game/scripts/garage_stage03_equipment.gd",
+  "phase_scope": [
+    "Power-cell exchange under the observation deck in zone 04",
+    "Dedicated pod upgrade and calibration bay in zone 05",
+    "Spare-cell cabinet supporting the zone 04 exchange cell"
+  ],
+  "placements": [
+    {
+      "id": "power-cell-exchange-zone04",
+      "name": "Power Cell Exchange Cell",
+      "center": [-18.8, -0.065, 7.2],
+      "footprint": [8.7, 5.75],
+      "height_above_floor": 4.368,
+      "zone": "04 diagnostics / re-power",
+      "support": "main garage floor; 5 mm inset to floor finish",
+      "deck_clearance": 2.883,
+      "features": [
+        "twin armored gantry towers",
+        "double rail and suspended lift head",
+        "blind-mate high-voltage power-cell connectors",
+        "recessed charge-status window and cooling fins",
+        "operator touchscreen and lockout label",
+        "grounded service deck, tie-downs, guide lights and amber boundary"
+      ]
+    },
+    {
+      "id": "spare-power-cell-cabinet-zone04",
+      "name": "Spare Power Cell Cabinet",
+      "center": [-24.5, -0.065, 5.8],
+      "footprint": [1.75, 3.3],
+      "height_above_floor": 4.54,
+      "zone": "04 diagnostics / re-power",
+      "support": "main garage floor; 5 mm inset to floor finish",
+      "deck_clearance": 2.71,
+      "features": [
+        "three service tiers",
+        "six independently marked cell storage slots",
+        "charge-state lights and structural uprights"
+      ]
+    },
+    {
+      "id": "racer-upgrade-configurator-zone05",
+      "name": "Racer Upgrade and Calibration Bay",
+      "center": [-9.2, -0.065, 9.3],
+      "footprint": [3.4, 5.45],
+      "height_above_floor": 3.815,
+      "zone": "05 tool and parts depository",
+      "support": "main garage floor; 5 mm inset to floor finish",
+      "ingress_clearance": 0.5,
+      "features": [
+        "replaceable hover-vector pod on instrumented cradle",
+        "layered armor, intake louvers and exposed vector coils",
+        "paired tactile consoles and telemetry display",
+        "three-axis metrology bridge with calibration scale",
+        "modular service drawers and floor-contact wayfinding"
+      ]
+    }
+  ],
+  "circulation_contract": {
+    "front_ingress_lane_x": [-7, 2],
+    "cross_aisle_z": [-5.75, 1.25],
+    "vehicle_ramps_or_collision": "none added by this equipment layer",
+    "battery_exchange_area": "inside zone 04; entirely beneath deck footprint",
+    "upgrade_bay_edge_to_ingress": "0.5 m from bay's east edge to lane boundary"
+  },
+  "asset_provenance": {
+    "phase_03_hero_equipment": "custom procedural Godot meshes; no third-party geometry",
+    "review_catalog": "CC0 sources and custom GLBs remain in art/garage_prop_review_library and are not yet staged into runtime",
+    "paid_generation_services": 0
+  },
+  "review_status": {
+    "function": "composition follows zones 04/05 and preserves the marked vehicle ingress and cross-aisle",
+    "form": "code-authored preview meshes added; no production render captured yet",
+    "runtime": "not assessed in a device build"
+  }
+}

@@ -9,6 +9,7 @@ const WHITE: Color = Color("eef4f6")
 const MUTED: Color = Color("9aafc0")
 const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
 const WorkshopScript = preload("res://scripts/garage_workshop.gd")
+const Stage03EquipmentScript = preload("res://scripts/garage_stage03_equipment.gd")
 const DualJoystickScript = preload("res://scripts/garage_dual_joystick.gd")
 const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
 const DECK_STAGE02_PATH: String = "res://assets/garage/shell/observation_deck_stage02.glb"
@@ -397,6 +398,7 @@ func _build_3d_stage() -> void:
 	_activate_stage01_shell()
 	_activate_stage02_deck()
 	_activate_stage02c_partitions()
+	_activate_stage03_equipment()
 
 func _activate_stage01_shell() -> void:
 	if not STAGE01_REVIEW:
@@ -461,6 +463,15 @@ func _activate_stage02c_partitions() -> void:
 	_interior_partitions.name = "GarageZonePartitionsStage02C"
 	_world.add_child(_interior_partitions)
 	print("NEON_FOUNDRY_STAGE02C_PARTITIONS_LOADED zones=6 height=7.20 vehicle_portals=8")
+
+func _activate_stage03_equipment() -> void:
+	# Equipment is authored as its own procedural layer so the approved shell,
+	# deck and partitions remain independently rebuildable.
+	var equipment := Node3D.new()
+	equipment.name = "GarageEquipment_Stage03"
+	equipment.set_script(Stage03EquipmentScript)
+	_world.add_child(equipment)
+	print("NEON_FOUNDRY_STAGE03_EQUIPMENT_LOADED battery_exchange=zone04 upgrade_bay=zone05")
 
 func _partition_blocks_crossing(previous: Vector3, current: Vector3,
 		axis: String, fixed: float, start: float, finish: float,
