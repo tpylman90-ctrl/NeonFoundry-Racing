@@ -97,8 +97,8 @@ func _run() -> void:
 	menu._garage_page._resolve_deck_walk(old_under)
 	assert(is_equal_approx(menu._garage_page._walk_position.y, 1.75))
 	# Stair height is continuous; entering from the lower landing works.
-	var foot: Vector3 = Vector3(-24.8, 1.75, 19.85)
-	menu._garage_page._walk_position = Vector3(-24.8, 1.75, 19.65)
+	var foot: Vector3 = Vector3(-24.8, 1.75, 19.98)
+	menu._garage_page._walk_position = Vector3(-24.8, 1.75, 19.85)
 	menu._garage_page._resolve_deck_walk(foot)
 	assert(menu._garage_page._walk_position.y > 1.75)
 	assert(menu._garage_page._walk_position.y < 2.0)
