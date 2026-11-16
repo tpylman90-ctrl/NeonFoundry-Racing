@@ -26,7 +26,7 @@ SOURCE.parent.mkdir(parents=True, exist_ok=True)
 X0, X1 = -26.82, -11.14
 Z0, Z1 = 3.25, 12.05
 DECK_Y = 7.20
-STAIR_X0, STAIR_X1 = -26.55, -23.85
+STAIR_X0, STAIR_X1 = -23.70, -21.00
 STAIR_Z0, STAIR_Z1 = 12.05, 19.95  # upper landing -> front landing
 STEPS = 38
 
@@ -151,7 +151,7 @@ rail_run("x", Z1-.15, STAIR_X1+.16, X1)
 box("Deck/amber edge indicating inspection outlook",
     (cx, DECK_Y+.008, Z0+.10), (X1-X0-.65, .016, .08), YELLOW, .008)
 
-# One clear 2.7m-wide stair rises beside the left perimeter wall. The stairs
+# One clear 2.7m-wide stair rises set inward from the west perimeter wall. The stairs
 # are closed-backed to read as a continuous flight; the floor itself serves as
 # the lower landing, ending just short of the front wall.
 STAIR_CX=(STAIR_X0+STAIR_X1)/2

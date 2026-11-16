@@ -20,6 +20,7 @@ var _batch_tools: Dictionary = {}
 func _ready() -> void:
 	_create_materials()
 	_build_battery_exchange()
+	_build_battery_line()
 	_build_upgrade_bay()
 	_build_battery_storage()
 	_build_zone_markers()
@@ -196,6 +197,135 @@ func _build_battery_exchange() -> void:
 		_box(cell, "StatusLouver", Vector3(side * 1.32, 2.69, 1.825), Vector3(0.10, 0.73, 0.028), "metal")
 	_label(cell, "POWER CELL / EXCHANGE", Vector3(0, 3.40, 1.78), 0.23, Color("80e9f4"))
 	_label(cell, "HIGH VOLTAGE  •  LOCKED", Vector3(0, 0.74, 2.48), 0.14, Color("ffad62"))
+
+func _build_battery_line() -> void:
+	# A compact battery-production line wraps the hero exchange cell. Its machines
+	# sit under the mezzanine and stay below the underside structure.
+	_build_formation_bank()
+	_build_thermal_conditioner()
+	_build_diagnostic_bench()
+	_build_exchange_robot_arms()
+
+func _build_formation_bank() -> void:
+	# Four independently readable formation/charge cabinets along the far side.
+	var row := Node3D.new()
+	row.name = "FormationChargeBank_Zone04"
+	row.position = Vector3(-18.8, -0.065, 11.12)
+	add_child(row)
+	_box(row, "BankArmorPlinth", Vector3(0, 0.13, 0), Vector3(7.85, 0.24, 1.48), "ink")
+	_box(row, "BankServiceRail", Vector3(0, 0.28, -0.58), Vector3(7.55, 0.075, 0.13), "cyan_dark")
+	for unit in range(4):
+		var x: float = -2.94 + float(unit) * 1.96
+		_box(row, "FormationCabinetBase", Vector3(x, 0.37, 0), Vector3(1.72, 0.22, 1.18), "graphite")
+		_box(row, "FormationCabinetShell", Vector3(x, 1.45, 0), Vector3(1.57, 1.92, 1.12), "body")
+		_box(row, "CabinetCrown", Vector3(x, 2.45, 0), Vector3(1.65, 0.14, 1.18), "ink")
+		_box(row, "ChargeStatusLens", Vector3(x, 2.48, 0.605), Vector3(1.22, 0.052, 0.028), "cyan")
+		_box(row, "CabinetServiceWindow", Vector3(x, 1.65, 0.568), Vector3(1.20, 0.92, 0.04), "glass")
+		_box(row, "ChargeCoilSpine", Vector3(x - 0.53, 1.63, 0.598), Vector3(0.11, 0.68, 0.035), "amber")
+		for slot in range(3):
+			var y: float = 0.94 + float(slot) * 0.42
+			_box(row, "FormationCellTray", Vector3(x, y, 0.64), Vector3(0.87, 0.28, 0.12), "ink")
+			_box(row, "TrayPowerIndicator", Vector3(x + 0.47, y, 0.714), Vector3(0.10, 0.065, 0.024), "cyan" if (unit + slot) % 4 != 3 else "amber")
+		for side in [-1.0, 1.0]:
+			_box(row, "CabinetVentFin", Vector3(x + side * 0.73, 1.44, 0), Vector3(0.07, 1.24, 0.84), "ink")
+			for fin in range(5):
+				_box(row, "VentSlat", Vector3(x + side * 0.772, 1.05 + float(fin) * 0.19, 0.18), Vector3(0.022, 0.045, 0.49), "metal")
+		_label(row, "CELL FORMATION / %02d" % (unit + 1), Vector3(x, 2.67, 0.57), 0.095, Color("8beaf5"))
+
+func _build_thermal_conditioner() -> void:
+	# Thermal chamber and coolant manifolds occupy the west service pocket.
+	var chamber := Node3D.new()
+	chamber.name = "ThermalConditioningCell_Zone04"
+	chamber.position = Vector3(-25.08, -0.065, 9.60)
+	add_child(chamber)
+	_box(chamber, "ThermalFoundation", Vector3(0, 0.12, 0), Vector3(2.82, 0.22, 3.84), "ink")
+	_box(chamber, "InsulatedChamberCore", Vector3(0, 1.65, 0), Vector3(2.40, 2.72, 3.28), "graphite")
+	_box(chamber, "ChamberOuterArmor", Vector3(0, 1.70, 0), Vector3(2.62, 2.57, 3.46), "body")
+	# Recessed front door surround, glass viewport, segmented locking clamps.
+	_box(chamber, "DoorShadow", Vector3(0, 1.57, 1.75), Vector3(1.70, 2.08, 0.055), "ink")
+	_box(chamber, "DoorGlass", Vector3(0, 1.60, 1.79), Vector3(1.31, 1.47, 0.035), "glass")
+	_box(chamber, "DoorStatusLine", Vector3(0, 2.48, 1.82), Vector3(0.96, 0.06, 0.025), "cyan")
+	for side in [-1.0, 1.0]:
+		_box(chamber, "DoorLockRail", Vector3(side * 0.91, 1.60, 1.82), Vector3(0.11, 2.20, 0.15), "metal")
+		for y in [0.82, 1.58, 2.34]:
+			_cylinder(chamber, "DoorClamp", Vector3(side * 0.91, y, 1.94), 0.13, 0.22, "amber", 14, Vector3.FORWARD)
+		_box(chamber, "ChillerSidePanel", Vector3(side * 1.34, 1.74, -0.25), Vector3(0.055, 1.50, 2.70), "ink")
+		for fin in range(7):
+			_box(chamber, "HeatExchangerFin", Vector3(side * 1.38, 1.55, -1.22 + float(fin) * 0.34), Vector3(0.07, 1.74, 0.11), "metal")
+	# Two hard-piped coolant trunks and bright flow collars make this a process machine.
+	for side in [-1.0, 1.0]:
+		_rod(chamber, "CoolantTrunk", Vector3(side * 1.04, 3.05, -1.62), Vector3(side * 1.04, 3.28, 1.48), 0.075, "cyan_dark")
+		_cylinder(chamber, "CoolantFlowCollar", Vector3(side * 1.04, 3.18, 0.82), 0.12, 0.18, "cyan", 14, Vector3.FORWARD)
+	_box(chamber, "ThermalControlConsole", Vector3(0, 1.20, 2.25), Vector3(1.56, 1.15, 0.38), "ink")
+	_box(chamber, "ThermalControlScreen", Vector3(0, 1.69, 2.045), Vector3(1.24, 0.59, 0.04), "glass")
+	_box(chamber, "ThermalScreenTelemetry", Vector3(0, 1.75, 2.017), Vector3(0.83, 0.045, 0.018), "cyan")
+	_label(chamber, "THERMAL CONDITIONING", Vector3(0, 3.15, 1.80), 0.105, Color("ffbd78"))
+
+func _build_diagnostic_bench() -> void:
+	# Optical cell metrology bench on the front edge, with its own handling arm.
+	var bench := Node3D.new()
+	bench.name = "CellMetrologyWorkstation_Zone04"
+	bench.position = Vector3(-18.8, -0.065, 3.82)
+	add_child(bench)
+	_box(bench, "MetrologyFoot", Vector3(0, 0.13, 0), Vector3(6.90, 0.24, 0.90), "ink")
+	_box(bench, "VibrationIsolationTop", Vector3(0, 0.31, 0), Vector3(6.62, 0.15, 0.88), "metal")
+	_box(bench, "BenchFrontArmor", Vector3(0, 0.76, 0.31), Vector3(6.34, 0.74, 0.24), "body")
+	for x in [-2.8, -1.4, 0.0, 1.4, 2.8]:
+		_box(bench, "BenchDrawer", Vector3(x, 0.75, 0.445), Vector3(1.13, 0.28, 0.035), "ink")
+		_box(bench, "DrawerPull", Vector3(x, 0.76, 0.468), Vector3(0.45, 0.035, 0.015), "amber")
+	# Three sensor cradles and inspection coils make the top a true work surface.
+	for i in range(3):
+		var x: float = -2.12 + float(i) * 2.12
+		_box(bench, "InspectionCellCradle", Vector3(x, 0.48, -0.02), Vector3(1.20, 0.19, 0.70), "graphite")
+		_box(bench, "CellSample", Vector3(x, 0.72, -0.02), Vector3(0.69, 0.31, 0.44), "body")
+		_box(bench, "SampleTelemetryWindow", Vector3(x, 0.75, 0.205), Vector3(0.43, 0.12, 0.025), "glass")
+		_cylinder(bench, "InductionRing", Vector3(x, 0.59, -0.02), 0.31, 0.04, "cyan_dark", 24)
+	# Dual-rail laser scanner gantry over the bench.
+	for x in [-2.82, 2.82]:
+		_box(bench, "ScannerPortalUpright", Vector3(x, 1.65, -0.25), Vector3(0.17, 2.30, 0.18), "ink")
+		_box(bench, "ScannerRail", Vector3(x * 0.5, 2.74, -0.25), Vector3(5.75, 0.18, 0.38), "body")
+		_box(bench, "ScannerEmitter", Vector3(x * 0.5, 2.61, 0.02), Vector3(0.70, 0.28, 0.66), "graphite")
+		_box(bench, "LaserAperture", Vector3(x * 0.5, 2.44, 0.365), Vector3(0.24, 0.045, 0.025), "cyan")
+		for side in [-1.0, 1.0]:
+			_rod(bench, "ScannerCable", Vector3(x, 2.46, -0.25 + side * 0.05), Vector3(x, 0.48, -0.25 + side * 0.05), 0.032, "cyan_dark")
+	# Tool rack and operator display at the east end.
+	_box(bench, "DiagnosticConsole", Vector3(3.12, 1.18, -0.06), Vector3(0.62, 1.65, 0.73), "ink")
+	_box(bench, "DiagnosticDisplay", Vector3(3.10, 2.10, 0.33), Vector3(0.53, 0.65, 0.045), "glass")
+	for i in range(4):
+		_box(bench, "ProbeTool", Vector3(2.85 + float(i) * 0.19, 0.64, -0.42), Vector3(0.09, 0.38, 0.10), "amber")
+	_label(bench, "CELL METROLOGY / QC", Vector3(0, 2.96, 0.49), 0.11, Color("8beaf5"))
+
+func _build_exchange_robot_arms() -> void:
+	# Paired articulated handling robots flank the cell and share a precision
+	# rail with the overhead gantry. Each pivot, link and tool is independently
+	# modeled while all meshes stay inside the material-batched renderer.
+	var robots := Node3D.new()
+	robots.name = "DualArticulatedCellHandlingRobots_Zone04"
+	robots.position = Vector3(-18.8, -0.065, 7.2)
+	add_child(robots)
+	for side in [-1.0, 1.0]:
+		var base_x: float = side * 3.18
+		var shoulder := Vector3(base_x, 0.66, 0.22)
+		var elbow := Vector3(side * 2.42, 1.77, -0.06)
+		var wrist := Vector3(side * 1.53, 2.34, 0.34)
+		var tool := Vector3(side * 1.10, 2.12, 0.61)
+		_cylinder(robots, "RobotServoBase", Vector3(base_x, 0.78, 0.22), 0.46, 0.34, "ink", 18)
+		_cylinder(robots, "RobotTurntable", Vector3(base_x, 0.99, 0.22), 0.31, 0.12, "cyan_dark", 18)
+		_box(robots, "RobotShoulderHousing", Vector3(base_x, 1.32, 0.22), Vector3(0.62, 0.68, 0.62), "body", side * -0.24)
+		_cylinder(robots, "RobotShoulderJoint", shoulder, 0.28, 0.37, "metal", 18, Vector3.FORWARD)
+		_rod(robots, "RobotUpperLink", shoulder, elbow, 0.19, "graphite")
+		_rod(robots, "UpperLinkArmor", shoulder + Vector3(0, 0.06, 0), elbow + Vector3(0, 0.06, 0), 0.125, "metal")
+		_cylinder(robots, "RobotElbowServo", elbow, 0.25, 0.44, "amber", 18, Vector3.FORWARD)
+		_rod(robots, "RobotForearm", elbow, wrist, 0.145, "body")
+		_rod(robots, "ForearmActuator", elbow + Vector3(0, -0.09, 0.03), wrist + Vector3(0, -0.09, 0.03), 0.045, "cyan_dark")
+		_cylinder(robots, "RobotWristServo", wrist, 0.19, 0.32, "metal", 16, Vector3.FORWARD)
+		_rod(robots, "RobotToolStem", wrist, tool, 0.095, "graphite")
+		_box(robots, "CellClampBackplate", tool, Vector3(0.30, 0.12, 0.48), "ink")
+		for finger in [-1.0, 1.0]:
+			_rod(robots, "CellGripFinger",
+				tool + Vector3(finger * 0.12, -0.03, 0.12),
+				tool + Vector3(finger * 0.12, -0.18, 0.28), 0.035, "amber")
+		_box(robots, "RobotSafetyLight", Vector3(base_x, 1.60, 0.54), Vector3(0.16, 0.07, 0.035), "cyan")
 
 func _build_upgrade_bay() -> void:
 	# Zone 05, west of the ingress lane; the complete 3.4 m width stays clear

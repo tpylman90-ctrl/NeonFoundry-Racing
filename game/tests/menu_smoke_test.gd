@@ -97,18 +97,18 @@ func _run() -> void:
 	menu._garage_page._resolve_deck_walk(old_under)
 	assert(is_equal_approx(menu._garage_page._walk_position.y, 1.75))
 	# Stair height is continuous; entering from the lower landing works.
-	var foot: Vector3 = Vector3(-24.8, 1.75, 19.98)
-	menu._garage_page._walk_position = Vector3(-24.8, 1.75, 19.85)
+	var foot: Vector3 = Vector3(-22.35, 1.75, 19.98)
+	menu._garage_page._walk_position = Vector3(-22.35, 1.75, 19.85)
 	menu._garage_page._resolve_deck_walk(foot)
 	assert(menu._garage_page._walk_position.y > 1.75)
 	assert(menu._garage_page._walk_position.y < 2.0)
-	var stair_mid: Vector3 = Vector3(-24.0, 5.7, 16.0)
-	menu._garage_page._walk_position = Vector3(-24.0, 5.7, 15.8)
+	var stair_mid: Vector3 = Vector3(-22.35, 5.7, 16.0)
+	menu._garage_page._walk_position = Vector3(-22.35, 5.7, 15.8)
 	menu._garage_page._resolve_deck_walk(stair_mid)
 	assert(menu._garage_page._walk_position.y > 3.5)
 	assert(menu._garage_page._walk_position.y < 6.0)
 	# Reaching upper landing grants actual 3D viewing level.
-	var upper_stair: Vector3 = Vector3(-24.0, 8.95, 12.05)
+	var upper_stair: Vector3 = Vector3(-22.35, 8.95, 12.05)
 	menu._garage_page._walk_position = upper_stair
 	menu._garage_page._resolve_deck_walk(upper_stair)
 	assert(is_equal_approx(

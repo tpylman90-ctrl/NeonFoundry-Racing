@@ -21,8 +21,8 @@ const DECK_X1: float = -11.14
 const DECK_Z0: float = 3.25
 const DECK_Z1: float = 12.05
 const DECK_SURFACE_Y: float = 7.20
-const DECK_STAIR_X0: float = -26.55
-const DECK_STAIR_X1: float = -23.85
+const DECK_STAIR_X0: float = -23.70
+const DECK_STAIR_X1: float = -21.00
 const DECK_STAIR_TOP_Z: float = 12.05
 const DECK_STAIR_BOTTOM_Z: float = 19.95
 const WALK_EYE_HEIGHT: float = 1.75
@@ -38,11 +38,11 @@ var _camera: Camera3D
 var _vehicle_holder: Node3D
 var _yaw: float = 0.14
 var _pitch: float = 0.18
-var _distance: float = 10.5
+var _distance: float = 12.5
 var _target_yaw: float = 0.14
 var _target_pitch: float = 0.18
-var _target_distance: float = 10.5
-var _inspection_target: Vector3 = Vector3(-14.5, 2.45, 8.3)
+var _target_distance: float = 12.5
+var _inspection_target: Vector3 = Vector3(-18.8, 2.30, 7.20)
 var _dragging: bool = false
 var _vehicle_loaded: bool = false
 var _detail: Label
