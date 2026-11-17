@@ -1,21 +1,23 @@
 {
   "project": "Neon Foundry Racing",
   "document": "Garage Stage 03 equipment placement manifest",
-  "version": "1.0",
+  "version": "1.1",
   "status": "in progress; procedural preview equipment is wired into the garage scene",
   "unit": "m",
   "coordinates": "Godot X right, Z front, Y up; floor finish Y=-0.05; deck finish Y=7.20",
   "source": "game/scripts/garage_stage03_equipment.gd",
   "phase_scope": [
     "Power-cell exchange under the observation deck in zone 04",
-    "Dedicated pod upgrade and calibration bay in zone 05",
-    "Spare-cell cabinet supporting the zone 04 exchange cell"
+    "Four-cabinet formation and charging row at the front of zone 04",
+    "Thermal conditioning chamber in the west-rear service pocket",
+    "Optical metrology bench at the east-front edge of zone 04",
+    "Dedicated pod upgrade and calibration bay in zone 05"
   ],
   "placements": [
     {
       "id": "power-cell-exchange-zone04",
       "name": "Power Cell Exchange Cell",
-      "center": [-18.8, -0.065, 7.2],
+      "center": [-21.8, -0.065, 7.6],
       "footprint": [8.7, 5.75],
       "height_above_floor": 4.368,
       "zone": "04 diagnostics / re-power",
@@ -31,19 +33,31 @@
       ]
     },
     {
-      "id": "spare-power-cell-cabinet-zone04",
-      "name": "Spare Power Cell Cabinet",
-      "center": [-24.5, -0.065, 5.8],
-      "footprint": [1.75, 3.3],
-      "height_above_floor": 4.54,
+      "id": "formation-charge-bank-zone04",
+      "name": "Four-Cell Formation and Charging Bank",
+      "center": [-21.8, -0.065, 12.3],
+      "footprint": [7.85, 1.48],
+      "height_above_floor": 2.54,
       "zone": "04 diagnostics / re-power",
-      "support": "main garage floor; 5 mm inset to floor finish",
-      "deck_clearance": 2.71,
-      "features": [
-        "three service tiers",
-        "six independently marked cell storage slots",
-        "charge-state lights and structural uprights"
-      ]
+      "features": ["four independent charge cabinets", "twelve cell trays", "ventilation and status indicators"]
+    },
+    {
+      "id": "thermal-conditioning-zone04",
+      "name": "Thermal Conditioning Chamber",
+      "center": [-25.08, -0.065, 15.9],
+      "footprint": [2.82, 3.84],
+      "height_above_floor": 3.28,
+      "zone": "04 diagnostics / re-power",
+      "features": ["insulated test chamber", "segmented door clamps", "hard-piped coolant manifolds"]
+    },
+    {
+      "id": "cell-metrology-zone04",
+      "name": "Cell Metrology Workbench",
+      "center": [-14.65, -0.065, 3.82],
+      "footprint": [6.90, 0.90],
+      "height_above_floor": 2.96,
+      "zone": "04 diagnostics / re-power",
+      "features": ["three inspection cradles", "laser scanner gantry", "operator console"]
     },
     {
       "id": "racer-upgrade-configurator-zone05",
@@ -67,7 +81,10 @@
     "front_ingress_lane_x": [-7, 2],
     "cross_aisle_z": [-5.75, 1.25],
     "vehicle_ramps_or_collision": "none added by this equipment layer",
-    "battery_exchange_area": "inside zone 04; entirely beneath deck footprint",
+    "battery_exchange_area": "center-left of zone 04; kept separate from the front workbench",
+    "workcell_walkway": "about 1.1 m between exchange deck and formation bank",
+    "stair_approach": "lower toe Z=17.0; front wall Z=20.25; 3.25 m unobstructed approach",
+    "stairwell_notch": "X=-16.0..-13.3; Z=9.05..12.05",
     "upgrade_bay_edge_to_ingress": "0.5 m from bay's east edge to lane boundary"
   },
   "asset_provenance": {
@@ -75,11 +92,12 @@
     "review_catalog": "CC0 sources and custom GLBs remain in art/garage_prop_review_library and are not yet staged into runtime",
     "paid_generation_services": 0
   },
-  "review_camera_target": [-14.5, 2.45, 8.3],
-  "review_camera_note": "Initial orbit camera frames the zone 04 battery exchange and zone 05 upgrade bay beneath the elevated observation deck.",
+  "review_camera_target": [-20.2, 2.30, 8.4],
+  "review_camera_note": "Initial orbit camera centers the distributed zone 04 battery workcells and the stairwell opening.",
   "review_status": {
     "function": "composition follows zones 04/05 and preserves the marked vehicle ingress and cross-aisle",
     "form": "code-authored preview meshes added; no production render captured yet",
     "runtime": "not assessed in a device build"
   }
 }
+

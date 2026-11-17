@@ -53,10 +53,11 @@ Built in the approved 54m × 44m Foundry Lot. The raised viewing deck is **above
 
 - Open north-facing rail overlooks the transverse vehicle aisle and three future robotic lift bays.
 - Industrial steel I-beams, supports moved clear of the small service doorway, cross supports, anti-slip floor, low-profile orange hazard marking, and open metal safety rails; original mesh geometry, entirely built in Blender and exported as its own GLB. The perimeter and partition walls replace railings along both wall-side edges.
-- A 2.7m-wide 38-tread closed-backed service stair climbs from Z +19.95 at the front wall to the flush deck landing at Z +12.05. The stair lane is moved close to the left wall, the separate raised landing pad is removed, and the existing ground floor provides a continuous front landing. The upper edge beam and railing remain interrupted at the stair opening.
+- A 2.7m-wide, 38-tread service stair climbs from Z +17.00 to an interior deck landing at Z +9.05 through a 3m-deep notch. Its lower landing is 3.25m clear of the front wall and the stair is set away from both side walls. The floor plate is split around the opening; no stair tread or landing runs into the perimeter wall.
 - Dual analog sticks remain unchanged. Camera movement now follows stair elevation. Ground-level walking **under** the deck does not teleport the player upstairs. Upper-level guard boundaries prevent stepping off.
 - No added area lights, dynamic shadows, fog, machinery, partitions, glass or lifts. Maintain the current phone FPS baseline (~94 FPS before this deck).
 - The six structural shell meshes and their packed PBR maps remain unchanged, while the new deck is a separate asset for inspection or future replacement.
 - Godot camera validation checks floor, stairs, deck height and fall protection; Blender/glTF validator checks exported deck materials and spatial bounds.
 
 **The user's earlier blueprint is a planning reference:** future craft and cell-swap equipment are not yet visible in Stage 02A. The deck provides a genuine elevated view of the space where those vehicles will later sit.
+

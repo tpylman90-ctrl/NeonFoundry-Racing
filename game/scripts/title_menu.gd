@@ -77,8 +77,11 @@ func _ready() -> void:
 	elif "--capture-deckwalk" in OS.get_cmdline_user_args():
 		_open_section("garage")
 		_garage_page.call("_toggle_walk")
-		_garage_page.set("_walk_position", Vector3(-19.0, 8.95, 5.2))
-		_garage_page.set("_walk_yaw", 0.0)
+		# Inspect the new stairwell cutout from its upper landing, looking down
+		# the flight toward the clear ground-level arrival pad.
+		_garage_page.set("_walk_position", Vector3(-14.65, 8.95, 7.8))
+		_garage_page.set("_walk_yaw", PI)
+		_garage_page.set("_walk_pitch", -0.45)
 		_capture_screen("NeonFoundry-ObservationOverlook.png", "garage")
 	elif "--capture-store" in OS.get_cmdline_user_args():
 		_open_section("store")
@@ -593,3 +596,4 @@ func _capture_screen(filename: String, capture_page: String) -> void:
 	else:
 		print("NEON_FOUNDRY_MENU_CAPTURE_OK " + filename)
 	get_tree().quit()
+

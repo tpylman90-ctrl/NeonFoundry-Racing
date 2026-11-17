@@ -21,10 +21,10 @@ const DECK_X1: float = -11.14
 const DECK_Z0: float = 3.25
 const DECK_Z1: float = 12.05
 const DECK_SURFACE_Y: float = 7.20
-const DECK_STAIR_X0: float = -23.70
-const DECK_STAIR_X1: float = -21.00
-const DECK_STAIR_TOP_Z: float = 12.05
-const DECK_STAIR_BOTTOM_Z: float = 19.95
+const DECK_STAIR_X0: float = -16.00
+const DECK_STAIR_X1: float = -13.30
+const DECK_STAIR_TOP_Z: float = 9.05
+const DECK_STAIR_BOTTOM_Z: float = 17.00
 const WALK_EYE_HEIGHT: float = 1.75
 const INTERNAL_PARTITION_HEIGHT: float = 7.2
 const STAGE01_REVIEW: bool = true
@@ -42,7 +42,7 @@ var _distance: float = 12.5
 var _target_yaw: float = 0.14
 var _target_pitch: float = 0.18
 var _target_distance: float = 12.5
-var _inspection_target: Vector3 = Vector3(-18.8, 2.30, 7.20)
+var _inspection_target: Vector3 = Vector3(-20.2, 2.30, 8.40)
 var _dragging: bool = false
 var _vehicle_loaded: bool = false
 var _detail: Label
@@ -111,13 +111,14 @@ func _process(delta: float) -> void:
 			_walk_position.x >= DECK_STAIR_X0 - 0.25 and \
 			_walk_position.x <= DECK_STAIR_X1 + 0.25 and \
 			_walk_position.z >= DECK_STAIR_TOP_Z - 0.35 and \
-			_walk_position.z <= DECK_STAIR_BOTTOM_Z
+			_walk_position.z <= DECK_STAIR_BOTTOM_Z + 0.8
 		var on_upper_deck: bool = STAGE01_REVIEW and old_walk_position.y > WALK_EYE_HEIGHT + 0.2
 		var min_x: float = -SHELL_HALF_WIDTH + WALL_WALK_CLEARANCE
 		var max_z: float = SHELL_FRONT - WALL_WALK_CLEARANCE
 		if in_stair_approach:
-			min_x = DECK_STAIR_X0 + 0.15
-			max_z = DECK_STAIR_BOTTOM_Z
+			# Leave the lower landing open from the room side while preserving
+			# the standard side-wall buffer.
+			max_z = minf(SHELL_FRONT - 1.25, DECK_STAIR_BOTTOM_Z + 1.05)
 		elif on_upper_deck:
 			min_x = DECK_X0 + 0.35
 			max_z = DECK_Z1 - 0.20
@@ -157,8 +158,11 @@ func _resolve_deck_walk(previous: Vector3) -> void:
 		DECK_STAIR_X0, DECK_STAIR_X1, DECK_STAIR_TOP_Z, DECK_STAIR_BOTTOM_Z)
 	var was_on_stairs: bool = _point_inside_horizontal(previous,
 		DECK_STAIR_X0, DECK_STAIR_X1, DECK_STAIR_TOP_Z, DECK_STAIR_BOTTOM_Z)
+	var in_stairwell: bool = _point_inside_horizontal(_walk_position,
+		DECK_STAIR_X0 - 0.18, DECK_STAIR_X1 + 0.18,
+		DECK_STAIR_TOP_Z, DECK_Z1)
 	var on_deck: bool = _point_inside_horizontal(_walk_position,
-		DECK_X0, DECK_X1, DECK_Z0, DECK_Z1)
+		DECK_X0, DECK_X1, DECK_Z0, DECK_Z1) and not in_stairwell
 	var from_upper: bool = previous.y > WALK_EYE_HEIGHT + 0.2
 	if on_stairs:
 		# Guard against entering halfway up from a side: stairs can be
@@ -899,3 +903,4 @@ func _zoom(amount: float) -> void:
 
 func navigate_back() -> void:
 	return_to_hub.emit()
+

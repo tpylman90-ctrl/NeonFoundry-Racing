@@ -1,5 +1,5 @@
 extends Node3D
-## Stage 03 garage equipment: two functional, oversized hero work cells.
+## Stage 03 garage equipment: battery production, cell exchange and vehicle upgrades.
 ## The shop shell and circulation remain authored by the earlier stages.
 
 const INK := Color("101c29")
@@ -22,7 +22,6 @@ func _ready() -> void:
 	_build_battery_exchange()
 	_build_battery_line()
 	_build_upgrade_bay()
-	_build_battery_storage()
 	_build_zone_markers()
 	_commit_batches()
 
@@ -115,7 +114,7 @@ func _build_battery_exchange() -> void:
 	# The full 4.45 m silhouette leaves clearance to the deck above.
 	var cell := Node3D.new()
 	cell.name = "PowerCellExchangeCell_Zone04"
-	cell.position = Vector3(-18.8, -0.065, 7.2)
+	cell.position = Vector3(-21.8, -0.065, 7.6)
 	add_child(cell)
 
 	# Load-spreading floor plinth with chamfer-like tiered armor, service seams,
@@ -210,7 +209,7 @@ func _build_formation_bank() -> void:
 	# Four independently readable formation/charge cabinets along the far side.
 	var row := Node3D.new()
 	row.name = "FormationChargeBank_Zone04"
-	row.position = Vector3(-18.8, -0.065, 11.12)
+	row.position = Vector3(-21.8, -0.065, 12.30)
 	add_child(row)
 	_box(row, "BankArmorPlinth", Vector3(0, 0.13, 0), Vector3(7.85, 0.24, 1.48), "ink")
 	_box(row, "BankServiceRail", Vector3(0, 0.28, -0.58), Vector3(7.55, 0.075, 0.13), "cyan_dark")
@@ -236,7 +235,7 @@ func _build_thermal_conditioner() -> void:
 	# Thermal chamber and coolant manifolds occupy the west service pocket.
 	var chamber := Node3D.new()
 	chamber.name = "ThermalConditioningCell_Zone04"
-	chamber.position = Vector3(-25.08, -0.065, 9.60)
+	chamber.position = Vector3(-25.08, -0.065, 15.90)
 	add_child(chamber)
 	_box(chamber, "ThermalFoundation", Vector3(0, 0.12, 0), Vector3(2.82, 0.22, 3.84), "ink")
 	_box(chamber, "InsulatedChamberCore", Vector3(0, 1.65, 0), Vector3(2.40, 2.72, 3.28), "graphite")
@@ -265,7 +264,7 @@ func _build_diagnostic_bench() -> void:
 	# Optical cell metrology bench on the front edge, with its own handling arm.
 	var bench := Node3D.new()
 	bench.name = "CellMetrologyWorkstation_Zone04"
-	bench.position = Vector3(-18.8, -0.065, 3.82)
+	bench.position = Vector3(-14.65, -0.065, 3.82)
 	add_child(bench)
 	_box(bench, "MetrologyFoot", Vector3(0, 0.13, 0), Vector3(6.90, 0.24, 0.90), "ink")
 	_box(bench, "VibrationIsolationTop", Vector3(0, 0.31, 0), Vector3(6.62, 0.15, 0.88), "metal")
@@ -301,7 +300,7 @@ func _build_exchange_robot_arms() -> void:
 	# modeled while all meshes stay inside the material-batched renderer.
 	var robots := Node3D.new()
 	robots.name = "DualArticulatedCellHandlingRobots_Zone04"
-	robots.position = Vector3(-18.8, -0.065, 7.2)
+	robots.position = Vector3(-21.8, -0.065, 7.6)
 	add_child(robots)
 	for side in [-1.0, 1.0]:
 		var base_x: float = side * 3.18
@@ -415,10 +414,11 @@ func _build_zone_markers() -> void:
 	# Low, floor-contact wayfinding at each hero cell; the 7 m cross-aisle and
 	# 9 m front ingress are deliberately left free of props and overhead clutter.
 	var plates: Array[Dictionary] = [
-		{"name": "POWER CELL / 04", "p": Vector3(-18.8, -0.039, 10.38), "w": 7.1},
+		{"name": "POWER CELL / 04", "p": Vector3(-21.8, -0.039, 10.62), "w": 7.1},
 		{"name": "UPGRADES / 05", "p": Vector3(-9.20, -0.039, 12.27), "w": 2.8}
 	]
 	for entry in plates:
 		var p: Vector3 = entry["p"]
 		_box(self, "FloorWayfindingPlate_" + str(entry["name"]), p, Vector3(float(entry["w"]), 0.022, 0.19), "ink")
 		_box(self, "FloorWayfindingLine_" + str(entry["name"]), p + Vector3(0, 0.006, 0), Vector3(float(entry["w"]) - 0.22, 0.012, 0.035), "amber")
+

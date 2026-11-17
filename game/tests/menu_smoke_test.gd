@@ -75,7 +75,7 @@ func _run() -> void:
 	)
 	assert(deck_meshes.size() == 4)
 	# Cell-swap mezzanine is flush with the partition cap at 7.2m; guard
-	# rails top at about 8.37m. Stair opening meets the deck at z=12.05.
+	# rails top at about 8.37m. A wide notch gives the stair an interior top landing.
 	var deck_bounds: AABB = (
 		(deck_meshes[0] as MeshInstance3D).global_transform *
 		(deck_meshes[0] as MeshInstance3D).get_aabb()
@@ -87,8 +87,10 @@ func _run() -> void:
 	assert(deck_bounds.end.x > -11.3)
 	assert(deck_bounds.position.z > 3.0)
 	assert(deck_bounds.position.z < 3.6)
-	assert(deck_bounds.end.z > 19.8)
-	assert(deck_bounds.end.z < 20.2)
+	assert(deck_bounds.end.z > 17.3)
+	assert(deck_bounds.end.z < 17.8)
+	assert(menu._garage_page.SHELL_FRONT - menu._garage_page.DECK_STAIR_BOTTOM_Z > 3.0)
+	assert(menu._garage_page.DECK_STAIR_TOP_Z < menu._garage_page.DECK_Z1 - 2.8)
 	assert(deck_bounds.end.y > 8.2)
 	assert(deck_bounds.end.y < 8.6)
 	# Floor can be traversed UNDER the deck without snapping upstairs.
@@ -97,18 +99,18 @@ func _run() -> void:
 	menu._garage_page._resolve_deck_walk(old_under)
 	assert(is_equal_approx(menu._garage_page._walk_position.y, 1.75))
 	# Stair height is continuous; entering from the lower landing works.
-	var foot: Vector3 = Vector3(-22.35, 1.75, 19.98)
-	menu._garage_page._walk_position = Vector3(-22.35, 1.75, 19.85)
+	var foot: Vector3 = Vector3(-14.65, 1.75, 17.03)
+	menu._garage_page._walk_position = Vector3(-14.65, 1.75, 16.95)
 	menu._garage_page._resolve_deck_walk(foot)
 	assert(menu._garage_page._walk_position.y > 1.75)
 	assert(menu._garage_page._walk_position.y < 2.0)
-	var stair_mid: Vector3 = Vector3(-22.35, 5.7, 16.0)
-	menu._garage_page._walk_position = Vector3(-22.35, 5.7, 15.8)
+	var stair_mid: Vector3 = Vector3(-14.65, 3.7, 13.0)
+	menu._garage_page._walk_position = Vector3(-14.65, 3.7, 12.8)
 	menu._garage_page._resolve_deck_walk(stair_mid)
 	assert(menu._garage_page._walk_position.y > 3.5)
 	assert(menu._garage_page._walk_position.y < 6.0)
 	# Reaching upper landing grants actual 3D viewing level.
-	var upper_stair: Vector3 = Vector3(-22.35, 8.95, 12.05)
+	var upper_stair: Vector3 = Vector3(-14.65, 8.95, 9.05)
 	menu._garage_page._walk_position = upper_stair
 	menu._garage_page._resolve_deck_walk(upper_stair)
 	assert(is_equal_approx(
@@ -313,3 +315,4 @@ func _run() -> void:
 	await process_frame
 	print("NEON_FOUNDRY_MENU_SMOKE_OK independent garage/retail/profile/race scenes and complete race UI flow")
 	quit()
+

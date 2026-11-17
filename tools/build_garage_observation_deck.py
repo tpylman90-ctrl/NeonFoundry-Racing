@@ -26,8 +26,8 @@ SOURCE.parent.mkdir(parents=True, exist_ok=True)
 X0, X1 = -26.82, -11.14
 Z0, Z1 = 3.25, 12.05
 DECK_Y = 7.20
-STAIR_X0, STAIR_X1 = -23.70, -21.00
-STAIR_Z0, STAIR_Z1 = 12.05, 19.95  # upper landing -> front landing
+STAIR_X0, STAIR_X1 = -16.00, -13.30
+STAIR_Z0, STAIR_Z1 = 9.05, 17.00  # deck notch -> clear interior landing
 STEPS = 38
 
 bpy.ops.object.select_all(action="SELECT")
@@ -85,16 +85,24 @@ def beam_between(name: str, start: tuple, end: tuple,
     return obj
 
 
-# Platform is tied to the partition cap; the adjoining wall acts as its east
-# guard. The stair opening meets the deck edge at z=12.05.
+# A broad, accessible stairwell notch reaches 3m into the front edge of the
+# deck. Split the anti-slip plate around that opening instead of letting floor
+# geometry cap the top flight. The notch is wider than the stair by 0.36m.
 cx = (X0+X1)/2
 cz = (Z0+Z1)/2
-box("Deck/anti-slip walking plate", (cx, DECK_Y-.10, cz),
-    (X1-X0, .20, Z1-Z0), FLOOR, .034)
+opening_x0, opening_x1 = STAIR_X0-.18, STAIR_X1+.18
+left_width = opening_x0-X0
+right_width = X1-opening_x1
+box("Deck/walk plate west field", ((X0+opening_x0)/2, DECK_Y-.10, cz),
+    (left_width, .20, Z1-Z0), FLOOR, .034)
+box("Deck/walk plate east field", ((opening_x1+X1)/2, DECK_Y-.10, cz),
+    (right_width, .20, Z1-Z0), FLOOR, .034)
+box("Deck/walk plate rear field", ((opening_x0+opening_x1)/2, DECK_Y-.10, (Z0+STAIR_Z0)/2),
+    (opening_x1-opening_x0, .20, STAIR_Z0-Z0), FLOOR, .034)
 edge_segments = [
     (X0, X1),
-    (X0, STAIR_X0-.12),
-    (STAIR_X1+.12, X1),
+    (X0, opening_x0),
+    (opening_x1, X1),
 ]
 for edge, segments in ((Z0, [edge_segments[0]]),
                        (Z1, edge_segments[1:])):
@@ -118,7 +126,7 @@ for z in (4.5, 6.55, 8.65):
         (X1-X0-.5, .19, .20), STEEL)
 
 # Four columns at the perimeter preserve the power-cell swap footprint.
-for x, z in ((X0+.52, Z0+.25), (STAIR_X1+.35, 9.55),
+for x, z in ((X0+.52, Z0+.25), (STAIR_X1+.70, 9.55),
              (X1-.45, Z0+.25), (X1-.45, 9.55)):
     box("Deck/support-column", (x, (DECK_Y-.75)/2, z),
         (.32, DECK_Y-.75, .32), STEEL, .035)
@@ -151,9 +159,9 @@ rail_run("x", Z1-.15, STAIR_X1+.16, X1)
 box("Deck/amber edge indicating inspection outlook",
     (cx, DECK_Y+.008, Z0+.10), (X1-X0-.65, .016, .08), YELLOW, .008)
 
-# One clear 2.7m-wide stair rises set inward from the west perimeter wall. The stairs
-# are closed-backed to read as a continuous flight; the floor itself serves as
-# the lower landing, ending just short of the front wall.
+# One clear 2.7m-wide stair rises through the deck-edge notch. It sits inboard
+# from both the west and east walls and reaches a dedicated ground landing with
+# more than 3m clearance to the front wall.
 STAIR_CX=(STAIR_X0+STAIR_X1)/2
 run=STAIR_Z1-STAIR_Z0
 for i in range(STEPS):
@@ -182,9 +190,11 @@ for x in (STAIR_X0+.16, STAIR_X1-.16):
         zz=STAIR_Z1-fraction*run
         box("Deck/stair-guard-post", (x, yy+.56, zz),
             (.07, 1.12, .07), STEEL, .01)
-# Floor marker for stairs access, not a partition.
-box("Deck/stair-entry-safety-marking", (STAIR_CX, -.045, STAIR_Z1-.75),
-    (STAIR_X1-STAIR_X0+.25, .018, .085), YELLOW, .008)
+# Low, slip-resistant arrival platform makes the lower entry unmistakable.
+box("Deck/stair-lower-landing", (STAIR_CX, .055, STAIR_Z1-.72),
+    (3.45, .11, 2.55), STEEL, .035)
+box("Deck/stair-entry-safety-marking", (STAIR_CX, .116, STAIR_Z1+.10),
+    (STAIR_X1-STAIR_X0+.28, .018, .085), YELLOW, .008)
 
 
 def batch(name, objs):
@@ -214,7 +224,7 @@ for obj in joined:
 bpy.context.scene["garage_stage"] = "02A / observation deck over power-cell swap"
 bpy.context.scene["deck_finished_y"] = DECK_Y
 bpy.context.scene["deck_footprint"] = f"x[{X0},{X1}], z[{Z0},{Z1}]"
-bpy.context.scene["deck_usable_access"] = "38-step closed stair; wall-flush deck, clear front landing"
+bpy.context.scene["deck_usable_access"] = "38-step stair through 3m deck notch; lower landing 3.25m clear of front wall"
 bpy.context.scene["licensing"] = "original generated project meshes and PBR colors"
 bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE))
 bpy.ops.object.select_all(action="DESELECT")
@@ -228,3 +238,4 @@ assert OUTPUT.stat().st_size > 8_000, OUTPUT
 assert len(joined) == 4, len(joined)
 print("NEON_FOUNDRY_DECK_STAGE02_OK location=power_cell_swap meshes=4 stair_treads=%d floor_y=%.2f glb=%d" %
       (STEPS, DECK_Y, OUTPUT.stat().st_size))
+

@@ -1,7 +1,7 @@
 {
   "project": "Neon Foundry Racing",
   "document": "Garage structural layout and power-cell swap observation deck",
-  "version": "2.0",
+  "version": "2.1",
   "unit": "m",
   "coordinate_system": {
     "axes": "Godot X right, Z front/down, Y up",
@@ -172,14 +172,24 @@
     "viewing_edge": "rear/north, facing lift bays across 7m aisle",
     "stairs": {
       "x": [
-        -26.55,
-        -23.85
+        -16.0,
+        -13.3
       ],
       "z": [
-        12.05,
-        19.95
+        9.05,
+        17.0
       ],
-      "steps": 38
+      "steps": 38,
+      "deck_notch_z": [
+        9.05,
+        12.05
+      ],
+      "lower_front_wall_clearance": 3.25,
+      "landing_pad": [
+        3.45,
+        2.55
+      ]
     }
   }
 }
+
