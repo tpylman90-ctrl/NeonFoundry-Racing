@@ -39,10 +39,10 @@ var _camera: Camera3D
 var _vehicle_holder: Node3D
 var _yaw: float = 0.72
 var _pitch: float = 0.32
-var _distance: float = 44.0
+var _distance: float = 20.5
 var _target_yaw: float = 0.72
 var _target_pitch: float = 0.32
-var _target_distance: float = 44.0
+var _target_distance: float = 20.5
 var _inspection_target: Vector3 = Vector3(0, 5.2, -1.75)
 var _dragging: bool = false
 var _vehicle_loaded: bool = false
@@ -350,7 +350,7 @@ func _build_3d_stage() -> void:
 
 	_camera = Camera3D.new()
 	_camera.name = "InspectionCamera"
-	_camera.fov = 60.0
+	_camera.fov = 72.0
 	_camera.near = 0.08
 	_camera.far = 175.0
 	_camera.current = true
@@ -757,9 +757,9 @@ func _build_overlay() -> void:
 	angle_row.add_theme_constant_override("separation", 6)
 	views.add_child(angle_row)
 	for spec in [
-		{"text": "3/4", "a": 0.72, "p": 0.32, "d": 44.0},
-		{"text": "SIDE", "a": 1.57, "p": 0.24, "d": 38.0},
-		{"text": "TOP", "a": 0.0, "p": 1.22, "d": 47.0}
+		{"text": "3/4", "a": 0.72, "p": 0.32, "d": 20.5},
+		{"text": "SIDE", "a": 1.57, "p": 0.24, "d": 20.5},
+		{"text": "TOP", "a": 0.0, "p": 1.22, "d": 10.0}
 	]:
 		var b: Button = _button(str(spec["text"]), _move_view.bind(float(spec["a"]), float(spec["p"]), float(spec["d"])))
 		b.custom_minimum_size.y = 43
@@ -806,7 +806,7 @@ func _build_overlay() -> void:
 	action_row.add_theme_constant_override("separation", 12)
 	bottom.add_child(action_row)
 	var back := _button("‹   MAIN HUB", func() -> void: return_to_hub.emit())
-	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(0.72, 0.32, 44.0))
+	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(0.72, 0.32, 20.5))
 	var race := _button("RACE CONTROL   ›", func() -> void: request_race_control.emit())
 	for b in [back, spin, race]:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -907,7 +907,7 @@ func _toggle_graphics_quality() -> void:
 	_set_graphics_detail(not _quality_detail)
 
 func _zoom(amount: float) -> void:
-	_target_distance = clampf(_target_distance + amount, 16.0, 60.0)
+	_target_distance = clampf(_target_distance + amount, 8.0, 30.0)
 
 func navigate_back() -> void:
 	return_to_hub.emit()
