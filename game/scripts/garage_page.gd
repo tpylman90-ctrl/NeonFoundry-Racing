@@ -11,6 +11,7 @@ const MUTED: Color = Color("9aafc0")
 const PREVIEW_PATH: String = "res://assets/garage/forge_preview.glb"
 const WorkshopScript = preload("res://scripts/garage_workshop.gd")
 const Stage03EquipmentScript = preload("res://scripts/garage_stage03_equipment.gd")
+const FullFacilityScript = preload("res://scripts/garage_full_facility.gd")
 const DualJoystickScript = preload("res://scripts/garage_dual_joystick.gd")
 const SHELL_STAGE01_PATH: String = "res://assets/garage/shell/shell_stage01.glb"
 const DECK_STAGE02_PATH: String = "res://assets/garage/shell/observation_deck_stage02.glb"
@@ -36,13 +37,13 @@ const WALL_WALK_CLEARANCE: float = 2.2
 var _world: Node3D
 var _camera: Camera3D
 var _vehicle_holder: Node3D
-var _yaw: float = 0.14
-var _pitch: float = 0.18
-var _distance: float = 12.5
-var _target_yaw: float = 0.14
-var _target_pitch: float = 0.18
-var _target_distance: float = 12.5
-var _inspection_target: Vector3 = Vector3(-20.2, 2.30, 8.40)
+var _yaw: float = 0.72
+var _pitch: float = 0.32
+var _distance: float = 44.0
+var _target_yaw: float = 0.72
+var _target_pitch: float = 0.32
+var _target_distance: float = 44.0
+var _inspection_target: Vector3 = Vector3(0, 5.2, -1.75)
 var _dragging: bool = false
 var _vehicle_loaded: bool = false
 var _detail: Label
@@ -74,6 +75,7 @@ var _legacy_room: Node3D
 var _shell_stage: Node3D
 var _observation_deck: Node3D
 var _interior_partitions: Node3D
+var _full_facility: Node3D
 
 func _ready() -> void:
 	_build_3d_stage()
@@ -340,11 +342,7 @@ func _build_3d_stage() -> void:
 	_vehicle_holder.name = "VehicleDisplay"
 	_vehicle_holder.position.y = 0.33
 	_world.add_child(_vehicle_holder)
-	_load_craft_preview()
-	_add_contact_shadow("ChassisContactShadow", Vector3(0, 0.333, 0),
-		Vector2(8.7, 7.4), 0.34)
-	_add_contact_shadow("PlatformContactShadow", Vector3(0, -0.042, 0),
-		Vector2(15.7, 15.7), 0.25)
+	# VehicleDisplay intentionally stays empty until an approved craft is assigned.
 	_workshop = Node3D.new()
 	_workshop.name = "LiveWorkshopEquipment"
 	_workshop.set_script(WorkshopScript)
@@ -405,6 +403,7 @@ func _build_3d_stage() -> void:
 	_activate_stage02_deck()
 	_activate_stage02c_partitions()
 	_activate_stage03_equipment()
+	_activate_full_facility()
 
 func _activate_stage01_shell() -> void:
 	if not STAGE01_REVIEW:
@@ -422,8 +421,8 @@ func _activate_stage01_shell() -> void:
 	_legacy_room.visible = false
 	_vehicle_holder.visible = false
 	_workshop.visible = false
-	# The previous dramatic grade/post effects caused the last FPS regression;
-	# this comparison isolates material and bevel quality only.
+	# Keep the shell's balanced mobile profile; material details and layered geometry
+	# provide atmosphere without enabling expensive post effects.
 	_garage_environment.glow_enabled = false
 	_garage_environment.fog_enabled = false
 	_garage_environment.ambient_light_energy = 0.56
@@ -478,6 +477,15 @@ func _activate_stage03_equipment() -> void:
 	equipment.set_script(Stage03EquipmentScript)
 	_world.add_child(equipment)
 	print("NEON_FOUNDRY_STAGE03_EQUIPMENT_LOADED battery_exchange=zone04 upgrade_bay=zone05")
+
+func _activate_full_facility() -> void:
+	# Adds the complete lot around the already authored battery and upgrade cells.
+	# Those Stage 03 pieces stay authoritative and the three service pads remain empty.
+	_full_facility = Node3D.new()
+	_full_facility.name = "FoundryLotFullFacility"
+	_full_facility.set_script(FullFacilityScript)
+	_world.add_child(_full_facility)
+	print("NEON_FOUNDRY_FULL_FACILITY_LOADED six_zones=true vehicle_bays=empty")
 
 func _partition_blocks_crossing(previous: Vector3, current: Vector3,
 		axis: String, fixed: float, start: float, finish: float,
@@ -712,10 +720,10 @@ func _build_overlay() -> void:
 	title_panel.add_child(head)
 	head.add_child(_label("N / F  MOTORSPORT DIVISION   //   FOUNDRY LOT", 15, CYAN))
 	head.add_child(_label(
-		"STAGE 03  /  POWER & UPGRADE CELLS" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
+		"SIX-ZONE  /  FULL FACILITY" if STAGE01_REVIEW else "GARAGE  /  VEHICLE INSPECTION",
 		28, WHITE))
 	head.add_child(_label(
-		"POWER-CELL EXCHANGE  •  UPGRADE / CALIBRATION" if STAGE01_REVIEW
+		"ROBOTIC ASSEMBLY  •  BATTERY WORKS  •  RACE HQ" if STAGE01_REVIEW
 		else "FULL 3D SHOWROOM   •   TOUCH & DRAG TO ORBIT",
 		14, MUTED))
 
@@ -749,9 +757,9 @@ func _build_overlay() -> void:
 	angle_row.add_theme_constant_override("separation", 6)
 	views.add_child(angle_row)
 	for spec in [
-		{"text": "3/4", "a": 2.78, "p": 0.21, "d": 15.0},
-		{"text": "SIDE", "a": 1.57, "p": 0.15, "d": 12.3},
-		{"text": "TOP", "a": 0.0, "p": 1.22, "d": 15.4}
+		{"text": "3/4", "a": 0.72, "p": 0.32, "d": 44.0},
+		{"text": "SIDE", "a": 1.57, "p": 0.24, "d": 38.0},
+		{"text": "TOP", "a": 0.0, "p": 1.22, "d": 47.0}
 	]:
 		var b: Button = _button(str(spec["text"]), _move_view.bind(float(spec["a"]), float(spec["p"]), float(spec["d"])))
 		b.custom_minimum_size.y = 43
@@ -798,7 +806,7 @@ func _build_overlay() -> void:
 	action_row.add_theme_constant_override("separation", 12)
 	bottom.add_child(action_row)
 	var back := _button("‹   MAIN HUB", func() -> void: return_to_hub.emit())
-	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(2.78, 0.21, 15.0))
+	var spin := _button("⟳   RESET VIEW", func() -> void: _move_view(0.72, 0.32, 44.0))
 	var race := _button("RACE CONTROL   ›", func() -> void: request_race_control.emit())
 	for b in [back, spin, race]:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -810,7 +818,7 @@ func _build_overlay() -> void:
 
 func _inspect() -> void:
 	_bay_state = "inspect"
-	_detail.text = "Rotate with a finger, switch angles, or zoom in to inspect the craft and hangar. The Forge GLB displayed here is an EXPERIMENTAL work-in-progress."
+	_detail.text = "Explore the six-zone foundry, battery works, robotic assembly, service lifts and race operations. All craft bays are empty."
 
 func _show_craft() -> void:
 	_bay_state = "select"
@@ -842,7 +850,7 @@ func _toggle_walk() -> void:
 	_title_panel.visible = not _walk_mode
 	_tools_panel.visible = not _walk_mode and not STAGE01_REVIEW
 	_walk_toggle.text = "RETURN TO INSPECTION" if _walk_mode else "WALK THE GARAGE"
-	_detail.text = "WALKAROUND MODE\nLeft thumb moves/strafe; right thumb pans and looks up/down. Both sticks support independent fingers." if _walk_mode else "INSPECTION MODE\nTouch-drag to orbit around the model. Use the camera presets for detail study."
+	_detail.text = "WALKAROUND MODE\nLeft thumb moves/strafe; right thumb pans and looks up/down. Both sticks support independent fingers." if _walk_mode else "INSPECTION MODE\nOrbit and zoom across the full six-zone facility. Switch to WALK THE GARAGE to explore on foot."
 
 func _refresh_equipment_status() -> void:
 	if _workshop != null and _equipment_status != null:
@@ -899,7 +907,7 @@ func _toggle_graphics_quality() -> void:
 	_set_graphics_detail(not _quality_detail)
 
 func _zoom(amount: float) -> void:
-	_target_distance = clampf(_target_distance + amount, 6.8, 20.0)
+	_target_distance = clampf(_target_distance + amount, 16.0, 60.0)
 
 func navigate_back() -> void:
 	return_to_hub.emit()

@@ -38,6 +38,10 @@ func _run() -> void:
 	assert(not menu._garage_page._legacy_room.visible)
 	assert(not menu._garage_page._workshop.visible)
 	assert(not menu._garage_page._vehicle_holder.visible)
+	assert(menu._garage_page._vehicle_holder.get_child_count() == 0)
+	assert(menu._garage_page._full_facility != null)
+	assert(menu._garage_page._full_facility.visible)
+	assert(menu._garage_page._full_facility.find_children("Facility_*", "MeshInstance3D", true, false).size() >= 6)
 	assert(menu._garage_page._shell_stage.find_children("*", "MeshInstance3D", true, false).size() >= 6)
 	# Verify actual imported world orientation, not just scene presence.
 	var meshes: Array[Node] = menu._garage_page._shell_stage.find_children(
@@ -131,8 +135,8 @@ func _run() -> void:
 	assert(menu._garage_page._walk_position.z > -22.0)
 	menu._garage_page._toggle_walk()
 	menu._garage_page._walk_position = Vector3(0.0, 1.75, 11.0)
-	assert(menu._garage_page._world.get_node("ChassisContactShadow") != null)
-	assert(menu._garage_page._world.get_node("PlatformContactShadow") != null)
+	assert(menu._garage_page._world.get_node_or_null("ChassisContactShadow") == null)
+	assert(menu._garage_page._world.get_node_or_null("PlatformContactShadow") == null)
 	assert(menu._garage_page._reflection_probe.update_mode == ReflectionProbe.UPDATE_ONCE)
 	assert(menu._garage_page._reflection_probe.box_projection)
 	assert(not menu._garage_page._hero_key.visible)
