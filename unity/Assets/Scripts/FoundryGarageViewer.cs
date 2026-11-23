@@ -6,6 +6,7 @@ using UnityEngine;
 public sealed class FoundryGarageViewer : MonoBehaviour
 {
     private Camera cam;
+    [SerializeField] private Transform craftTarget, cellTarget, deckTarget;
     private Transform[] destinations;
     private string[] labels = { "CRAFT", "CELL WORKS", "OVERLOOK" };
     private int locationIndex;
@@ -25,16 +26,20 @@ public sealed class FoundryGarageViewer : MonoBehaviour
 
     public void Initialize(Transform craft, Transform cellWorks, Transform overlook)
     {
+        craftTarget = craft;
+        cellTarget = cellWorks;
+        deckTarget = overlook;
         destinations = new[] { craft, cellWorks, overlook };
         focus = craft.position;
     }
     void Awake()
     {
         cam = GetComponent<Camera>();
+        destinations = new[] { craftTarget, cellTarget, deckTarget };
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 0;
         fpsTime = Time.unscaledTime;
-        if (destinations != null) focus = destinations[0].position;
+        if (craftTarget != null) focus = craftTarget.position;
         UpdateCamera();
     }
     void Update()
