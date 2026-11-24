@@ -1,0 +1,82 @@
+name: NF-BW01 Containerized Blender Master
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-container-master.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  containerized-master:
+    name: Blender 4.3 container - real high poly GLB and editable master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout model source
+        uses: actions/checkout@v4
+      - name: Generate review geometry using BlenderKit headless Blender image
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/output
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash \
+            blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then
+                BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"
+              fi
+              test -x "$BIN"
+              "$BIN" --version | head -1
+              "$BIN" --background --factory-startup \
+                --python art/reviews/NF-BW01/v01/build_highpoly.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/output --master-only
+            ' 2>&1 | tee nf-bw01-container-build.log
+          grep -q "NF_BW01_GATE02_MASTER_PACKAGE_OK" nf-bw01-container-build.log
+      - name: Check actual Blender source, geometry export, and metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/output
+          test "$(stat -c %s "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend")" -gt 100000
+          test "$(stat -c %s "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb")" -gt 100000
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path("art/reviews/NF-BW01/v01/output")
+          j=json.loads((p/"model_manifest.json").read_text())
+          assert j["object_count"]>=70 and j["owner_gate02_approved"] is False
+          print("NF_BW01_CONTAINER_MODEL_VERIFIED", j["object_count"], j["dimensions_m"])
+          PY
+          sha256sum "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend" "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb" > "$out/SHA256SUMS.txt"
+          ls -lh "$out"
+      - name: Persist model and inspection GLB
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Blender-Container-Master-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/output/
+            nf-bw01-container-build.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish inspection-only source as prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/output
+          gh release create "nf-bw01-container-master-$GITHUB_RUN_NUMBER" \
+            "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend" \
+            "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb" \
+            "$out/model_manifest.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 Gate 02 true Blender master (awaiting visual review)" \
+            --notes "This is the original editable high-poly .blend and a matching inspection-only GLB. The asset is not a final game-ready model and is not visually approved." \
+            --prerelease
