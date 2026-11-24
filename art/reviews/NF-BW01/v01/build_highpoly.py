@@ -481,13 +481,27 @@ if len(meshes)<70:
     raise RuntimeError("Missing detailed assemblies: only %d objects"%len(meshes))
 
 def visible_bounds(objects):
+    """Audit the actual renderable geometry, not curve control-handle bounds.
+
+    Blender 4.3 reports the Bezier handle control polygon as the object bound;
+    that includes unused handle locations far beyond the swept cable. Convert
+    each evaluated object to a mesh and inspect its real vertices instead.
+    """
+    bpy.context.view_layer.update()
     coords=[]
     dg=bpy.context.evaluated_depsgraph_get()
     for o in objects:
         ev=o.evaluated_get(dg)
-        if ev.type in {"MESH","CURVE","FONT"}:
-            for v in ev.bound_box:
-                coords.append(ev.matrix_world @ Vector(v))
+        if ev.type not in {"MESH","CURVE","FONT"}:
+            continue
+        shape=ev.to_mesh()
+        if shape is None:
+            raise RuntimeError("Could not evaluate actual mesh for bounds: "+o.name)
+        for v in shape.vertices:
+            coords.append(ev.matrix_world @ v.co)
+        ev.to_mesh_clear()
+    if not coords:
+        raise RuntimeError("No evaluated real geometry for dimensional audit")
     a=[min(v[i] for v in coords) for i in range(3)]
     b=[max(v[i] for v in coords) for i in range(3)]
     return a,b,[b[i]-a[i] for i in range(3)]
