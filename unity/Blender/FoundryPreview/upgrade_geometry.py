@@ -167,6 +167,14 @@ def upgrade_garage(box, cyl, tor, loft, M):
             for sign in (-1,1):
                 box("CEILING | subtle cooled emitter", (x,y+sign*.14,7.235),
                     (4.6,.029,.02),"CYAN",.003)
+    # Fully enclosed overhead shell, interrupted by narrow dark service gaps.
+    # This prevents the blue procedural sky from replacing the hangar roof.
+    for x in (-8,-2.66,2.66,8):
+        for y in (-15,-9,-3,3,9,15):
+            box("CEILING | enclosed steel cassette", (x,y,7.76),
+                (5.11,5.67,.13),"WALL",.027)
+            box("CEILING | overhead darker acoustic inset", (x,y,7.655),
+                (4.69,5.21,.039),"CARBON",.019)
     # Ceiling peripheral tile cassettes / exposed central spine gives depth.
     for x in (-13.7,13.7):
         for y in (-12,-6,0,6,12):
