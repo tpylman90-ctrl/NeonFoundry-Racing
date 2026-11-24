@@ -154,12 +154,12 @@ def make_evaluated_mesh(src,target,groupname):
     return dst
 
 def reduce_object(obj,level):
-    if level==0:return
-    # Keep hard-surface silhouette-bearing objects rather than forcing
-    # decimation through every square-edged and hand-built housing.
+    # LOD0 must not exceed the high-poly master: preserve the visible silhouette
+    # while reducing dense circular bearings/fasteners and modifier tessellation.
+    # Avoid decimation on individual tiny parts that already have few faces.
     facecount=len(obj.data.polygons)
     if facecount<160:return
-    target= .66 if level==1 else .35
+    target=.72 if level==0 else (.66 if level==1 else .35)
     modifier=obj.modifiers.new("Gate03 inspectable decimation","DECIMATE")
     modifier.decimate_type="COLLAPSE"
     modifier.ratio=target
@@ -257,6 +257,8 @@ def generate_lod(level):
     }
 
 lods=[generate_lod(n) for n in (0,1,2)]
+if lods[0]["triangles"]>=182600:
+    raise RuntimeError("LOD0 must be lighter than approved 182600-triangle source")
 if not (lods[0]["triangles"]>lods[1]["triangles"]>lods[2]["triangles"]):
     raise RuntimeError("LOD triangle counts must strictly decrease "+str(lods))
 if lods[1]["triangles"]>lods[0]["triangles"]*.82:
