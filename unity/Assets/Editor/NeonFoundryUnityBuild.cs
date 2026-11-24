@@ -41,7 +41,7 @@ public static class NeonFoundryUnityBuild
             pipeline = UniversalRenderPipelineAsset.Create(renderer);
             AssetDatabase.CreateAsset(pipeline, PipelinePath);
         }
-        pipeline.renderScale = .92f;
+        pipeline.renderScale = .90f;
         pipeline.supportsHDR = true;
         pipeline.msaaSampleCount = 2;
         pipeline.shadowDistance = 36f;
@@ -57,6 +57,7 @@ public static class NeonFoundryUnityBuild
         craft.transform.position = new Vector3(0f, 0.28f, 0f);
         ApplyMaterials(garage);
         ApplyMaterials(craft);
+        SetupWalkableSurfaces();
 
         var craftFocus = new GameObject("Target | Craft");
         craftFocus.transform.position = new Vector3(0, 1.4f, 0);
@@ -68,7 +69,7 @@ public static class NeonFoundryUnityBuild
         var cameraObject = new GameObject("Main Camera | Touch inspection");
         cameraObject.tag = "MainCamera";
         var camera = cameraObject.AddComponent<Camera>();
-        camera.fieldOfView = 60f;
+        camera.fieldOfView = 55f;
         camera.nearClipPlane = .06f;
         camera.farClipPlane = 125f;
         camera.allowHDR = true;
@@ -125,17 +126,22 @@ public static class NeonFoundryUnityBuild
     }
     private static void ApplyMaterials(GameObject root)
     {
-        var armor=EnsureMaterial("NF_ARMOR",new Color(.25f,.39f,.50f),.68f,.72f);
+        var armor=EnsureMaterial("NF_ARMOR",new Color(.29f,.37f,.44f),.70f,.71f);
         var carbon=EnsureMaterial("NF_CARBON",new Color(.014f,.023f,.035f),.20f,.48f);
-        var steel=EnsureMaterial("NF_STEEL",new Color(.51f,.62f,.67f),.79f,.64f);
+        var steel=EnsureMaterial("NF_STEEL",new Color(.57f,.61f,.65f),.78f,.64f);
         var glass=EnsureMaterial("NF_GLASS",new Color(.018f,.125f,.20f),.48f,.89f);
         var cyan=EnsureMaterial("NF_CYAN",new Color(.012f,.60f,.94f),.10f,.58f,2.4f);
         var amber=EnsureMaterial("NF_AMBER",new Color(1f,.23f,.028f),.12f,.49f,1.9f);
-        var floor=EnsureMaterial("NF_FLOOR",new Color(.065f,.092f,.112f),.23f,.28f);
-        var wall=EnsureMaterial("NF_WALL",new Color(.13f,.18f,.22f),.40f,.44f);
+        var floor=EnsureMaterial("NF_FLOOR",new Color(.14f,.155f,.17f),.28f,.31f);
+        var wall=EnsureMaterial("NF_WALL",new Color(.18f,.20f,.225f),.42f,.47f);
         var rubber=EnsureMaterial("NF_RUBBER",new Color(.035f,.043f,.046f),.02f,.13f);
         var battery=EnsureMaterial("NF_BATTERY",new Color(.23f,.38f,.28f),.34f,.62f);
         var red=EnsureMaterial("NF_RED",new Color(.72f,.062f,.045f),.44f,.68f);
+        ApplyBakedAlbedo(armor,"NF_ARMOR_COATED", new Vector2(2f,2f));
+        ApplyBakedAlbedo(carbon,"NF_CARBON_WEAVE", new Vector2(3f,3f));
+        ApplyBakedAlbedo(steel,"NF_STEEL_BRUSHED", new Vector2(2f,2f));
+        ApplyBakedAlbedo(floor,"NF_FLOOR_SURFACE", new Vector2(4f,4f));
+        ApplyBakedAlbedo(wall,"NF_WALL_STAMPED", new Vector2(3f,3f));
         foreach (Renderer r in root.GetComponentsInChildren<Renderer>(true))
         {
             Material[] source=r.sharedMaterials;
@@ -161,13 +167,48 @@ public static class NeonFoundryUnityBuild
             r.receiveShadows=true;
         }
     }
+    private static void ApplyBakedAlbedo(Material mat, string textureName, Vector2 tiling)
+    {
+        string path = "Assets/Resources/Foundry/Textures/" + textureName + ".png";
+        if (!File.Exists(path))
+            throw new Exception("Missing baked detail map: " + path);
+        AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+        Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (tex == null)
+            throw new Exception("Failed to import baked detail map: " + path);
+        mat.SetTexture("_BaseMap", tex);
+        mat.SetTextureScale("_BaseMap", tiling);
+        EditorUtility.SetDirty(mat);
+    }
+    /// <summary>Lightweight walkable proxy geometry, without attaching expensive
+    /// collision meshes to the detailed batched 3D environment.</summary>
+    private static void SetupWalkableSurfaces()
+    {
+        var root = new GameObject("Walkable | collision proxies");
+        AddWalkBox(root.transform, "Garage floor", new Vector3(0,-.22f,0),
+            new Vector3(35,.32f,37));
+        AddWalkBox(root.transform, "Observation deck", new Vector3(11.8f,3.45f,-12.5f),
+            new Vector3(8.1f,.25f,6.55f));
+        for(int i=0;i<18;i++)
+            AddWalkBox(root.transform, "Access stair " + (i+1),
+                new Vector3(10.85f,.12f+i*.184f,-(2.55f+i*.53f)),
+                new Vector3(2f,.16f,.51f));
+    }
+    private static void AddWalkBox(Transform root, string label, Vector3 center, Vector3 dimensions)
+    {
+        var obj = new GameObject(label);
+        obj.transform.SetParent(root,false);
+        obj.transform.position = center;
+        var collider = obj.AddComponent<BoxCollider>();
+        collider.size = dimensions;
+    }
     private static void SetupEnvironment()
     {
         RenderSettings.ambientMode=AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor=new Color(.25f,.40f,.54f);
-        RenderSettings.ambientEquatorColor=new Color(.16f,.25f,.35f);
-        RenderSettings.ambientGroundColor=new Color(.055f,.075f,.10f);
-        RenderSettings.ambientIntensity=1.1f;
+        RenderSettings.ambientSkyColor=new Color(.20f,.28f,.35f);
+        RenderSettings.ambientEquatorColor=new Color(.13f,.18f,.22f);
+        RenderSettings.ambientGroundColor=new Color(.05f,.065f,.075f);
+        RenderSettings.ambientIntensity=.77f;
         RenderSettings.fog=true;
         RenderSettings.fogMode=FogMode.Linear;
         RenderSettings.fogColor=new Color(.08f,.12f,.17f);
@@ -177,7 +218,7 @@ public static class NeonFoundryUnityBuild
         var sun=sunObject.AddComponent<Light>();
         sun.type=LightType.Directional;
         sun.color=new Color(.77f,.87f,1f);
-        sun.intensity=1.45f;
+        sun.intensity=1.35f;
         sun.shadows=LightShadows.Soft;
         sun.shadowStrength=.68f;
         sunObject.transform.rotation=Quaternion.Euler(46f,-32f,0f);
@@ -193,14 +234,14 @@ public static class NeonFoundryUnityBuild
     }
     private static void SetupLocalLighting()
     {
-        CreateLamp("Cool main bay fill",new Vector3(0,6.1f,0),
-            new Color(.27f,.70f,1f),7.8f,17f);
-        CreateLamp("Warm machine bay",new Vector3(-7,5.9f,-12),
-            new Color(1f,.39f,.15f),7.1f,13f);
-        CreateLamp("Cool machine bay",new Vector3(6,5.9f,-12),
-            new Color(.11f,.73f,1f),6.4f,12f);
-        CreateLamp("Entry fill",new Vector3(0,5.6f,13),
-            new Color(.43f,.77f,1f),4.5f,12f);
+        CreateLamp("White main bay industrial fill",new Vector3(0,6.25f,0),
+            new Color(.74f,.86f,1f),6.3f,17f);
+        CreateLamp("Warm diagnostic stations",new Vector3(-7,5.9f,-12),
+            new Color(1f,.58f,.29f),5.5f,13f);
+        CreateLamp("Cool energy exchange",new Vector3(6,5.9f,-12),
+            new Color(.28f,.70f,1f),4.1f,12f);
+        CreateLamp("Dock door reflected daylight",new Vector3(0,5.6f,13),
+            new Color(.69f,.81f,.96f),3.8f,12f);
     }
     private static void CreateLamp(string name,Vector3 position,Color color,float intensity,float range)
     {
@@ -224,13 +265,20 @@ public static class NeonFoundryUnityBuild
         }
         Bloom bloom;
         if(!profile.TryGet(out bloom)) bloom=profile.Add<Bloom>(true);
-        bloom.threshold.value=1.17f;
-        bloom.intensity.value=.38f;
-        bloom.scatter.value=.59f;
+        bloom.threshold.value=1.08f;
+        bloom.intensity.value=.26f;
+        bloom.scatter.value=.55f;
         ColorAdjustments grade;
         if(!profile.TryGet(out grade))grade=profile.Add<ColorAdjustments>(true);
-        grade.contrast.value=9f;
-        grade.saturation.value=6f;
+        grade.contrast.value=14f;
+        grade.saturation.value=-3f;
+        Tonemapping tonemapping;
+        if(!profile.TryGet(out tonemapping))tonemapping=profile.Add<Tonemapping>(true);
+        tonemapping.mode.value=TonemappingMode.ACES;
+        Vignette vignette;
+        if(!profile.TryGet(out vignette))vignette=profile.Add<Vignette>(true);
+        vignette.intensity.value=.12f;
+        vignette.smoothness.value=.33f;
         var obj=new GameObject("Post | controlled emissive bloom");
         var volume=obj.AddComponent<Volume>();
         volume.isGlobal=true;
@@ -255,7 +303,7 @@ public static class NeonFoundryUnityBuild
         PrepareScene();
         PlayerSettings.companyName="Neon Foundry";
         PlayerSettings.productName="Neon Foundry Garage Preview";
-        PlayerSettings.bundleVersion="0.1.0";
+        PlayerSettings.bundleVersion="0.2.0";
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.LandscapeLeft;
         PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android,
             "com.tpylman.neonfoundryracing.unityreview");
