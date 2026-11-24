@@ -533,6 +533,30 @@ bpy.ops.export_scene.gltf(
     export_materials="EXPORT")
 print("NF_BW01_INSPECTION_GLB_OK")
 
+# Model-only artifact is intentionally independent of headless viewport rendering.
+# It preserves the actual editable .blend and inspection GLB even if OpenGL is
+# unavailable on a CI runner. Clay/wire images are still required for Gate 02
+# *visual* approval.
+if "--master-only" in sys.argv:
+    master_manifest={
+        "asset_id":"NF-BW01",
+        "gate":"02",
+        "status":"MASTER_AND_INSPECTION_GLB_BUILT_VISUAL_RENDERS_PENDING",
+        "owner_approval_gate_01":"2026-11-23: Looks good proceed",
+        "unit":"m","front_axis":"-Y","up_axis":"+Z",
+        "bounds_min_m":bmin,"bounds_max_m":bmax,"dimensions_m":dims,
+        "object_count":len(meshes),
+        "high_poly_master":"NF_BW01_GATE02_HIGH_POLY_MASTER.blend",
+        "inspection_glb":"NF_BW01_GATE02_INSPECTION_ONLY.glb",
+        "game_ready":False,"owner_gate02_approved":False,
+        "notes":["True Blender high-poly source and derivative GLB. No production UV/PBR/LOD.",
+                 "Visual images are required before gate 02 can be accepted.",
+                 "Robot kinematic and collision clearances not yet validated."]
+    }
+    (OUT/"model_manifest.json").write_text(json.dumps(master_manifest,indent=2))
+    print("NF_BW01_GATE02_MASTER_PACKAGE_OK",len(meshes))
+    raise SystemExit(0)
+
 def position_camera(eye,target,scale=5.0):
     cam_obj.location=eye
     cam_obj.rotation_euler=(Vector(target)-cam_obj.location).to_track_quat("-Z","Y").to_euler()
