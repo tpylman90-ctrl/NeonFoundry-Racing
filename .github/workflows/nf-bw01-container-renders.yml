@@ -56,9 +56,9 @@ jobs:
         run: |
           set -euo pipefail
           out=art/reviews/NF-BW01/v01/output
-          test "$(find "$out" -maxdepth 1 -name '*.png' -type f | wc -l)" -eq 13
+          test "$(find "$out" -maxdepth 1 -name '*.png' -type f | wc -l)" -eq 16
           test -s "$out/model_manifest.json"
-          for fn in 01_front_clay 02_rear_clay 03_left_clay 04_right_clay 05_top_clay 06_underside_clay 07_front_three_quarter_clay 08_rear_three_quarter_clay 09_robot_joint_closeup 10_cradle_dock_closeup 11_front_wire 12_three_quarter_wire 13_robot_wire; do
+          for fn in 01_front_clay 02_rear_clay 03_left_clay 04_right_clay 05_top_clay 06_underside_clay 07_front_three_quarter_clay 08_rear_three_quarter_clay 09_robot_joint_closeup 10_cradle_dock_closeup 11_front_wire 12_three_quarter_wire 13_robot_wire 14_gripper_mechanism_closeup 15_underframe_structure_closeup 16_gripper_wire; do
             test "$(stat -c %s "$out/$fn.png")" -gt 12000
           done
           python3 - <<'PY'
@@ -96,8 +96,11 @@ jobs:
             "$out/09_robot_joint_closeup.png" \
             "$out/10_cradle_dock_closeup.png" \
             "$out/12_three_quarter_wire.png" \
+            "$out/14_gripper_mechanism_closeup.png" \
+            "$out/15_underframe_structure_closeup.png" \
+            "$out/16_gripper_wire.png" \
             "$out/model_manifest.json" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "NF-BW01 Gate 02 clay/wire views (VISUAL REVIEW PENDING)" \
-            --notes "All images rendered from real Blender geometry and verified by PNG dimensions. Full 13-view set plus editable .blend and inspection GLB available in the linked workflow artifact and master release. Not approved for texturing or Unity." \
+            --title "NF-BW01 Gate 02 R2 mechanical refinement (VISUAL REVIEW PENDING)" \
+            --notes "All images rendered from real Blender geometry and verified by PNG dimensions. Full 16-view set plus editable .blend and inspection GLB available in the linked workflow artifact and master release. Not approved for texturing or Unity." \
             --prerelease
