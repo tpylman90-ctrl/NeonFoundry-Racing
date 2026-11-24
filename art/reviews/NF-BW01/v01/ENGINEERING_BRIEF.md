@@ -6,7 +6,7 @@
 **Category:** Large inspectable workshop machine / robot-assisted power cassette exchange cell  
 **Target:** Neon Foundry Racing Unity 6 garage battery works; isolated Blender review first  
 **Authorship:** Original project design; references cited for industrial *principles* only; no copied proprietary geometry  
-**Governing process:** [Production Standard](../../../..//docs/PRODUCTION_STANDARD.md) and [Asset Review Template](../../../..//docs/ASSET_REVIEW_TEMPLATE.md).  
+**Governing process:** [Production Standard](../../../../docs/PRODUCTION_STANDARD.md) and [Asset Review Template](../../../../docs/ASSET_REVIEW_TEMPLATE.md).  
 **Gate 01 evidence:** [orthographic proposed dimensions](ORTHOGRAPHIC_BLUEPRINT.svg), this brief, review record.  
 **Next gate:** Gate 02 high-poly master *after explicit approval*.
 
