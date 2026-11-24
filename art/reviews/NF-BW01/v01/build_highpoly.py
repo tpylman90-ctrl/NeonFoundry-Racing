@@ -229,10 +229,20 @@ def pivot(name,at):
     return o
 
 def put_under(child,parent):
-    """Preserve world transform, with edit-friendly keyed pivot parenting."""
-    world=child.matrix_world.copy()
+    """Preserve world transforms on Blender 4.0 and 4.3+ during pivot parenting.
+
+    The evaluation graph must update before measuring and after assigning
+    the parent inverse. Reassigning only matrix_world is not deterministic
+    across Blender versions.
+    """
+    bpy.context.view_layer.update()
+    original=child.matrix_world.copy()
     child.parent=parent
-    child.matrix_world=world
+    child.matrix_parent_inverse=parent.matrix_world.inverted_safe()
+    bpy.context.view_layer.update()
+    delta=(child.matrix_world.translation-original.translation).length
+    if delta>.001:
+        raise RuntimeError("Parenting changed world position of "+child.name+": "+str(delta))
 
 # foundation: directional cast plinth, narrow vertical fins, accessible anchor points
 set_group(STRUCT)
