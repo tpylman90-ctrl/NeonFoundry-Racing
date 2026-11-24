@@ -1,0 +1,74 @@
+name: NF-BW01 Gate 02 Blender Master (No Renderer)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "art/reviews/NF-BW01/v01/build_highpoly.py"
+      - ".github/workflows/nf-bw01-master.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  master:
+    name: Save editable high-poly master and inspection GLB
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install headless Blender model exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender python3-numpy
+          blender --version | head -1
+      - name: Author actual geometry, save Blender source, export GLB
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile art/reviews/NF-BW01/v01/build_highpoly.py
+          blender --background --factory-startup \
+            --python art/reviews/NF-BW01/v01/build_highpoly.py \
+            -- --out art/reviews/NF-BW01/v01/output --master-only 2>&1 | tee nf-bw01-master.log
+          grep -q NF_BW01_GATE02_MASTER_PACKAGE_OK nf-bw01-master.log
+          out=art/reviews/NF-BW01/v01/output
+          test "$(stat -c %s "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend")" -gt 100000
+          test "$(stat -c %s "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb")" -gt 100000
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path("art/reviews/NF-BW01/v01/output")
+          j=json.loads((p/"model_manifest.json").read_text())
+          assert j["status"]=="MASTER_AND_INSPECTION_GLB_BUILT_VISUAL_RENDERS_PENDING"
+          assert j["object_count"]>70
+          assert j["game_ready"] is False
+          print("NF_BW01_VERIFIED_MODEL_MASTER_OK",j["object_count"],j["dimensions_m"])
+          PY
+          sha256sum "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend" "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb" > "$out/SHA256SUMS.txt"
+          ls -lh "$out"
+      - name: Upload editable high-poly master
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate02-Master-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/output/
+            nf-bw01-master.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish model review downloads (not a game asset)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/output
+          gh release create "nf-bw01-master-$GITHUB_RUN_NUMBER" \
+            "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend" \
+            "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb" \
+            "$out/model_manifest.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 editable master #$GITHUB_RUN_NUMBER (REVIEW PENDING)" \
+            --notes "Blender high-poly master and inspection-only GLB, derived from the actual original machine geometry. Gate 02 requires real Blender clay/wire views and owner review; not production-approved." \
+            --prerelease
