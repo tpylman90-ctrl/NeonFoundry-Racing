@@ -6,7 +6,7 @@ The prior Godot game and Blender library remain unchanged.
 - **Editor:** 6000.3.27f2; Universal Render Pipeline 17.3.0.
 - **Target:** Android ARM64; Vulkan with OpenGLES3 fallback.
 - **Build:** Shared Eclipse Hollow Sky Unity runner with its existing Unity license secrets.
-- **Source models:** `Blender/FoundryPreview/generate_assets.py` creates two OBJ/MTL assets on CI.
+- **Source models:** `Blender/FoundryPreview/generate_assets.py` and `upgrade_geometry.py` author geometry, UV-aware surface masks and material batching on CI.
 - **Build method:** `NeonFoundryUnityBuild.BuildAndroid`.
 - **Expected APK:** `unity/Builds/Android/NeonFoundry-Unity-Garage.apk`.
 
@@ -16,12 +16,21 @@ sponsons, machined thruster rims, vent slats and canopy, plus an independent
 hangar with cell workstations, chargers, robotic arm fixtures, and an observation
 deck reached by an unblocked stair run.
 
+R2 garage composition:
+- Sealed industrial ceiling with acoustic cassettes, architectural ribs, optical housings, improved camera clearance, and cinematic but restrained URP grading.
+- Structured floor service lanes, engineered wall bays, machining details, hydraulic cradle, warning inlays, and mirrored hover-pod fasteners.
+- Dedicated battery assembly machines, diagnostic readouts, power converters, energy cassettes, robot tooling, and spare maglev coils with separate aisle circulation.
+- Functional observation-deck stair ground proxies (not an unrestricted character controller); continuous railings preserve landing access.
+- Five procedural 256px tiled detail maps generated using Blender's NumPy; mobile-friendly joining of surface meshes to reduce renderer submission overhead.
+
 Touch controls:
-- ORBIT: one finger rotates, pinch zooms, two fingers pan.
-- WALK: left thumb moves, right thumb looks; fixed-height collision-free prototype.
+- ORBIT: one finger rotates, pinch zooms, two fingers pan. Camera height avoids clipping through the enclosed roof.
+- WALK: left thumb moves, right thumb looks; floor, staircase, and overlook support ground-height tracking. Per-object wall/craft collision is not implemented.
 - Header buttons switch focus to Craft, Cell Works, or Overlook. FPS displayed.
 
-**Review limitations:** No save system, race physics, collision-based walking, exact GLB
-asset transfer, final PBR bakes, or playable race yet. Material assignment currently
-maps Blender material slots onto a reduced URP test palette. This stage is
+**Review limitations:** No save system, race physics, full character controller, exact GLB
+asset transfer, final high-resolution authored PBR bakes, or playable race yet. The five
+Blender-authored detail textures are intentionally small tiling surface variations—not
+photorealistic scanned materials. Material assignment maps Blender material slots onto
+shared URP materials. The review craft is not the approved final hero mesh. This stage is
 intentionally separate from production assets until phone performance is verified.
