@@ -1,0 +1,102 @@
+name: NF-BW01 Blender Clay and Wire Review Views
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-container-renders.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  clay-evidence:
+    name: Render true Blender source clay and topology
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render actual model through headless Blender with virtual software display
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/output
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash \
+            blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              if command -v Xvfb >/dev/null; then
+                Xvfb :99 -screen 0 1600x1200x24 -nolisten tcp > /tmp/bw01-x.log 2>&1 &
+              elif command -v Xvnc >/dev/null; then
+                Xvnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None > /tmp/bw01-x.log 2>&1 &
+              elif command -v Xtigervnc >/dev/null; then
+                Xtigervnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None > /tmp/bw01-x.log 2>&1 &
+              else
+                echo "No virtual display server found in Blender image"
+                exit 20
+              fi
+              export DISPLAY=:99
+              sleep 2
+              echo "Display: $DISPLAY; Blender: $BIN"
+              "$BIN" --background --factory-startup \
+                --python art/reviews/NF-BW01/v01/build_highpoly.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/output
+            ' 2>&1 | tee nf-bw01-render.log
+          grep -q NF_BW01_GATE02_RENDER_PACKAGE_OK nf-bw01-render.log
+      - name: Verify real Blender clay and topology evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/output
+          test "$(find "$out" -maxdepth 1 -name '*.png' -type f | wc -l)" -eq 13
+          test -s "$out/model_manifest.json"
+          for fn in 01_front_clay 02_rear_clay 03_left_clay 04_right_clay 05_top_clay 06_underside_clay 07_front_three_quarter_clay 08_rear_three_quarter_clay 09_robot_joint_closeup 10_cradle_dock_closeup 11_front_wire 12_three_quarter_wire 13_robot_wire; do
+            test "$(stat -c %s "$out/$fn.png")" -gt 12000
+          done
+          python3 - <<'PY'
+          import json,pathlib,struct
+          p=pathlib.Path("art/reviews/NF-BW01/v01/output")
+          j=json.loads((p/"model_manifest.json").read_text())
+          assert j["object_count"]>=70 and j["game_ready"] is False
+          for fn in p.glob("*.png"):
+              raw=fn.read_bytes()[:24]
+              assert raw.startswith(b"\x89PNG\r\n\x1a\n"),fn
+              w,h=struct.unpack(">II",raw[16:24])
+              assert w==1400 and h==1000,(fn,w,h)
+          print("NF_BW01_REVIEW_VIEWS_VERIFIED",len(list(p.glob("*.png"))),j["object_count"])
+          PY
+          ls -lh "$out"
+      - name: Upload original high-poly clay and topology PNG views
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate02-Actual-Geometry-Renders-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/output/
+            nf-bw01-render.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish key actual-model review images (Gate 02 not approved)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/output
+          gh release create "nf-bw01-clay-review-$GITHUB_RUN_NUMBER" \
+            "$out/07_front_three_quarter_clay.png" \
+            "$out/08_rear_three_quarter_clay.png" \
+            "$out/09_robot_joint_closeup.png" \
+            "$out/10_cradle_dock_closeup.png" \
+            "$out/12_three_quarter_wire.png" \
+            "$out/model_manifest.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 Gate 02 clay/wire views (VISUAL REVIEW PENDING)" \
+            --notes "All images rendered from real Blender geometry and verified by PNG dimensions. Full 13-view set plus editable .blend and inspection GLB available in the linked workflow artifact and master release. Not approved for texturing or Unity." \
+            --prerelease
