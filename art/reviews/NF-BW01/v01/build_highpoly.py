@@ -495,6 +495,12 @@ def visible_bounds(objects):
 bmin,bmax,dims=visible_bounds(meshes)
 print("NF_BW01_MODEL_BOUNDS",bmin,bmax,dims)
 if bmin[0]<-1.97 or bmax[0]>1.97 or bmin[1]<-1.29 or bmax[1]>1.29 or bmin[2]<-.04 or bmax[2]>3.43:
+    for obj in meshes:
+        lo,hi,_=visible_bounds([obj])
+        if lo[0]<-1.97 or hi[0]>1.97 or lo[1]<-1.29 or hi[1]>1.29 or lo[2]<-.04 or hi[2]>3.43:
+            print("NF_BW01_BOUND_OFFENDER",obj.name,obj.type,
+                  "parent",obj.parent.name if obj.parent else "NONE",
+                  "min",lo,"max",hi)
     raise RuntimeError("Gate02 model violates approved 3.8 x 2.4 x 3.4m envelope; review oversized component")
 
 # Save an editable real Blender scene with separate assemblies, no destructive joins.
