@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="790" viewBox="0 0 1600 790">
+<title>NF-BW01 Aegis Battery Exchange Workstation - Gate 01 conceptual orthographic layout</title>
+<desc>Proposed 3800 millimeter wide, 2400 millimeter deep, 3400 millimeter high robot-assisted battery workstation. Orthographic top, front, and right elevation. Concept only, not actual mesh.</desc>
+<defs>
+  <marker id="end" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#1e3748" stroke-width="1.4"/></marker>
+  <pattern id="grip" width="11" height="11" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="11" height="11" fill="#e6edf0"/><line x1="0" y1="0" x2="0" y2="11" stroke="#a4b4bd" stroke-width="2"/></pattern>
+  <style>
+    text{font-family:"Arial","DejaVu Sans",sans-serif;fill:#14232e}
+    .title{font-size:26px;font-weight:bold;letter-spacing:1px}
+    .subtitle{font-size:13px;fill:#4e6170;letter-spacing:.4px}
+    .panel{fill:#fff;stroke:#bcc8d0;stroke-width:1.4}
+    .view{font-size:19px;font-weight:bold;letter-spacing:1px}
+    .label{font-size:13px;font-weight:600}
+    .small{font-size:11.5px;fill:#4d606b}
+    .dimension{font-size:14px;font-weight:bold}
+    .edge{fill:none;stroke:#1b3444;stroke-width:2.3}
+    .thin{fill:none;stroke:#577080;stroke-width:1.2}
+    .dash{fill:none;stroke:#7e929e;stroke-width:1.35;stroke-dasharray:7 5}
+    .base{fill:#f1f4f6;stroke:#1b3444;stroke-width:2.3}
+    .machine{fill:#dbe4e8;stroke:#1b3444;stroke-width:2.2}
+    .tool{fill:#8ea0ac;stroke:#1b3444;stroke-width:2.2}
+    .highlight{fill:url(#grip);stroke:#1b3444;stroke-width:2}
+    .axis{stroke:#a3b3bb;stroke-width:1;stroke-dasharray:5 4}
+  </style>
+</defs>
+<rect width="1600" height="790" fill="#f6f8f9"/>
+<rect x="26" y="21" width="1548" height="91" rx="6" fill="#eaf0f3" stroke="#ccd6dc"/>
+<text x="50" y="59" class="title">NF-BW01   /   AEGIS BATTERY EXCHANGE WORKSTATION</text>
+<text x="50" y="84" class="subtitle">ENGINEERING REVIEW   •   GATE 01   •   VERSION 0.1   •   METRES / MILLIMETRES   •   CONCEPT ONLY — NOT A BUILT MESH</text>
+<rect x="28" y="128" width="500" height="578" class="panel"/>
+<rect x="550" y="128" width="500" height="578" class="panel"/>
+<rect x="1072" y="128" width="500" height="578" class="panel"/>
+<text x="49" y="158" class="view">01 / TOP PLAN</text>
+<text x="571" y="158" class="view">02 / FRONT ELEVATION</text>
+<text x="1093" y="158" class="view">03 / RIGHT-SIDE ELEVATION</text>
+
+<!-- Top plan: 107px/m, X left to right, rear is page top -->
+<line x1="79" y1="200" x2="485.6" y2="200" class="thin"/>
+<line x1="79" y1="193" x2="79" y2="208" class="edge"/>
+<line x1="485.6" y1="193" x2="485.6" y2="208" class="edge"/>
+<text x="282" y="191" class="dimension" text-anchor="middle">3800 mm</text>
+<line x1="57" y1="228" x2="57" y2="484.8" class="thin"/>
+<line x1="49" y1="228" x2="65" y2="228" class="edge"/>
+<line x1="49" y1="484.8" x2="65" y2="484.8" class="edge"/>
+<text x="49" y="362" class="dimension" transform="rotate(-90 49 362)" text-anchor="middle">2400 mm</text>
+<rect x="79" y="228" width="406.6" height="256.8" class="base"/>
+<rect x="92" y="241" width="380.6" height="230.8" class="dash"/>
+<text x="286" y="220" class="small" text-anchor="middle">REAR (+Y)  •  HIGH-VOLTAGE CONDUIT SIDE</text>
+<text x="286" y="505" class="small" text-anchor="middle">FRONT (-Y)  •  PLAYER / SERVICE AISLE</text>
+<line x1="282" y1="227" x2="282" y2="485" class="axis"/>
+<line x1="79" y1="356" x2="486" y2="356" class="axis"/>
+<!-- Robot pedestal + arm path -->
+<circle cx="186" cy="287" r="47" class="machine"/>
+<circle cx="186" cy="287" r="30" class="dash"/>
+<circle cx="186" cy="287" r="12" class="tool"/>
+<path d="M186 287 L230 323 L270 374" fill="none" stroke="#81939e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M186 287 L230 323 L270 374" class="edge"/>
+<circle cx="230" cy="323" r="13" class="machine"/>
+<rect x="253" y="364" width="38" height="18" rx="4" class="tool"/>
+<!-- Cradle -->
+<rect x="217" y="319" width="120" height="143" rx="6" class="machine"/>
+<rect x="231" y="331" width="92" height="122" fill="#edf3f5" stroke="#1b3444" stroke-width="1.5"/>
+<rect x="239" y="347" width="76" height="88" rx="5" class="highlight"/>
+<path d="M226 330 V453 M329 330 V453" class="edge"/>
+<text x="277" y="399" class="label" text-anchor="middle">MODULE</text>
+<!-- Rack -->
+<rect x="341" y="269" width="94" height="114" rx="5" class="machine"/>
+<rect x="355" y="282" width="66" height="82" class="highlight"/>
+<path d="M349 310 H428 M349 345 H428" class="thin"/>
+<text x="388" y="259" class="small" text-anchor="middle">EXCHANGE DOCK</text>
+<!-- HMI and cabinet -->
+<rect x="392" y="420" width="68" height="32" rx="3" class="tool"/>
+<rect x="398" y="426" width="56" height="20" rx="1" fill="#e3edf2" stroke="#283d4d"/>
+<rect x="437" y="241" width="30" height="44" rx="3" class="tool"/>
+<text x="354" y="458" class="small">HMI</text>
+<text x="103" y="254" class="small">ROBOT</text>
+<path d="M315 448 L359 395 L371 385" class="dash" marker-end="url(#end)"/>
+<text x="105" y="538" class="label">BOUNDARIES / MOTION</text>
+<text x="105" y="558" class="small">Solid = machine footprint   •   Dashed = internal guard boundary</text>
+<text x="105" y="576" class="small">Robot motion stays inside enclosure. Sweep not yet simulated.</text>
+<text x="105" y="605" class="label">PROPOSED GARAGE BAY</text>
+<text x="105" y="625" class="small">Blender center (-6.60, +12.25, 0), replacing an existing station.</text>
+<text x="105" y="645" class="small">5.00 m bay pitch leaves 1.20 m nominal side-to-side spacing.</text>
+<text x="105" y="665" class="small">Central bay approach aisle is approximately 5.15 m deep.</text>
+
+<!-- Front elevation: X width 3800, Z height 3400 -->
+<line x1="593" y1="184" x2="999.6" y2="184" class="thin"/>
+<line x1="593" y1="177" x2="593" y2="191" class="edge"/>
+<line x1="999.6" y1="177" x2="999.6" y2="191" class="edge"/>
+<text x="796" y="177" class="dimension" text-anchor="middle">3800 mm</text>
+<line x1="582" y1="198" x2="582" y2="562" class="thin"/>
+<line x1="575" y1="198" x2="589" y2="198" class="edge"/>
+<line x1="575" y1="562" x2="589" y2="562" class="edge"/>
+<text x="574" y="380" class="dimension" text-anchor="middle" transform="rotate(-90 574 380)">3400 mm</text>
+<rect x="593" y="542" width="406.6" height="20" class="base"/>
+<rect x="613" y="534" width="369" height="8" class="machine"/>
+<path d="M662 535 V495 Q662 489 669 489 H739 Q746 489 746 495 V535Z" class="tool"/>
+<path d="M704 492 L711 423 L750 323 L788 298" fill="none" stroke="#8297a4" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M704 492 L711 423 L750 323 L788 298" fill="none" stroke="#233b4b" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="711" cy="423" r="24" class="machine"/>
+<circle cx="750" cy="323" r="19" class="machine"/>
+<circle cx="788" cy="298" r="15" class="tool"/>
+<path d="M780 311 V351 M797 311 V351" class="edge"/>
+<rect x="729" y="456" width="135" height="81" rx="6" class="machine"/>
+<rect x="748" y="469" width="96" height="24" rx="4" class="highlight"/>
+<rect x="741" y="500" width="111" height="11" class="tool"/>
+<rect x="760" y="455" width="68" height="10" class="edge"/>
+<rect x="866" y="390" width="94" height="146" class="machine"/>
+<rect x="878" y="403" width="68" height="86" class="highlight"/>
+<path d="M878 501 H948" class="thin"/>
+<rect x="942" y="348" width="42" height="91" rx="4" class="tool"/>
+<rect x="949" y="357" width="28" height="55" fill="#eaf1f4" stroke="#1b3444" stroke-width="1.2"/>
+<line x1="593" y1="575" x2="1000" y2="575" class="axis"/>
+<text x="702" y="584" class="small" text-anchor="middle">BOLTED PEDESTAL</text>
+<text x="803" y="584" class="small" text-anchor="middle">SHUTTLE</text>
+<text x="905" y="584" class="small" text-anchor="middle">CASSETTE RACK</text>
+<text x="962" y="334" class="small" text-anchor="middle">HMI</text>
+<text x="591" y="621" class="label">ROBOT-PARK POSITION</text>
+<text x="591" y="641" class="small">6-axis-inspired articulation; visible bearings, protective shells,</text>
+<text x="591" y="659" class="small">real gripper jaws and cable routing. Pose/clearances still conceptual.</text>
+
+<!-- Right elevation: depth 2400, height 3400 -->
+<line x1="1134" y1="184" x2="1390.8" y2="184" class="thin"/>
+<line x1="1134" y1="177" x2="1134" y2="191" class="edge"/>
+<line x1="1390.8" y1="177" x2="1390.8" y2="191" class="edge"/>
+<text x="1262" y="177" class="dimension" text-anchor="middle">2400 mm</text>
+<line x1="1107" y1="198" x2="1107" y2="562" class="thin"/>
+<line x1="1100" y1="198" x2="1114" y2="198" class="edge"/>
+<line x1="1100" y1="562" x2="1114" y2="562" class="edge"/>
+<text x="1097" y="380" class="dimension" text-anchor="middle" transform="rotate(-90 1097 380)">3400 mm</text>
+<rect x="1134" y="542" width="256.8" height="20" class="base"/>
+<rect x="1144" y="534" width="235" height="8" class="machine"/>
+<!-- back robot -->
+<path d="M1308 531 V486 H1350 V531Z" class="tool"/>
+<path d="M1308 489 L1288 408 L1251 332 L1204 309" fill="none" stroke="#8297a4" stroke-width="34" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M1308 489 L1288 408 L1251 332 L1204 309" fill="none" stroke="#233b4b" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1288" cy="408" r="22" class="machine"/>
+<circle cx="1251" cy="332" r="19" class="machine"/>
+<circle cx="1204" cy="309" r="13" class="tool"/>
+<path d="M1194 324 V354 M1215 324 V354" class="edge"/>
+<!-- cradle -->
+<rect x="1169" y="462" width="143" height="73" rx="5" class="machine"/>
+<rect x="1182" y="449" width="96" height="15" rx="3" class="highlight"/>
+<path d="M1176 496 H1308 M1176 512 H1308" class="thin"/>
+<!-- back power cabinet -->
+<rect x="1341" y="315" width="42" height="217" rx="3" class="machine"/>
+<path d="M1349 350 H1374 M1349 367 H1374 M1349 384 H1374 M1349 401 H1374 M1349 418 H1374" class="thin"/>
+<rect x="1149" y="397" width="37" height="76" class="tool"/>
+<rect x="1155" y="403" width="25" height="59" fill="#edf3f5" stroke="#1b3444"/>
+<text x="1158" y="584" class="small">FRONT (-Y)</text>
+<text x="1326" y="584" class="small">REAR (+Y)</text>
+<text x="1097" y="621" class="label">INTERNAL CLEARANCE IS UNVERIFIED</text>
+<text x="1097" y="641" class="small">Robot and tool sweep require a modeled reach-envelope test.</text>
+<text x="1097" y="659" class="small">No motion outside the guarded machine boundary.</text>
+<line x1="28" y1="724" x2="1572" y2="724" stroke="#c3ccd0"/>
+<text x="33" y="750" class="small">NF-BW01 / V0.1   |   NOT TO SCALE FOR MANUFACTURING  •  GRAPHIC SCALE 107px PER METRE FOR CONCEPT FOOTPRINTS  •  BLENDER Z-UP</text>
+<text x="33" y="769" class="small">Artwork is an ORIGINAL schematic for design approval, not a model render or real machinery certification. Owner signoff required for Gate 01.</text>
+</svg>
