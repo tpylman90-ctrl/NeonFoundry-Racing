@@ -1,7 +1,7 @@
 # NF-BW01 / v01 — Production Gate Review
 
-**Gate:** 01 — Art direction and engineering brief  
-**Status:** IN_PROGRESS / PENDING OWNER REVIEW  
+**Gate:** 02 — High-poly Blender master  
+**Status:** GATE 01 APPROVED / GATE 02 IN_PROGRESS  
 **Asset:** Aegis battery exchange workstation  
 **Asset class:** Inspectable industrial workshop equipment  
 **Target presentation:** Unity 6 garage cell works (close inspection)  
@@ -15,15 +15,15 @@
 - Original concept dimension drawing: [ORTHOGRAPHIC_BLUEPRINT.svg](ORTHOGRAPHIC_BLUEPRINT.svg).
 - Existing garage integration evidence: `unity/Blender/FoundryPreview/generate_assets.py`; rear service stations on 5m centers and an open central approach.
 - External reference only: industrial battery robotic assembly and real industrial safety source URLs within the brief.
-- Real Blender asset: **not yet created** (Gate 02).
-- Visual owner approval: **not yet received**.
+- Real Blender asset: **in construction** (Gate 02).
+- Gate 01 owner approval: **2026-11-23, “Looks good proceed.”**
 
 ## Mandatory gate ledger
 
 | Gate | Status | Evidence / blockers |
 |---|---|---|
-| 01 — Art direction and engineering brief | **IN_PROGRESS** | Written engineering brief and concept 3-view SVG; owner signoff still pending |
-| 02 — High-poly master | NOT_STARTED | Must not start until Gate 01 is approved |
+| 01 — Art direction and engineering brief | **APPROVED** | Owner: “Looks good proceed.” (2026-11-23). Engineering brief and orthographic concept accepted |
+| 02 — High-poly master | **IN_PROGRESS** | Blender master and actual-model clay/wire inspection views in development; visual signoff pending |
 | 03 — Game mesh, UVs and LODs | NOT_STARTED | Await high-poly approval |
 | 04 — PBR and texture baking | NOT_STARTED | Await optimized game mesh |
 | 05 — Studio/Unity visual comparison | NOT_STARTED | Await Blender/Unity test meshes |
@@ -38,13 +38,13 @@
 - [x] Concept front/top/side orthographics **drawn** (not actual 3D renders)
 - [x] Proposed garage location based on current script (not verified against deployed asset)
 - [x] Reference/provenance sources recorded; no third-party mesh imported
-- [ ] Owner approves style, identity, dimensions and concept drawing
+- [x] Owner approves style, identity, dimensions and concept drawing (2026-11-23)
 - [ ] Any revisions needed for robotics sweep/cassette size resolved in the brief
 
 ## Proposed owner decision
 
-**PENDING**. This record becomes `APPROVED` only after the owner clearly accepts Gate 01. Owner may instead request revision. No guessed date or fabricated consent.
+**Gate 01 APPROVED on 2026-11-23** by owner in conversation: “Looks good proceed.” **Gate 02 NOT APPROVED** until the actual Blender master is reviewed.
 
-## Next stage, ONLY after approval
+## Gate 02 production scope — authorized by owner
 
 Create the actual editable Blender high-poly master with separate objects/pivots for pedestal, six-axis arm, gripper, guided cassette shuttle, safety guard, HMI, charge rack, conduit and cabinet. Present clay/wire front/back/side/top/bottom/three-quarter and joint-mechanism close-ups, all rendered from the **actual constructed mesh**.
