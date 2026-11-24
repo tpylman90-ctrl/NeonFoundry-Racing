@@ -9,13 +9,22 @@
 **Purpose:** First complete quality-calibration asset under `docs/PRODUCTION_STANDARD.md`  
 **Revision:** 0.1, 2026-11-23
 
+## Verified Gate 02 master output
+
+- Blender source: [NF_BW01_GATE02_HIGH_POLY_MASTER.blend](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/download/nf-bw01-container-master-4/NF_BW01_GATE02_HIGH_POLY_MASTER.blend)
+- High-poly inspection-only GLB: [NF_BW01_GATE02_INSPECTION_ONLY.glb](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/download/nf-bw01-container-master-4/NF_BW01_GATE02_INSPECTION_ONLY.glb)
+- Verified container workflow: [Blender master build #45312545027](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45312545027)
+- Actual geometry: **413 independently retained modeled objects**, verified bounds **3.77 × 2.36 × 2.67 m**, from evaluated mesh vertices in Blender 4.3.
+- Clay/wireframe multi-view render set: **separate validation step; pending** at this checkpoint.
+- **NOT approved**: gate 02 visual review, kinematic/clearance checks, UVs, PBR, game-ready optimization, and Unity integration.
+
 ## Gate evidence
 
 - Proposed dimensions, mechanisms, design DNA, operations and integration: [ENGINEERING_BRIEF.md](ENGINEERING_BRIEF.md).
 - Original concept dimension drawing: [ORTHOGRAPHIC_BLUEPRINT.svg](ORTHOGRAPHIC_BLUEPRINT.svg).
 - Existing garage integration evidence: `unity/Blender/FoundryPreview/generate_assets.py`; rear service stations on 5m centers and an open central approach.
 - External reference only: industrial battery robotic assembly and real industrial safety source URLs within the brief.
-- Real Blender asset: **in construction** (Gate 02).
+- Real Blender asset: **generated and exported** (Gate 02), see model release below.
 - Gate 01 owner approval: **2026-11-23, “Looks good proceed.”**
 
 ## Mandatory gate ledger
@@ -23,7 +32,7 @@
 | Gate | Status | Evidence / blockers |
 |---|---|---|
 | 01 — Art direction and engineering brief | **APPROVED** | Owner: “Looks good proceed.” (2026-11-23). Engineering brief and orthographic concept accepted |
-| 02 — High-poly master | **IN_PROGRESS** | Blender master and actual-model clay/wire inspection views in development; visual signoff pending |
+| 02 — High-poly master | **IN_PROGRESS** | Real `.blend` + inspection GLB generated and verified; clay/wire render suite and owner signoff pending |
 | 03 — Game mesh, UVs and LODs | NOT_STARTED | Await high-poly approval |
 | 04 — PBR and texture baking | NOT_STARTED | Await optimized game mesh |
 | 05 — Studio/Unity visual comparison | NOT_STARTED | Await Blender/Unity test meshes |
