@@ -15,7 +15,12 @@
 - High-poly inspection-only GLB: [NF_BW01_GATE02_INSPECTION_ONLY.glb](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/download/nf-bw01-container-master-4/NF_BW01_GATE02_INSPECTION_ONLY.glb)
 - Verified container workflow: [Blender master build #45312545027](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45312545027)
 - Actual geometry: **413 independently retained modeled objects**, verified bounds **3.77 × 2.36 × 2.67 m**, from evaluated mesh vertices in Blender 4.3.
-- Clay/wireframe multi-view render set: **separate validation step; pending** at this checkpoint.
+- Clay/wireframe multi-view render set: **13 authentic Blender-generated 1400×1000 PNG views verified**, including revised underside, front/rear/side/top, 3/4, robot joints and cassette close-ups.
+- [Verified render CI #45313327569](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45313327569) — all rendering, PNG integrity, artifact upload and publication steps successful.
+- [Gate 02 review image release](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-clay-review-2) with key PNG images.
+- GitHub Actions artifact: `NF-BW01-Gate02-Actual-Geometry-Renders-2`, full 13-view render set plus inspection model and manifest.
+- Source model and inspection GLB are also available in [most recent master release](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-container-master-5).
+- **Visual observations (not user approval):** Readable articulated arm, guide rail cassette cradle, cooling/power enclosure and guard posts. Underside is mostly a plain base plate and wireframe is dense in joint close-ups; address if owner requests more mechanical undercarriage detail.
 - **NOT approved**: gate 02 visual review, kinematic/clearance checks, UVs, PBR, game-ready optimization, and Unity integration.
 
 ## Gate evidence
@@ -32,7 +37,7 @@
 | Gate | Status | Evidence / blockers |
 |---|---|---|
 | 01 — Art direction and engineering brief | **APPROVED** | Owner: “Looks good proceed.” (2026-11-23). Engineering brief and orthographic concept accepted |
-| 02 — High-poly master | **IN_PROGRESS** | Real `.blend` + inspection GLB generated and verified; clay/wire render suite and owner signoff pending |
+| 02 — High-poly master | **IN_PROGRESS / VISUAL REVIEW** | 413-object Blender master, GLB, 13 actual-model clay/wire views verified. Explicit owner visual signoff still pending. |
 | 03 — Game mesh, UVs and LODs | NOT_STARTED | Await high-poly approval |
 | 04 — PBR and texture baking | NOT_STARTED | Await optimized game mesh |
 | 05 — Studio/Unity visual comparison | NOT_STARTED | Await Blender/Unity test meshes |
