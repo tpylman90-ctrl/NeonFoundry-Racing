@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq blender python3-pil
+          sudo apt-get install -y -qq blender python3-pil python3-numpy
           blender --version | head -2
       - name: Validate authored Python source
         run: python3 -m py_compile art/reviews/NF-BW01/v01/build_highpoly.py
