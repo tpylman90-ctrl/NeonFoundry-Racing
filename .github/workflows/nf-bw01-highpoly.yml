@@ -1,0 +1,108 @@
+name: NF-BW01 Gate 02 Blender High-Poly Review
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "art/reviews/NF-BW01/v01/build_highpoly.py"
+      - ".github/workflows/nf-bw01-highpoly.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nf-bw01-highpoly-review
+  cancel-in-progress: false
+
+jobs:
+  model-and-review:
+    name: Blender original mesh + review renders
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out original asset source
+        uses: actions/checkout@v4
+      - name: Install free Blender and image assembly tool
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender python3-pil
+          blender --version | head -2
+      - name: Validate authored Python source
+        run: python3 -m py_compile art/reviews/NF-BW01/v01/build_highpoly.py
+      - name: Build authentic high-poly master and review renders
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/output
+          blender --background --factory-startup \
+            --python art/reviews/NF-BW01/v01/build_highpoly.py \
+            -- --out art/reviews/NF-BW01/v01/output 2>&1 | tee nf-bw01-build.log
+          grep -q "NF_BW01_GATE02_RENDER_PACKAGE_OK" nf-bw01-build.log
+      - name: Validate true model evidence and generate review contact sheet
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/output
+          test -s "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend"
+          test -s "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb"
+          test -s "$out/model_manifest.json"
+          test "$(find "$out" -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 13
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw, ImageFont
+          import json,pathlib
+          p=pathlib.Path("art/reviews/NF-BW01/v01/output")
+          j=json.loads((p/"model_manifest.json").read_text())
+          assert j["object_count"]>=70
+          assert j["status"]=="ACTUAL_BLENDER_MODEL_BUILT_VISUAL_APPROVAL_PENDING"
+          files=sorted(p.glob("*.png"))
+          assert len(files)==13
+          for x in files:
+              assert Image.open(x).size==(1400,1000), x
+          w,h=500,390
+          sheet=Image.new("RGB",(4*w,4*h),(233,239,242))
+          draw=ImageDraw.Draw(sheet)
+          try:
+              font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",16)
+          except OSError:
+              font=ImageFont.load_default()
+          for i,fn in enumerate(files):
+              thumb=Image.open(fn).convert("RGB")
+              thumb.thumbnail((w-16,h-49))
+              x=(i%4)*w+8
+              y=(i//4)*h+8
+              sheet.paste(thumb,(x,y))
+              draw.text((x+6,y+h-38),fn.stem,fill=(25,41,51),font=font)
+          sheet.save(p/"NF_BW01_GATE02_CONTACT_SHEET.png",optimize=True)
+          print("NF_BW01_REAL_MODEL_CONTACT_SHEET_OK",p/"NF_BW01_GATE02_CONTACT_SHEET.png")
+          PY
+          sha256sum "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend" "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb" > "$out/SHA256SUMS.txt"
+          ls -lh "$out"
+      - name: Upload high-poly master and authentic renders for owner review
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate02-HighPoly-Review-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/output/
+            nf-bw01-build.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish inspection-only preview asset bundle
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/output
+          tag="nf-bw01-gate02-review-$GITHUB_RUN_NUMBER"
+          gh release create "$tag" \
+            "$out/NF_BW01_GATE02_HIGH_POLY_MASTER.blend" \
+            "$out/NF_BW01_GATE02_INSPECTION_ONLY.glb" \
+            "$out/NF_BW01_GATE02_CONTACT_SHEET.png" \
+            "$out/model_manifest.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 high-poly clay review #$GITHUB_RUN_NUMBER (NOT APPROVED)" \
+            --notes "Original high-poly Blender workstation model. 13 actual-geometry clay/wire views available in the workflow artifact. Gate 02 visual owner approval is PENDING. Inspection GLB is NOT the optimized game mesh. No Unity integration, final materials or phone claims." \
+            --prerelease
