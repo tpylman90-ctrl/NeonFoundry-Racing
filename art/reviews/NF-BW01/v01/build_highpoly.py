@@ -246,7 +246,14 @@ def put_under(child,parent):
 
 # foundation: directional cast plinth, narrow vertical fins, accessible anchor points
 set_group(STRUCT)
-box("BW01_00 | welded foundation 3.64x2.24",(0,0,.085),(3.64,2.24,.17),"HOUSING",.062,5)
+# R2: open C-frame beneath the machined deck. The old solid slab occluded
+# all underside structure and could not serve as a credible service undercarriage.
+for yy in (-1.035,1.035):
+    box("BW01_00 | welded front/rear perimeter C beam",
+        (0,yy,.085),(3.64,.17,.17),"HOUSING",.024,4)
+for xx in (-1.735,1.735):
+    box("BW01_00 | welded side perimeter C beam",
+        (xx,0,.085),(.17,2.07,.17),"HOUSING",.023,4)
 box("BW01_00 | floating top plate",(0,-.035,.192),(3.47,2.08,.078),"BRUSH",.023)
 for x in (-1.70,1.70):
     for y in (-.99,.99):
@@ -463,11 +470,22 @@ for side in (-1,1):
     for y in (-.78,.78):
         box("BW01_80 | shield retainer",(sx,y,2.47),(.15,.14,.10),"DARK",.010)
 
+# Review revision R2: additional manufacturing structure is deliberately kept
+# separate and editable in its existing mechanical assembly collections.
+from gate02_mechanical_refinement import add_mechanical_refinements
+gate02_revision=add_mechanical_refinements({
+    "set_group":set_group,"box":box,"cyl":cyl,"torus":torus,
+    "beam":beam,"bolt":bolt,"cable":cable,"pivot":pivot,
+    "put_under":put_under,"STRUCT":STRUCT,"ROBOT":ROBOT,
+    "UPPER":UPPER,"FORE":FORE,"WRIST":WRIST,
+    "p0":p0,"p1":p1,"p2":p2,"p3":p3
+})
+
 # Hierarchy in Outliner, with real individual edit-friendly pivots
 # Only physically related arm components are parented; avoid scene-wide collapsing.
 for group,root in ((UPPER,sh_pivot),(FORE,el_pivot),(WRIST,wrist_pivot)):
     for obj in list(group.objects):
-        if obj != root and obj.type in {"MESH","CURVE","FONT"}:
+        if obj != root and obj.parent is None and obj.type in {"MESH","CURVE","FONT"}:
             put_under(obj,root)
 
 # bounds stats & invariant checks
@@ -572,10 +590,12 @@ if "--master-only" in sys.argv:
         "asset_id":"NF-BW01",
         "gate":"02",
         "status":"MASTER_AND_INSPECTION_GLB_BUILT_VISUAL_RENDERS_PENDING",
+        "mechanical_refinement":gate02_revision,
         "owner_approval_gate_01":"2026-11-23: Looks good proceed",
         "unit":"m","front_axis":"-Y","up_axis":"+Z",
         "bounds_min_m":bmin,"bounds_max_m":bmax,"dimensions_m":dims,
         "object_count":len(meshes),
+ "mechanical_refinement":gate02_revision,
         "high_poly_master":"NF_BW01_GATE02_HIGH_POLY_MASTER.blend",
         "inspection_glb":"NF_BW01_GATE02_INSPECTION_ONLY.glb",
         "game_ready":False,"owner_gate02_approved":False,
@@ -664,7 +684,7 @@ for o in meshes:
 
 manifest={
  "asset_id":"NF-BW01",
- "revision":"Gate02-v01",
+ "revision":"Gate02-v02",
  "gate":"02",
  "status":"ACTUAL_BLENDER_MODEL_BUILT_VISUAL_APPROVAL_PENDING",
  "owner_approval_gate_01":"2026-11-23: Looks good proceed",
