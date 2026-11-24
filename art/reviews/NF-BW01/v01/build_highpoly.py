@@ -84,9 +84,12 @@ def normal(o,bevel=0.0,seg=3):
         mod=o.modifiers.new("Radiused manufactured edges","BEVEL")
         mod.width=bevel
         mod.segments=seg
-        mod.affect="EDGES" if hasattr(mod,"affect") else None
+        if hasattr(mod,"affect"):
+            mod.affect="EDGES"
         mod.loop_slide=True
         mod.profile=.65
+    if o.type=="MESH" and hasattr(o.data,"use_auto_smooth"):
+        o.data.use_auto_smooth=True
     mod=o.modifiers.new("Corner normals","WEIGHTED_NORMAL")
     mod.keep_sharp=True
     mod.weight=45
@@ -549,20 +552,46 @@ views={
 }
 for key,(eye,target,scale) in views.items():
     position_camera(eye,target,scale)
-    scene.display.shading.show_wireframes=False
     scene.render.filepath=str(OUT/(key+".png"))
     bpy.ops.render.render(write_still=True)
     print("NF_BW01_RENDER_OK",key)
+# Workbench Scene shading in Debian Blender 4.0 has no show_wireframes flag.
+# Generate TRUE geometry-edge overlays from the actual master geometry instead.
+# Do this only after saving the editable source + all clay renders.
+wire_overlays=[]
+for source in list(meshes):
+    if source.type!="MESH":
+        continue
+    # Fasteners create high-frequency wire noise; they remain editable in master.
+    if any(word in source.name.lower() for word in (
+        "washer","hex fastener","captive shell bolt","mount bolt",
+        "bearing cover","indicator","status diode","status strip")):
+        continue
+    outline=source.copy()
+    outline.data=source.data.copy()
+    STUDIO.objects.link(outline)
+    outline.name="_STUDIO | TRUE mesh wire | "+source.name
+    outline.data.materials.clear()
+    outline.data.materials.append(M["DARK"])
+    wire=outline.modifiers.new("Actual topology edge inspection","WIREFRAME")
+    wire.use_replace=True
+    wire.thickness=.0033
+    wire.offset=.18
+    wire.use_even_offset=True
+    wire_overlays.append(outline)
+print("NF_BW01_TRUE_MESH_WIRE_OVERLAYS",len(wire_overlays))
 for key,(eye,target,scale) in {
     "11_front_wire":views["01_front_clay"],
     "12_three_quarter_wire":views["07_front_three_quarter_clay"],
     "13_robot_wire":views["09_robot_joint_closeup"],
 }.items():
     position_camera(eye,target,scale)
-    scene.display.shading.show_wireframes=True
     scene.render.filepath=str(OUT/(key+".png"))
     bpy.ops.render.render(write_still=True)
     print("NF_BW01_RENDER_OK",key)
+# Inspection-only overlays are not part of the saved source or GLB.
+for obj in wire_overlays:
+    bpy.data.objects.remove(obj,do_unlink=True)
 
 # count explicit evaluated polygons, record evidence without false runtime claims
 dg=bpy.context.evaluated_depsgraph_get()
