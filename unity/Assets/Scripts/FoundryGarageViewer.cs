@@ -12,7 +12,7 @@ public sealed class FoundryGarageViewer : MonoBehaviour
     private int locationIndex;
     private Vector3 focus;
     private bool walkMode;
-    private float yaw = -138f, pitch = 22f, orbitDistance = 15.8f;
+    private float yaw = -138f, pitch = 11f, orbitDistance = 12.9f;
     private Vector3 walker = new Vector3(0f, 1.75f, -10f);
     private float lookPitch = 8f, walkYaw = 0f;
     private Vector2 previousPointer;
@@ -23,6 +23,7 @@ public sealed class FoundryGarageViewer : MonoBehaviour
     private float fpsTime, fps;
     private int frames;
     private GUIStyle headStyle, bodyStyle, buttonStyle, tinyStyle;
+    private Texture2D darkButtonTexture;
 
     public void Initialize(Transform craft, Transform cellWorks, Transform overlook)
     {
@@ -147,7 +148,18 @@ public sealed class FoundryGarageViewer : MonoBehaviour
         walker += Quaternion.Euler(0, walkYaw, 0) * motion * (5.1f * Time.deltaTime);
         walker.x = Mathf.Clamp(walker.x, -15.7f, 15.7f);
         walker.z = Mathf.Clamp(walker.z, -16.5f, 16.5f);
-        walker.y = 1.75f; // Preview viewer only; production will use collisions / stairs.
+        // Surface proxies in the Unity scene allow actual ascent on 18 steps and
+        // walking across the observation deck without expensive MeshColliders.
+        Vector3 groundTest = new Vector3(walker.x, walker.y + .48f, walker.z);
+        if (Physics.Raycast(groundTest, Vector3.down, out RaycastHit surface, 3.15f,
+            Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            float desiredEyeHeight = surface.point.y + 1.70f;
+            // Ignore a balcony directly overhead or an implausibly tall step.
+            if (desiredEyeHeight <= walker.y + .48f)
+                walker.y = Mathf.MoveTowards(walker.y, desiredEyeHeight,
+                    3.4f * Time.deltaTime);
+        }
     }
     bool OverTopButtons(Vector2 point)
     {
@@ -163,7 +175,11 @@ public sealed class FoundryGarageViewer : MonoBehaviour
         else
         {
             Quaternion q = Quaternion.Euler(pitch, yaw, 0);
-            transform.position = focus - q * Vector3.forward * orbitDistance;
+            Vector3 proposed = focus - q * Vector3.forward * orbitDistance;
+            // The original high-angle orbit started inside the 7m ceiling,
+            // making bright overhead rails fill most of the screen.
+            proposed.y = Mathf.Clamp(proposed.y, 1.10f, 6.48f);
+            transform.position = proposed;
             transform.LookAt(focus, Vector3.up);
         }
     }
@@ -173,8 +189,8 @@ public sealed class FoundryGarageViewer : MonoBehaviour
         locationIndex = index;
         focus = destinations[index].position;
         walkMode = false;
-        orbitDistance = index == 0 ? 15.8f : 12f;
-        pitch = index == 2 ? 14f : 23f;
+        orbitDistance = index == 0 ? 12.9f : index == 1 ? 12.5f : 11.6f;
+        pitch = index == 2 ? 8f : 11f;
         yaw = index == 1 ? -155f : -138f;
     }
     void SwitchMode()
@@ -193,17 +209,30 @@ public sealed class FoundryGarageViewer : MonoBehaviour
     {
         if (headStyle != null) return;
         headStyle = new GUIStyle(GUI.skin.label) {
-            fontSize = 27, fontStyle = FontStyle.Bold,
+            fontSize = 22, fontStyle = FontStyle.Bold,
             normal = { textColor = new Color(.91f,.96f,1f) } };
         bodyStyle = new GUIStyle(GUI.skin.label) {
-            fontSize = 17, wordWrap = true,
+            fontSize = 14, wordWrap = true,
             normal = { textColor = new Color(.72f,.85f,.93f) } };
         tinyStyle = new GUIStyle(GUI.skin.label) {
-            fontSize = 15, alignment = TextAnchor.MiddleCenter,
+            fontSize = 13, alignment = TextAnchor.MiddleCenter,
             normal = { textColor = new Color(.85f,.98f,1f) } };
+        darkButtonTexture = new Texture2D(2,2,TextureFormat.RGBA32,false);
+        darkButtonTexture.SetPixels(new Color[] {
+            new Color(.044f,.085f,.12f,.94f),new Color(.044f,.085f,.12f,.94f),
+            new Color(.044f,.085f,.12f,.94f),new Color(.044f,.085f,.12f,.94f)
+        });
+        darkButtonTexture.Apply();
         buttonStyle = new GUIStyle(GUI.skin.button) {
-            fontSize = 17, fontStyle = FontStyle.Bold,
-            alignment = TextAnchor.MiddleCenter };
+            fontSize = 14, fontStyle = FontStyle.Bold,
+            alignment = TextAnchor.MiddleCenter,
+            fixedHeight = 0f };
+        buttonStyle.normal.background = darkButtonTexture;
+        buttonStyle.hover.background = darkButtonTexture;
+        buttonStyle.active.background = darkButtonTexture;
+        buttonStyle.normal.textColor = new Color(.84f,.94f,1f);
+        buttonStyle.hover.textColor = Color.white;
+        buttonStyle.active.textColor = new Color(.12f,.88f,1f);
     }
     void OnGUI()
     {
@@ -214,30 +243,31 @@ public sealed class FoundryGarageViewer : MonoBehaviour
         GUI.matrix = Matrix4x4.Scale(new Vector3(s,s,1));
         float w = Screen.width / s, h = Screen.height / s;
 
-        GUI.color = new Color(.015f,.035f,.060f,.90f);
-        GUI.Box(new Rect(16,14,460,104), GUIContent.none);
+        GUI.color = new Color(.014f,.031f,.052f,.91f);
+        GUI.Box(new Rect(12,12,380,79),GUIContent.none);
+        GUI.color = new Color(.11f,.84f,.94f);
+        GUI.DrawTexture(new Rect(12,12,4,79),Texture2D.whiteTexture);
         GUI.color = Color.white;
-        GUI.Label(new Rect(32,25,440,38), "NEON FOUNDRY / GARAGE", headStyle);
-        GUI.Label(new Rect(32,71,440,28),
-            "Unity 6 preview   |   " + labels[locationIndex] + "   |   " + fps.ToString("0") + " FPS", bodyStyle);
+        GUI.Label(new Rect(26,21,357,30),"NEON FOUNDRY   /   GARAGE",headStyle);
+        GUI.Label(new Rect(26,59,340,24),
+            "UNITY 6   •   " + labels[locationIndex] + "   •   " + fps.ToString("0") + " FPS",bodyStyle);
 
-        float x = w - 16;
-        if (GUI.Button(new Rect(x-166,23,155,57), walkMode ? "ORBIT VIEW" : "WALK MODE", buttonStyle))
+        float x = w - 12;
+        if (GUI.Button(new Rect(x-124,17,116,47),walkMode ? "ORBIT VIEW" : "WALK MODE",buttonStyle))
             SwitchMode();
-        if (GUI.Button(new Rect(x-300,23,127,57), "OVERLOOK", buttonStyle))
+        if (GUI.Button(new Rect(x-244,17,112,47),"OVERLOOK",buttonStyle))
             SelectLocation(2);
-        if (GUI.Button(new Rect(x-434,23,127,57), "CELL WORKS", buttonStyle))
+        if (GUI.Button(new Rect(x-365,17,113,47),"CELL WORKS",buttonStyle))
             SelectLocation(1);
-        if (GUI.Button(new Rect(x-568,23,127,57), "CRAFT", buttonStyle))
+        if (GUI.Button(new Rect(x-469,17,96,47),"CRAFT",buttonStyle))
             SelectLocation(0);
 
-        GUI.color = new Color(.015f,.035f,.060f,.82f);
-        GUI.Box(new Rect(w*.5f-302,h-68,604,50), GUIContent.none);
+        GUI.color = new Color(.014f,.031f,.052f,.76f);
+        GUI.Box(new Rect(w*.5f-271,h-51,542,37),GUIContent.none);
         GUI.color = Color.white;
-        GUI.Label(new Rect(w*.5f-284,h-63,569,42),
-            walkMode ? "LEFT THUMB  Move     RIGHT THUMB  Look     Tap ORBIT VIEW to exit"
-                     : "DRAG  Orbit      PINCH  Zoom      TWO FINGERS  Pan",
-            bodyStyle);
+        GUI.Label(new Rect(w*.5f-255,h-43,510,30),
+            walkMode ? "LEFT THUMB  Move        RIGHT THUMB  Look        ORBIT VIEW  Exit"
+                     : "DRAG  Orbit        PINCH  Zoom        TWO FINGERS  Pan",bodyStyle);
 
         if (walkMode)
         {
