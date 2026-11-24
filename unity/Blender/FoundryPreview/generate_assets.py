@@ -1,8 +1,10 @@
 # Neon Foundry Racing — deterministic Blender-authored Unity preview meshes.
 # Runs headlessly from the shared Eclipse Unity Android build runner.
 # All objects are newly constructed; no third-party meshes or proprietary assets.
-import bpy, math
+import bpy, math, sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from upgrade_geometry import upgrade_craft, upgrade_garage, author_texture_maps, merge_by_material
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "Assets" / "Resources" / "Foundry"
@@ -59,6 +61,7 @@ def tor(name,loc,major,minor,material,axis="Y"):
         location=loc,major_radius=major,minor_radius=minor)
     o=bpy.context.object;o.name=name
     if axis=="Y":o.rotation_euler[0]=math.pi/2
+    if axis=="X":o.rotation_euler[1]=math.pi/2
     return apply(o,material)
 def loft(name,sections,material):
     # Each section is (longitudinal Y, half-width X, lower Z, shoulder Z)
@@ -132,7 +135,8 @@ box("FORGE | canopy central spine",(0,-.12,2.37),(.085,2.36,.08),"STEEL",.025)
 box("FORGE | hood recessed channel",(0,2.84,1.45),(.25,1.94,.045),"CARBON",.015)
 for y in (-2.70,-1.52,.9,2.78):
     box("FORGE | intentional panel-seam inset",(0,y,1.74),(.065,.065,.04),"CYAN",.006)
-craft=list(bpy.context.scene.objects)
+upgrade_craft(box,cyl,tor,loft,M)
+craft=merge_by_material()
 export_obj("ForgeReviewCraft.obj",craft)
 
 # Dedicated walkable hangar — cell room has spaced machines and an accessible
@@ -187,6 +191,8 @@ for i in range(18):
         (2.0,.51,.16),"STEEL",.025)
 for z in (1.5,3.3,5.2):
     box("GARAGE | wall panel light",(-17.16,-14,z),(.06,2.7,.11),"AMBER",.008)
-garage=list(bpy.context.scene.objects)
+upgrade_garage(box,cyl,tor,loft,M)
+garage=merge_by_material()
+author_texture_maps(OUT)
 export_obj("FoundryGarage.obj",garage)
 print("NEON_FOUNDRY_UNITY_BLENDER_OK")
