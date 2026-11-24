@@ -1,0 +1,114 @@
+name: NF-BW01 Gate 03 LOD and UV Review
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-gate03.yml"
+      - "art/reviews/NF-BW01/v01/build_game_mesh.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: nf-bw01-gate03
+  cancel-in-progress: false
+jobs:
+  optimize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build original high-poly then game-ready-candidate LODs in Blender 4.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/gate03_output art/reviews/NF-BW01/v01/master_for_gate03
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              if command -v Xvfb >/dev/null; then
+                Xvfb :99 -screen 0 1600x1200x24 -nolisten tcp > /tmp/bw01-g03-display.log 2>&1 &
+              elif command -v Xvnc >/dev/null; then
+                Xvnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None > /tmp/bw01-g03-display.log 2>&1 &
+              else
+                echo "No headless display server installed"
+                exit 11
+              fi
+              export DISPLAY=:99
+              sleep 2
+              "$BIN" --background --factory-startup \
+                --python art/reviews/NF-BW01/v01/build_highpoly.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/master_for_gate03 --master-only
+              test -s art/reviews/NF-BW01/v01/master_for_gate03/NF_BW01_GATE02_HIGH_POLY_MASTER.blend
+              "$BIN" --background --factory-startup \
+                art/reviews/NF-BW01/v01/master_for_gate03/NF_BW01_GATE02_HIGH_POLY_MASTER.blend \
+                --python art/reviews/NF-BW01/v01/build_game_mesh.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/gate03_output --render
+            ' 2>&1 | tee nf-bw01-gate03.log
+          grep -q NF_BW01_GATE03_PACKAGE_OK nf-bw01-gate03.log
+      - name: Audit mesh reductions and UV coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate03_output
+          for f in NF_BW01_LOD0_INSPECTION_ONLY.glb NF_BW01_LOD1_INSPECTION_ONLY.glb NF_BW01_LOD2_INSPECTION_ONLY.glb NF_BW01_COLLISION_PROXIES_REVIEW.glb NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend; do
+            test "$(stat -c %s "$out/$f")" -gt 10000
+          done
+          for view in MASTER_THREE_QUARTER LOD0_THREE_QUARTER LOD1_THREE_QUARTER LOD2_THREE_QUARTER MASTER_SIDE LOD0_SIDE; do
+            test "$(stat -c %s "$out/GATE03_$view.png")" -gt 12000
+          done
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path("art/reviews/NF-BW01/v01/gate03_output")
+          j=json.loads((p/"gate03_manifest.json").read_text())
+          assert j["source_part_count"]>=500
+          x,y,z=j["LODs"]
+          assert x["triangles"]>y["triangles"]>z["triangles"]
+          assert y["triangles"]<x["triangles"]*.82
+          assert z["triangles"]<x["triangles"]*.60
+          for level in j["LODs"]:
+              assert level["uv_missing"]==0 and level["uv_invalid"]==0
+              assert level["renderers"]<130
+              assert level["uv_meshes_validated"]==level["renderers"]
+          assert j["collision"]["count"]==11
+          assert j["status"]=="GAME_MESH_CANDIDATES_AWAITING_VISUAL_APPROVAL"
+          print("NF_BW01_GATE03_AUDIT_PASSED",[(l["level"],l["triangles"],l["renderers"]) for l in j["LODs"]])
+          PY
+          sha256sum "$out"/*.glb "$out"/*.blend > "$out/SHA256SUMS.txt"
+          ls -lh "$out"
+      - name: Save review artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate03-LOD-Review-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/gate03_output/
+            nf-bw01-gate03.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish review-only LOD downloads
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate03_output
+          gh release create "nf-bw01-gate03-review-$GITHUB_RUN_NUMBER" \
+            "$out/NF_BW01_LOD0_INSPECTION_ONLY.glb" \
+            "$out/NF_BW01_LOD1_INSPECTION_ONLY.glb" \
+            "$out/NF_BW01_LOD2_INSPECTION_ONLY.glb" \
+            "$out/NF_BW01_COLLISION_PROXIES_REVIEW.glb" \
+            "$out/NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend" \
+            "$out/GATE03_MASTER_THREE_QUARTER.png" \
+            "$out/GATE03_LOD0_THREE_QUARTER.png" \
+            "$out/GATE03_LOD1_THREE_QUARTER.png" \
+            "$out/GATE03_LOD2_THREE_QUARTER.png" \
+            "$out/GATE03_LOD0_SIDE.png" \
+            "$out/gate03_manifest.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 Gate03 optimized LOD and UV REVIEW (pending owner)" \
+            --notes "Three separate LOD candidates from approved high-poly master, model UV0 audit, 11 collider proxies and same-camera Blender images. No PBR, Unity import, verified animation, or Android FPS claim." \
+            --prerelease
