@@ -526,7 +526,7 @@ world=bpy.data.worlds.new("Studio neutral environment")
 scene.world=world
 set_group(STUDIO)
 # Studio contact-shadow floor isn't part of the asset export.
-box("_STUDIO | matte backdrop", (0,0,-.089), (5.9,5.5,.12),"HOUSING",.0)
+studio_floor=box("_STUDIO | matte backdrop", (0,0,-.089), (5.9,5.5,.12),"HOUSING",.0)
 cam_data=bpy.data.cameras.new("Inspection orthographic")
 cam_obj=bpy.data.objects.new("Inspection orthographic",cam_data)
 STUDIO.objects.link(cam_obj)
@@ -606,9 +606,14 @@ views={
 }
 for key,(eye,target,scale) in views.items():
     position_camera(eye,target,scale)
+    # Actual underside must be visible. The broad studio floor would otherwise
+    # completely occlude the model from the underside orthographic camera.
+    studio_floor.hide_render=(key=="06_underside_clay")
+    bpy.context.view_layer.update()
     scene.render.filepath=str(OUT/(key+".png"))
     bpy.ops.render.render(write_still=True)
     print("NF_BW01_RENDER_OK",key)
+studio_floor.hide_render=False
 # Workbench Scene shading in Debian Blender 4.0 has no show_wireframes flag.
 # Generate TRUE geometry-edge overlays from the actual master geometry instead.
 # Do this only after saving the editable source + all clay renders.
