@@ -202,17 +202,17 @@ def upgrade_garage(box, cyl, tor, loft, M):
             box("CELL | insulated high-voltage handle", (bx,11.87,2.65),
                 (.35,.08,.092),"AMBER",.015)
     # 2 distinct industrial power towers at aisle edges; preserve separation.
-    for x in (-14.3, 7.65):
-        box("CELL | power converter stone base", (x,12.2,.48),
+    for x,yc in ((-14.3,6.5),(9.45,12.2)):
+        box("CELL | power converter stone base", (x,yc,.48),
             (2.15,2.50,.89),"RUBBER",.06)
-        box("CELL | standing converter steel shell", (x,12.2,2.83),
+        box("CELL | standing converter steel shell", (x,yc,2.83),
             (1.90,2.30,3.95),"ARMOR",.085)
-        box("CELL | access cut-out", (x,10.99,3.20),
+        box("CELL | access cut-out", (x,yc-1.21,3.20),
             (1.26,.04,2.54),"CARBON",.03)
         for iz in range(7):
-            box("CELL | hot swap heat sink fin", (x,10.93,2.15+iz*.36),
+            box("CELL | hot swap heat sink fin", (x,yc-1.27,2.15+iz*.36),
                 (1.10,.055,.068),"STEEL",.011)
-        for by in (11.34, 12.15,12.96):
+        for by in (yc-.86, yc-.05,yc+.76):
             cyl("CELL | cooling conduit", (x+1.02,by,4.25),
                 .105,1.1,"STEEL",segments=12)
     # Ceiling-mounted service gantry and safe readable orange overhead signage.
@@ -310,6 +310,13 @@ def author_texture_maps(output_root):
 def merge_by_material():
     """Mobile draw-call reduction: join disconnected solids into one mesh per
     PBR surface. Keep material assignments, visible geometry and UVs intact."""
+    meshes=[o for o in bpy.context.scene.objects if o.type=="MESH"]
+    # Bake the hard-surface bevel and weighted normals BEFORE joining, otherwise
+    # Blender would drop the modifiers from the non-active mesh objects.
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in meshes: obj.select_set(True)
+    bpy.context.view_layer.objects.active=meshes[0]
+    bpy.ops.object.convert(target="MESH")
     meshes=[o for o in bpy.context.scene.objects if o.type=="MESH"]
     material_names=sorted(set(
         o.data.materials[0].name for o in meshes if o.data.materials
