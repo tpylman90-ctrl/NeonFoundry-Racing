@@ -331,7 +331,9 @@ def merge_by_material():
     ))
     result=[]
     for mat in material_names:
-        group=[o for o in meshes if o.data.materials and o.data.materials[0].name==mat]
+        # Each join removes old Object datablocks; never reuse stale RNA handles.
+        group=[o for o in bpy.context.scene.objects
+               if o.type=="MESH" and o.data.materials and o.data.materials[0].name==mat]
         bpy.ops.object.select_all(action="DESELECT")
         for obj in group: obj.select_set(True)
         bpy.context.view_layer.objects.active=group[0]
