@@ -50,6 +50,10 @@ tools/                  Local and CI validation utilities
 .github/ISSUE_TEMPLATE/ Structured development and bug reports
 \`\`\`
 
+## Adopted professional production method
+
+**Required for all production-grade art and environments:** [Production Standard](docs/PRODUCTION_STANDARD.md) and [Asset Review Template](docs/ASSET_REVIEW_TEMPLATE.md). Work through engineering brief → high-poly master → optimized mesh/UV/LOD → PBR bake → matched Blender/Unity visual review → runtime integration → real Android profiling and owner approval. Label unapproved work as a prototype. A passing APK does not certify artistic quality. The existing [NF-H01 locked twelve-gate sequence](docs/HERO_CRAFT_BUILD_ORDER.md) remains authoritative for that craft.
+
 ## Working principles
 
 - **No hidden road masquerading as flight.** The vehicle flight model must eventually support actual altitude, momentum, and controllable recovery.
