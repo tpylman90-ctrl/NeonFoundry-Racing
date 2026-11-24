@@ -25,15 +25,34 @@
 - Source dimensions, unit system and player-accessible structure are not changed.
 - **No Unity prefab integration or Android APK is permitted until the applicable gates pass.**
 
+## Verified first-pass results — Blender 4.3, 2026-11-24
+
+[Successful geometry + visual comparison workflow #45406053140](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45406053140)
+
+[Published inspectable LOD, collision and editable Blender release](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-gate03-review-2)
+
+| Mesh | Triangle count | Renderer meshes | Standalone GLB |
+| --- | ---: | ---: | ---: |
+| High-poly R2 source (approximate evaluation) | 182,600 | 579 source components | Review master, not a runtime LOD |
+| LOD0 — close inspection | **152,394** | **68** | 11.6 MB |
+| LOD1 — middle distance | **71,148** | **67** | 4.69 MB |
+| LOD2 — far distance | **32,609** | **62** | 2.14 MB |
+
+From measured triangle counts, LOD0 is ~16.5% below source, LOD1 ~53.3% below LOD0 and LOD2 ~78.6% below LOD0. **These are geometry metrics, not measured Android GPU frame rates.**
+
+Automated tests verified no missing/NaN UV0 loop values, reduced triangle counts, positive output files, consistent approved physical bounds, and **11** independent coarse collision box candidates. Six same-camera Blender clay renders were published from the actual master/LOD meshes, not images generated from a description.
+
+**Known outstanding concerns:** The UV layout has unique islands only *within each exported mesh*; 68 renderer meshes reuse the same UV tile and are not a single bake-ready atlas. LOD0 remains ~152K tris; suitability for real Android hardware is **unverified**. Some exposed fasteners/vent details disappear at LOD1/LOD2 as intended, but owner must approve visual tradeoffs. Pivot boundaries survive in the grouping/naming system but have not been tested as a functional animated GLB rig. Proposed collision boxes are coarse and not validated against movement, safety guard access or actual Unity physics.
+
 ## Pending acceptance checks
-- [ ] LOD0/1/2 actual GLBs exported without corrupt topology
-- [ ] All three have finite UV0 and no missing UV face loops
-- [ ] Distinct LODs have strictly decreasing triangle counts
+- [x] LOD0/1/2 actual GLBs exported without corrupt topology
+- [x] All three have finite UV0 and no missing UV face loops
+- [x] Distinct LODs have strictly decreasing triangle counts
 - [ ] No important mechanism or silhouetted arm disappears prematurely
-- [ ] Core assembly and proposed pivot boundary names retained
+- [x] Core assembly and proposed pivot boundary names retained
 - [ ] Collision primitives aligned on real source views (no physics result assumed)
-- [ ] Matched close-up views support quality acceptance
+- [ ] Matched inspection views support quality acceptance (same-camera clay renders generated, owner review still pending)
 - [ ] Explicit owner approval of Gate 03
 
 ## Latest run
-[Gate 03 automated LOD/UV review](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/nf-bw01-gate03.yml). This document intentionally does not assert any build/LOD count until verified.
+[Gate 03 automated LOD/UV review](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45406053140), completed successfully. Gate 03 still awaiting owner visual approval and subsequent real-device validation at Gate 07.
