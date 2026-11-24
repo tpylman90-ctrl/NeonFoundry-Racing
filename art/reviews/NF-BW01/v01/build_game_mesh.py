@@ -286,4 +286,44 @@ report={
 (OUT/"gate03_manifest.json").write_text(json.dumps(report,indent=2))
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/"NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend"),
                            compress=True)
+# Same-angle real 3D comparisons, no concept renders or invented materials.
+# Keep clay workbench and studio from approved Gate02 master, but isolate the
+# selected LOD so its real silhouette can be compared with source.
+if "--render" in sys.argv:
+    scene=bpy.context.scene
+    studio_floor=bpy.data.objects.get("_STUDIO | matte backdrop")
+    cams=bpy.data.objects.get("Inspection orthographic")
+    if cams is None:
+        raise RuntimeError("Source Blender studio camera missing")
+    scene.camera=cams
+    scene.render.engine="BLENDER_WORKBENCH"
+    scene.render.resolution_x=1400
+    scene.render.resolution_y=1000
+    scene.render.resolution_percentage=100
+    scene.render.image_settings.file_format="PNG"
+    visible_sets={"MASTER":source_objs}
+    for i in range(3):
+        visible_sets["LOD%d"%i]=list(bpy.data.collections["GATE03_LOD%d"%i].objects)
+    all_renderable=list({o for arr in visible_sets.values() for o in arr})+colliders
+    views={
+        "THREE_QUARTER":((7,-10,7),(0,0,1.50),5.15),
+        "SIDE":((10,0,1.70),(0,0,1.65),4.55),
+    }
+    for variant,objs in visible_sets.items():
+        for obj in all_renderable:obj.hide_render=True
+        for obj in objs:obj.hide_render=False
+        if studio_floor:studio_floor.hide_render=False
+        for view,(eye,target,scale) in views.items():
+            if view=="SIDE" and variant in ("LOD1","LOD2"):
+                continue
+            cams.location=eye
+            cams.rotation_euler=(Vector(target)-cams.location).to_track_quat("-Z","Y").to_euler()
+            cams.data.type="ORTHO"
+            cams.data.ortho_scale=scale
+            bpy.context.view_layer.update()
+            name="GATE03_%s_%s"%(variant,view)
+            scene.render.filepath=str(OUT/(name+".png"))
+            bpy.ops.render.render(write_still=True)
+            print("NF_BW01_GATE03_COMPARISON_RENDER_OK",name)
+    for obj in all_renderable:obj.hide_render=False
 print("NF_BW01_GATE03_PACKAGE_OK",[(x["level"],x["triangles"],x["renderers"]) for x in lods])
