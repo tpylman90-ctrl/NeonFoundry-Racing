@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/nf-bw01-container-renders.yml"
+      - "art/reviews/NF-BW01/v01/build_highpoly.py"
   workflow_dispatch:
 
 permissions:
