@@ -31,9 +31,9 @@ The previous visual review was encouraging, and the owner authorized further wor
 - Scope: open underframe with real load-carrying crossmembers and diagonals, protected distribution casing and service pipes, hydraulic shoulder actuator, forearm drive/retainers, an independently keyed jaw carriage with rack teeth/soft pads and wrist connectors.
 - **Verified R2 source:** [Container master workflow #45403414584](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45403414584), successful, preserving **579 modeled objects** and measured physical envelope **3.77 × 2.36 × 2.665 m**.
 - [R2 editable Blender master + high-poly inspection GLB](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-container-master-7).
-- Additional real-mesh views 14 (gripper close-up), 15 (underframe underside) and 16 (gripper wire) added to the normal 13-view audit. **Render and publication review remains separate; do not claim images until published.**
+- The **16-view actual-geometry clay/wire review** passed [render job #45403451511](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45403451511); 16 PNG images are each 1400×1000. New views 14 (gripper), 15 (underframe), 16 (gripper wire). [Published R2 review PNGs](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-clay-review-5).
 - Gripper is **a parked engineered assembly**; stroke endpoints, closed-pose clearance, cassette socket alignment, motor power and joint collision volumes are not yet kinematically verified.
-- **Current gate decision:** IN_PROGRESS / AWAITING OWNER'S R2 VISUAL REVIEW. No UVs, PBR or Unity placement authorized.
+- **Current gate decision:** IN_PROGRESS / AWAITING OWNER'S R2 VISUAL REVIEW. The 579-part mesh is ~182,600 evaluated rendering triangles, deliberately high-poly and **not** an Android LOD. No live animation proof or reach test. No UVs, PBR or Unity placement authorized.
 
 ## Gate evidence
 
