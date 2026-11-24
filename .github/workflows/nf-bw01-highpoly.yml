@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq blender python3-pil python3-numpy
+          sudo apt-get install -y -qq blender python3-pil python3-numpy xvfb libegl1 libgl1-mesa-dri libosmesa6
           blender --version | head -2
       - name: Validate authored Python source
         run: python3 -m py_compile art/reviews/NF-BW01/v01/build_highpoly.py
@@ -37,7 +37,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p art/reviews/NF-BW01/v01/output
-          blender --background --factory-startup \
+          LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe \
+            xvfb-run -a -s "-screen 0 1600x1200x24" \
+            blender --background --factory-startup \
             --python art/reviews/NF-BW01/v01/build_highpoly.py \
             -- --out art/reviews/NF-BW01/v01/output 2>&1 | tee nf-bw01-build.log
           grep -q "NF_BW01_GATE02_RENDER_PACKAGE_OK" nf-bw01-build.log
