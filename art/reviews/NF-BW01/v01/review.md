@@ -1,7 +1,7 @@
 # NF-BW01 / v01 — Production Gate Review
 
-**Gate:** 02 — High-poly Blender master  
-**Status:** GATE 01 APPROVED / GATE 02 IN_PROGRESS  
+**Gate:** 03 — Optimized mesh, UVs and LODs  
+**Status:** GATES 01–02 APPROVED / GATE 03 IN PROGRESS  
 **Asset:** Aegis battery exchange workstation  
 **Asset class:** Inspectable industrial workshop equipment  
 **Target presentation:** Unity 6 garage cell works (close inspection)  
@@ -35,6 +35,15 @@ The previous visual review was encouraging, and the owner authorized further wor
 - Gripper is **a parked engineered assembly**; stroke endpoints, closed-pose clearance, cassette socket alignment, motor power and joint collision volumes are not yet kinematically verified.
 - **Current gate decision:** IN_PROGRESS / AWAITING OWNER'S R2 VISUAL REVIEW. The 579-part mesh is ~182,600 evaluated rendering triangles, deliberately high-poly and **not** an Android LOD. No live animation proof or reach test. No UVs, PBR or Unity placement authorized.
 
+## Gate 03 kickoff (2026-11-24)
+
+- User accepted Gate 02 R2's real 16-view mechanical form and authorized moving to optimization.
+- Preserve the 579-object high-poly Blender master unchanged as the source of truth.
+- Build LOD0/LOD1/LOD2 as separate review-only exports and keep robot joint/actuator components distinct from static workstation structures.
+- UVs must be reviewed for overlaps and degenerate islands; texture baking and actual paint are **Gate 04**, not Gate 03.
+- Do not place the asset in Unity, infer game FPS, or claim kinematic clearance certification at this gate.
+- Gate 03 will require real model-based triangle/UV/collider audit plus same-view silhouette checks.
+
 ## Gate evidence
 
 - Proposed dimensions, mechanisms, design DNA, operations and integration: [ENGINEERING_BRIEF.md](ENGINEERING_BRIEF.md).
@@ -49,8 +58,8 @@ The previous visual review was encouraging, and the owner authorized further wor
 | Gate | Status | Evidence / blockers |
 |---|---|---|
 | 01 — Art direction and engineering brief | **APPROVED** | Owner: “Looks good proceed.” (2026-11-23). Engineering brief and orthographic concept accepted |
-| 02 — High-poly master | **IN_PROGRESS / VISUAL REVIEW** | 413-object Blender master, GLB, 13 actual-model clay/wire views verified. Explicit owner visual signoff still pending. |
-| 03 — Game mesh, UVs and LODs | NOT_STARTED | Await high-poly approval |
+| 02 — High-poly master | **APPROVED** | Owner reviewed R2 clay views and said “These look really awesome,” then explicitly said “Ok proceed” when invited to move to Gate 03 (2026-11-24). Approved as visual shape, not functional kinematics. |
+| 03 — Game mesh, UVs and LODs | **IN_PROGRESS** | Create separate optimized GLB LOD0/1/2, UV audit and primitive collider review; owner quality approval pending. |
 | 04 — PBR and texture baking | NOT_STARTED | Await optimized game mesh |
 | 05 — Studio/Unity visual comparison | NOT_STARTED | Await Blender/Unity test meshes |
 | 06 — Unity integration | NOT_STARTED | No scene placement allowed |
@@ -69,7 +78,7 @@ The previous visual review was encouraging, and the owner authorized further wor
 
 ## Proposed owner decision
 
-**Gate 01 APPROVED on 2026-11-23** by owner in conversation: “Looks good proceed.” **Gate 02 NOT APPROVED** until the actual Blender master is reviewed.
+**Gate 01 APPROVED 2026-11-23. Gate 02 visually APPROVED 2026-11-24** by the user's positive assessment of actual R2 renders followed by “Ok proceed” to the offered Gate 03. The physical robotic operation remains unverified, and Gate 03 is not approved.
 
 ## Gate 02 production scope — authorized by owner
 
