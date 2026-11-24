@@ -12,6 +12,8 @@ import sys
 from mathutils import Vector
 from pathlib import Path
 from collections import Counter
+# Ensure local authored mechanical-detail modules load in every Blender runtime.
+sys.path.insert(0,str(Path(__file__).resolve().parent))
 
 OUT=Path(__file__).resolve().parent / "output"
 if "--out" in sys.argv:
@@ -595,7 +597,6 @@ if "--master-only" in sys.argv:
         "unit":"m","front_axis":"-Y","up_axis":"+Z",
         "bounds_min_m":bmin,"bounds_max_m":bmax,"dimensions_m":dims,
         "object_count":len(meshes),
- "mechanical_refinement":gate02_revision,
         "high_poly_master":"NF_BW01_GATE02_HIGH_POLY_MASTER.blend",
         "inspection_glb":"NF_BW01_GATE02_INSPECTION_ONLY.glb",
         "game_ready":False,"owner_gate02_approved":False,
@@ -623,12 +624,14 @@ views={
  "08_rear_three_quarter_clay":((-7,9,6),(0,0,1.50),5.15),
  "09_robot_joint_closeup":((-4,-5,4.8),(-.92,.46,1.93),2.35),
  "10_cradle_dock_closeup":((4,-6,4.0),(.12,-.12,.87),2.70),
+ "14_gripper_mechanism_closeup":((1,-4,3.15),(-.25,-.21,2.12),1.48),
+ "15_underframe_structure_closeup":((2,-1,-7),(0,0,.10),3.95),
 }
 for key,(eye,target,scale) in views.items():
     position_camera(eye,target,scale)
     # Actual underside must be visible. The broad studio floor would otherwise
     # completely occlude the model from the underside orthographic camera.
-    studio_floor.hide_render=(key=="06_underside_clay")
+    studio_floor.hide_render=(key in ("06_underside_clay","15_underframe_structure_closeup"))
     bpy.context.view_layer.update()
     scene.render.filepath=str(OUT/(key+".png"))
     bpy.ops.render.render(write_still=True)
@@ -663,6 +666,7 @@ for key,(eye,target,scale) in {
     "11_front_wire":views["01_front_clay"],
     "12_three_quarter_wire":views["07_front_three_quarter_clay"],
     "13_robot_wire":views["09_robot_joint_closeup"],
+    "16_gripper_wire":views["14_gripper_mechanism_closeup"],
 }.items():
     position_camera(eye,target,scale)
     scene.render.filepath=str(OUT/(key+".png"))
@@ -697,13 +701,14 @@ manifest={
  "bounds_max_m":bmax,
  "dimensions_m":dims,
  "object_count":len(meshes),
+ "mechanical_refinement":gate02_revision,
  "evaluated_render_triangles_approx":evaluated_triangles,
  "components":{c.name:len([o for o in c.objects if o.type in {"MESH","CURVE","FONT"}]) for c in machine_collections},
  "inspection_only":True,
  "game_ready":False,
  "high_poly_master":"NF_BW01_GATE02_HIGH_POLY_MASTER.blend",
  "inspection_glb":"NF_BW01_GATE02_INSPECTION_ONLY.glb",
- "renders":list(views.keys())+["11_front_wire","12_three_quarter_wire","13_robot_wire"],
+ "renders":list(views.keys())+["11_front_wire","12_three_quarter_wire","13_robot_wire","16_gripper_wire"],
  "notes":[
    "Actual Blender high-poly meshes with independent modules and edit pivots",
    "Neutral studio clay only. PBR/UV/LOD belongs to later gates",
