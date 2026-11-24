@@ -1,5 +1,7 @@
 # Neon Foundry Racing — Unity 6 Android Preview
 
+**Mandatory for production assets:** [Production Standard](../docs/PRODUCTION_STANDARD.md) and [Asset Review Template](../docs/ASSET_REVIEW_TEMPLATE.md). The current R1/R2 garage preview is a layout/performance experiment, not an approved production scene. Produce a model-review package and obtain the required sign-offs before promoting geometry or materials into production.
+
 This Unity project is isolated under `unity/` in the original Neon Foundry Racing repository.
 The prior Godot game and Blender library remain unchanged.
 
