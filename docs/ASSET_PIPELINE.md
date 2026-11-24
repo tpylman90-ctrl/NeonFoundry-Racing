@@ -1,5 +1,7 @@
 # Blender to Godot production standards
 
+> **Cross-engine governance:** The adopted [Neon Foundry Production Standard](PRODUCTION_STANDARD.md) and [Asset Review Template](ASSET_REVIEW_TEMPLATE.md) govern new production art in both the Unity and retained Godot lanes. This file documents Godot-specific implementation and does not authorize skipping the seven general quality gates or the locked twelve NF-H01 stages.
+
 ## Authoring
 
 - Save editable original Blender sources under art/ and approved GLB exports under game/assets/.
