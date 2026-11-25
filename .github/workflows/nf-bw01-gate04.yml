@@ -1,0 +1,119 @@
+name: NF-BW01 Gate 04 PBR Material Lookdev
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-gate04.yml"
+      - "art/reviews/NF-BW01/v01/build_gate04_materials.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: nf-bw01-gate04
+  cancel-in-progress: false
+jobs:
+  lookdev:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify approved Gate03 derivative Blender geometry
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .gate04-input
+          gh release download nf-bw01-gate03-review-2 --repo "$GITHUB_REPOSITORY" \
+            --pattern NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend \
+            --dir .gate04-input
+          test "$(stat -c %s .gate04-input/NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend)" -gt 1000000
+      - name: Build industrial PBR material maps and original model beauty renders
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/gate04_output
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              if command -v Xvfb >/dev/null; then
+                Xvfb :99 -screen 0 1600x1200x24 -nolisten tcp > /tmp/g04-x.log 2>&1 &
+              elif command -v Xvnc >/dev/null; then
+                Xvnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None > /tmp/g04-x.log 2>&1 &
+              else
+                echo "No virtual rendering display";exit 20
+              fi
+              export DISPLAY=:99
+              sleep 2
+              "$BIN" --background --factory-startup \
+                .gate04-input/NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend \
+                --python art/reviews/NF-BW01/v01/build_gate04_materials.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/gate04_output
+            ' 2>&1 | tee nf-bw01-gate04.log
+          grep -q NF_BW01_GATE04_MATERIAL_LOOKDEV_OK nf-bw01-gate04.log
+      - name: Check channel packing, actual model render sizes and honest bake status
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=art/reviews/NF-BW01/v01/gate04_output
+          test "$(stat -c %s "$dir/NF_BW01_GATE04_PBR_LOOKDEV_ONLY.glb")" -gt 1000000
+          test "$(stat -c %s "$dir/NF_BW01_GATE04_PBR_LOOKDEV.blend")" -gt 1000000
+          test "$(find "$dir/textures" -maxdepth 1 -name '*.png' | wc -l)" -eq 24
+          for name in NF_BW01_GATE04_THREE_QUARTER NF_BW01_GATE04_REAR_THREE_QUARTER NF_BW01_GATE04_ROBOT_DETAIL; do
+            test "$(stat -c %s "$dir/$name.png")" -gt 20000
+          done
+          python3 - <<'PY'
+          import json,pathlib,struct
+          p=pathlib.Path("art/reviews/NF-BW01/v01/gate04_output")
+          j=json.loads((p/"gate04_manifest.json").read_text())
+          assert j["texture_family_count"]==8
+          assert j["channel_packing"]["urp_metallic"]=="R"
+          assert j["channel_packing"]["urp_smoothness"]=="A = 1 - roughness"
+          assert j["baked_geometry_detail"] is False
+          assert j["renderer_groups"]>=60
+          assert len(list((p/"textures").glob("*.png")))==24
+          for f in p.rglob("*.png"):
+              raw=f.read_bytes()[:24]
+              assert raw.startswith(b"\x89PNG\r\n\x1a\n")
+              w,h=struct.unpack(">II",raw[16:24])
+              if f.parent.name=="textures":assert (w,h)==(512,512)
+              else:assert (w,h)==(1040,780)
+          print("NF_BW01_GATE04_TEXTURE_VALIDATION_OK",j["renderer_groups"])
+          PY
+          sha256sum "$dir"/*.glb "$dir"/*.blend > "$dir/SHA256SUMS.txt"
+          ls -lh "$dir"
+      - name: Upload all actual Blender material files and renders
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate04-Material-Lookdev-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/gate04_output/
+            nf-bw01-gate04.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish Gate04 material review bundle
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          dir=art/reviews/NF-BW01/v01/gate04_output
+          cd "$dir"
+          tar -czf NF_BW01_URP_TEXTURE_FAMILIES.tar.gz textures
+          gh release create "nf-bw01-gate04-lookdev-$GITHUB_RUN_NUMBER" \
+            NF_BW01_GATE04_PBR_LOOKDEV_ONLY.glb \
+            NF_BW01_GATE04_PBR_LOOKDEV.blend \
+            NF_BW01_URP_TEXTURE_FAMILIES.tar.gz \
+            NF_BW01_GATE04_THREE_QUARTER.png \
+            NF_BW01_GATE04_REAR_THREE_QUARTER.png \
+            NF_BW01_GATE04_ROBOT_DETAIL.png \
+            gate04_manifest.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 Gate04 industrial PBR lookdev — bake review pending" \
+            --notes "Eight metal/paint/rubber/glass material classes with Unity-URP metallic(R)/smoothness(A) packed maps, procedural micro-normal tiles, Cycles actual-model beauty views and editable Blender derivative. NO high-poly-to-low-poly normal/AO bake claimed, no Unity integration, still pending owner approval." \
+            --prerelease
