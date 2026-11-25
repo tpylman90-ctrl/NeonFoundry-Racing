@@ -60,6 +60,16 @@ Gate 03 UV0 covers each of 68 renderer meshes individually; the UVs reuse their 
 
 **Disposition:** `MATERIAL LOOKDEV PROMISING / BAKE REVISION REQUIRED`; visual Gate 04 **NOT APPROVED**. Do not advance to Gate 05 or game placement based on this inspection. Preserve all three camera views as baseline for bake iteration.
 
+## Gate 04 R2 continuation — authorized 2026-11-25
+
+The owner reviewed three actual Cycles beauty views and approved continuing refinement: “This is looking really good continue refinement.” This is **approval of the art direction and of continued Gate 04 work**, not signoff to start Gate 05.
+
+**R2 source improvements pushed:**
+- [Actual geometry bake pilot](prove_gate04_highlow_bakes.py) now writes explicit neutral white AO unused UV texels and tangent-neutral unused normal texels; margin increased to 20px and Cycles samples to 48. CI uses image pixel checks for black AO background and rejects uniform white AO.
+- [Actual PBR material renders](build_gate04_materials.py) use Cycles 32-sample output and include two new model-based inspection close-ups, gripper and battery cassette, alongside the established front/rear/robot views.
+- The baseline R2 approved mechanical geometry, the eight material families, and the original studio camera positions remain the visual reference.
+- **Pending verification:** both Actions workflows must finish and their output PNGs must be inspected for seams, grain and metallic roughness. Do not mark the re-bake successful until results are checked. Full 68-group bake coverage is still required and outside this three-group R2 pilot.
+
 ## Production QA state
 
 - [x] PBR lookdev material maps and derivative model generated and uploaded by successful GitHub run
