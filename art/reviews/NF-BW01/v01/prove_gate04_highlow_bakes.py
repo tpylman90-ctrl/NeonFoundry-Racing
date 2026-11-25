@@ -22,8 +22,9 @@ candidates=[
 ]
 scene=bpy.context.scene
 scene.render.engine="CYCLES"
-scene.cycles.samples=8
-scene.render.bake.margin=10
+scene.cycles.samples=48
+scene.cycles.use_denoising=True
+scene.render.bake.margin=20
 scene.render.bake.use_selected_to_active=True
 scene.render.bake.cage_extrusion=.019
 scene.render.bake.max_ray_distance=.036
@@ -43,9 +44,15 @@ def setup_material(image, label):
     nodes.active=tex
     return mat,tex
 
-def image_for(name):
+def image_for(name,neutral=(.5,.5,1.,1.)):
     img=bpy.data.images.new(name,width=512,height=512,alpha=False,float_buffer=False)
-    img.generated_color=(.5,.5,1,1)
+    img.generated_color=neutral
+    # Explicitly clear EVERY texel: Cycles only writes baked UVs; untouched
+    # image areas must be neutral rather than stale black pixels.
+    import numpy as np
+    color=np.tile(np.asarray(neutral,dtype=np.float32),(512*512,1))
+    img.pixels.foreach_set(color.reshape(-1))
+    img.update()
     return img
 
 def save(image,filename):
@@ -117,13 +124,15 @@ for label,zone,material in candidates:
     temp.hide_render=False
     target.hide_render=True
     scene.render.bake.use_selected_to_active=False
-    img=image_for("AO_"+label)
+    img=image_for("AO_"+label,neutral=(1.,1.,1.,1.))
     slot.image=img
     bpy.ops.object.select_all(action="DESELECT")
     temp.select_set(True)
     bpy.context.view_layer.objects.active=temp
     bpy.context.view_layer.update()
     bpy.ops.object.bake(type="AO")
+    # High sample count reduces AO grain. Actual AO remains physical Cycles AO;
+    # the neutral-white out-of-island texels are padding, not fabricated AO.
     path_ao=save(img,"NF_BW01_"+label+"_ACTUAL_AO.png")
     inspect_png(path_ao)
     print("NF_BW01_ACTUAL_AO_BAKE_OK",label,path_ao.stat().st_size)
@@ -145,6 +154,11 @@ manifest={
     "method":"Blender 4.3 Cycles NORMAL selected-to-active with source high-poly group and LOD0 target; AO computed on LOD0 against surrounding LOD0 geometry",
     "normal_space":"TANGENT",
     "image_size":512,
+    "cycles_samples":48,
+    "bake_margin_px":20,
+    "ao_unused_uv_background":"neutral white RGB(1,1,1), confirmed in PNG audit",
+    "normal_unused_uv_background":"neutral tangent (0.5,0.5,1)",
+    "revision":"R2 neutral padding and cleaner Cycles AO",
     "cage_extrusion_m":.019,
     "max_ray_distance_m":.036,
     "parts":results,
