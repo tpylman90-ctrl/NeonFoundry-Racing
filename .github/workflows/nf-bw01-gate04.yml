@@ -64,7 +64,7 @@ jobs:
           test "$(stat -c %s "$dir/NF_BW01_GATE04_PBR_LOOKDEV_ONLY.glb")" -gt 1000000
           test "$(stat -c %s "$dir/NF_BW01_GATE04_PBR_LOOKDEV.blend")" -gt 1000000
           test "$(find "$dir/textures" -maxdepth 1 -name '*.png' | wc -l)" -eq 24
-          for name in NF_BW01_GATE04_THREE_QUARTER NF_BW01_GATE04_REAR_THREE_QUARTER NF_BW01_GATE04_ROBOT_DETAIL; do
+          for name in NF_BW01_GATE04_THREE_QUARTER NF_BW01_GATE04_REAR_THREE_QUARTER NF_BW01_GATE04_ROBOT_DETAIL NF_BW01_GATE04_GRIPPER_DETAIL NF_BW01_GATE04_CASSETTE_DETAIL; do
             test "$(stat -c %s "$dir/$name.png")" -gt 20000
           done
           python3 - <<'PY'
@@ -112,6 +112,8 @@ jobs:
             NF_BW01_GATE04_THREE_QUARTER.png \
             NF_BW01_GATE04_REAR_THREE_QUARTER.png \
             NF_BW01_GATE04_ROBOT_DETAIL.png \
+            NF_BW01_GATE04_GRIPPER_DETAIL.png \
+            NF_BW01_GATE04_CASSETTE_DETAIL.png \
             gate04_manifest.json \
             --repo "$GITHUB_REPOSITORY" \
             --title "NF-BW01 Gate04 industrial PBR lookdev — bake review pending" \
