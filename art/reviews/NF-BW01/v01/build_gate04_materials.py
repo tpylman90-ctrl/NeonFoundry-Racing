@@ -178,7 +178,7 @@ print("NF_BW01_GATE04_LOOKDEV_GLB_OK")
 
 scene=bpy.context.scene
 scene.render.engine="CYCLES"
-scene.cycles.samples=16
+scene.cycles.samples=32
 scene.cycles.use_denoising=True
 scene.render.resolution_x=1040
 scene.render.resolution_y=780
@@ -220,6 +220,8 @@ views={
  "NF_BW01_GATE04_THREE_QUARTER":((7,-10,7),(0,0,1.50),5.15),
  "NF_BW01_GATE04_REAR_THREE_QUARTER":((-7,9,6),(0,0,1.50),5.15),
  "NF_BW01_GATE04_ROBOT_DETAIL":((1.5,-5,4.3),(-.9,.3,1.8),3.0),
+ "NF_BW01_GATE04_GRIPPER_DETAIL":((1.0,-4.0,3.1),(-.25,-.21,2.12),1.58),
+ "NF_BW01_GATE04_CASSETTE_DETAIL":((3.6,-4.8,3.6),(-.12,-.15,1.12),2.38),
 }
 for name,(eye,target,scale) in views.items():
     camera.location=eye
@@ -242,6 +244,7 @@ manifest={
  "ao":"NOT GENERATED YET","high_to_low_normal":"NOT GENERATED YET"},
  "uvs":"Reusable UV0 per output renderer mesh. Not global non-overlap atlas.",
  "baked_geometry_detail":False,
+ "revision":"Gate04 lookdev R2: 32-sample Cycles detail inspection views",
  "validation_needed":[
     "Cycles rendered beauty and metallic/roughness visual review",
     "Proper high-to-low normal selected-to-active cage/UV construction",
