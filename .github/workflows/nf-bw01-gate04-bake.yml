@@ -49,8 +49,10 @@ jobs:
           set -euo pipefail
           out=art/reviews/NF-BW01/v01/gate04_bake_proof
           test "$(find "$out" -name '*.png' | wc -l)" -eq 6
+          python3 -m pip install --quiet --user Pillow
           python3 - <<'PY'
           import json,pathlib
+          from PIL import Image,ImageStat
           p=pathlib.Path("art/reviews/NF-BW01/v01/gate04_bake_proof")
           j=json.loads((p/"gate04_bake_proof_manifest.json").read_text())
           assert len(j["parts"])==3
@@ -58,6 +60,19 @@ jobs:
           for o in j["parts"]:
               for field in ("normal_file","ao_file"):
                   assert (p/o[field]).stat().st_size>10000
+          assert j["cycles_samples"]>=32 and j["bake_margin_px"]>=16
+          for part in j["parts"]:
+              ao=Image.open(p/part["ao_file"]).convert("RGB")
+              normal=Image.open(p/part["normal_file"]).convert("RGB")
+              assert ao.size==(512,512) and normal.size==(512,512)
+              ao_px=list(ao.getdata())
+              black=sum(max(v)<10 for v in ao_px)/len(ao_px)
+              if black>.20:
+                  raise AssertionError(f"{part['assembly']}: excessive black AO background {black:.2%}")
+              extrema=ao.getextrema()
+              if min(v[0] for v in extrema)>240:
+                  raise AssertionError(f"{part['assembly']}: AO map is entirely white")
+              print("NF_BW01_R2_AO_BLACK_PIXELS",part["assembly"],round(black*100,3))
           print("NF_BW01_TRUE_BAKE_FILES_VERIFIED",len(j["parts"]))
           PY
       - name: Upload model-derived normal and AO maps
