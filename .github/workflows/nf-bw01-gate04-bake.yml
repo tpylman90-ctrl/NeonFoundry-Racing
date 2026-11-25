@@ -1,0 +1,84 @@
+name: NF-BW01 Gate 04 True Normal and AO Bake Pilot
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-gate04-bake.yml"
+      - "art/reviews/NF-BW01/v01/prove_gate04_highlow_bakes.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  geometry-bake-pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve approved source geometry derivative
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .gate04-input
+          gh release download nf-bw01-gate03-review-2 --repo "$GITHUB_REPOSITORY" \
+            --pattern NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend --dir .gate04-input
+          test -s .gate04-input/NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend
+      - name: Blender selected-to-active true high-poly to LOD0 normal/AO pilot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/gate04_bake_proof
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              "$BIN" --background --factory-startup \
+                .gate04-input/NF_BW01_GATE03_OPTIMIZED_CANDIDATE.blend \
+                --python art/reviews/NF-BW01/v01/prove_gate04_highlow_bakes.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/gate04_bake_proof
+            ' 2>&1 | tee nf-bw01-real-bake.log
+          grep -q NF_BW01_REAL_GEOMETRY_BAKE_PILOT_OK nf-bw01-real-bake.log
+      - name: Confirm six authentic bake maps and manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_bake_proof
+          test "$(find "$out" -name '*.png' | wc -l)" -eq 6
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path("art/reviews/NF-BW01/v01/gate04_bake_proof")
+          j=json.loads((p/"gate04_bake_proof_manifest.json").read_text())
+          assert len(j["parts"])==3
+          assert "selected-to-active" in j["method"]
+          for o in j["parts"]:
+              for field in ("normal_file","ao_file"):
+                  assert (p/o[field]).stat().st_size>10000
+          print("NF_BW01_TRUE_BAKE_FILES_VERIFIED",len(j["parts"]))
+          PY
+      - name: Upload model-derived normal and AO maps
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate04-TrueBakes-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/gate04_bake_proof/
+            nf-bw01-real-bake.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish true-bake proof separately from procedural lookdev
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_bake_proof
+          gh release create "nf-bw01-gate04-bake-pilot-$GITHUB_RUN_NUMBER" \
+            "$out"/*.png "$out/gate04_bake_proof_manifest.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 actual high-to-low normal/AO BAKE PILOT" \
+            --notes "Three distinct original high-poly to LOD0 matching material groups, Cycles selected-to-active tangent normal and true LOD0 AO output; method pilot only, remaining full-machine group bakes and visual seam inspection not yet approved." \
+            --prerelease
