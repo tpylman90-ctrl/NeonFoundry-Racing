@@ -106,14 +106,21 @@ def repair_unused_ao_texels(image, target, pad=20):
     blank=np.logical_not(padded)
     pixels[blank,:3]=1.
     pixels[blank,3]=1.
-    image.pixels.foreach_set(np.ascontiguousarray(pixels).reshape(-1))
-    image.update()
-    print("NF_BW01_UV_AO_REPAIR", target.name,
-          "UV occupancy",round(float(occupied.mean())*100,2),
-          "preserved with margin",round(float(padded.mean())*100,2),
-          "white-filled",round(float(blank.mean())*100,2))
     if occupied.mean()<.01:
         raise RuntimeError("UV occupancy unexpectedly small: "+target.name)
+    assert np.all(pixels[blank,:3]>=.995)
+    dark_inside=np.mean(np.max(pixels[padded,:3],axis=1)<.04)
+    image.pixels.foreach_set(np.ascontiguousarray(pixels).reshape(-1))
+    image.update()
+    report={
+       "uv_occupied_fraction":float(occupied.mean()),
+       "uv_plus_padding_fraction":float(padded.mean()),
+       "white_unused_fraction":float(blank.mean()),
+       "near_black_inside_uv_plus_padding_fraction":float(dark_inside),
+       "unused_uv_white_verified":True,
+    }
+    print("NF_BW01_UV_AO_REPAIR",target.name,report)
+    return report
 
 def inspect_png(p):
     # numerical pixel variability is evidence that a map wasn't a flat
@@ -187,7 +194,7 @@ for label,zone,material in candidates:
     bpy.ops.object.bake(type="AO")
     # Blender overrides generated white AO even outside bake UVs. Restore
     # only genuinely unoccupied UV texels; preserve computed dark occlusion.
-    repair_unused_ao_texels(img,temp,pad=20)
+    uv_audit=repair_unused_ao_texels(img,temp,pad=20)
     path_ao=save(img,"NF_BW01_"+label+"_ACTUAL_AO.png")
     inspect_png(path_ao)
     print("NF_BW01_ACTUAL_AO_BAKE_OK",label,path_ao.stat().st_size)
@@ -197,6 +204,7 @@ for label,zone,material in candidates:
         "lod_mesh":target.name,
         "normal_file":path_normal.name,
         "ao_file":path_ao.name,
+        "ao_uv_repair_audit":uv_audit,
         "UV_source":"LOD0 per-renderer UV0, not global atlas"
     })
     scene.render.bake.use_selected_to_active=True
