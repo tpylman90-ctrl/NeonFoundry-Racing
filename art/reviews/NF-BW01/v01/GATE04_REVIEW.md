@@ -43,6 +43,23 @@ Gate 03 UV0 covers each of 68 renderer meshes individually; the UVs reuse their 
 - Audit texel density, map memory, mipmapping/ASTC use and Unity URP importer settings. Record exact channels.
 - Show *actual* Blender/Cycles finished material review images; obtain owner approval before advancing to matching Unity studio Gate 05.
 
+## Visual inspection findings — 2026-11-24 (Gate 04 not approved)
+
+**Inspected actual files:** `NF_BW01_GATE04_THREE_QUARTER.png`, `NF_BW01_GATE04_REAR_THREE_QUARTER.png`, `NF_BW01_GATE04_ROBOT_DETAIL.png` from `nf-bw01-gate04-lookdev-1`, and all three actual Cycles-baked AO/normal pairs from `nf-bw01-gate04-bake-pilot-2`. These are inspected outputs, not hypothetical references.
+
+**Visual strengths (accept as artistic direction, not final technical approval):** warning-orange robot armor reads cleanly against graphite base and silvery machined joint faces. Distinct housings, open crate cradle, protected hose loops and composed silhouette remain legible under soft key/rim lighting. Studio reflections are restrained, and the design remains consistent across front/rear views.
+
+**Required corrections / risks before Gate 04 acceptance:**
+1. **AO UV backgrounds:** black unused regions are conspicuous in the actual AO PNGs, and many occupied regions have strong dark borders. Do not treat black unoccupied texels as valid ambient occlusion. Bake to an explicit neutral-white AO background, verify adequate island padding/dilation at mip levels and avoid dark seams.
+2. **AO sampling:** AO shows visible grain at full 512px view; increase Cycles samples/denoise appropriately and inspect 1:1 closeups. Pilot generated at 8 Cycles samples; unsuitable as a signed-off final bake.
+3. **Incomplete coverage:** selected-to-active detail and AO are demonstrated for only **3** material/assembly groups, not all 68 LOD0 renderers. Complete matching group plan and UV bake pages before claiming the whole machine has normal/AO detail.
+4. **Normal map subtlety:** geometry-baked tangent normal maps appear close to flat purple apart from fine edges (global means R/G ~0.501, B ~1.000). This is consistent with a high-fidelity LOD0 retaining much of the source geometry; visually verify that detail transfer is meaningful and no ray hits are missing. Do not mistake a flat-looking map for completed detail transfer.
+5. **Material highlights:** robot paint is clean, sometimes broad/flat, and the material-class boundaries are visually effective. Inspect close-up roughness/grain and fine panel edging at 100% zoom before claiming photorealistic materials. Unity URP comparisons remain Gate 05.
+
+**Pixel inspection diagnostic (counts are entire image, including unused UV space):** near-black pixel share (RGB max < 0.04) robot AO 60.6%, cassette AO 80.4%, shuttle AO 57.6%. These statistics do not distinguish valid dark interior occlusion from unoccupied UV texels, but reinforce the need for AO background and coverage inspection.
+
+**Disposition:** `MATERIAL LOOKDEV PROMISING / BAKE REVISION REQUIRED`; visual Gate 04 **NOT APPROVED**. Do not advance to Gate 05 or game placement based on this inspection. Preserve all three camera views as baseline for bake iteration.
+
 ## Production QA state
 
 - [x] PBR lookdev material maps and derivative model generated and uploaded by successful GitHub run
