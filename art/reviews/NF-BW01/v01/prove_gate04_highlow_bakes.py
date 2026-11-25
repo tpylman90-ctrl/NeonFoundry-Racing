@@ -66,7 +66,8 @@ def inspect_png(p):
 results=[]
 for label,zone,material in candidates:
     target=next((o for o in lods if (" | "+zone+" | ") in o.name
-                 and material in o.name.lower()),None)
+                 and o.data.materials
+                 and material in o.data.materials[0].name.lower()),None)
     if target is None:
         options=[o.name for o in lods if zone in o.name]
         raise RuntimeError("Missing LOD0 "+zone+" material "+material+": "+str(options))
