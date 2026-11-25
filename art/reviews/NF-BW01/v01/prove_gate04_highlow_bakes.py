@@ -61,6 +61,60 @@ def save(image,filename):
     image.save()
     return OUT/filename
 
+def repair_unused_ao_texels(image, target, pad=20):
+    """White-fill ONLY texels outside UV triangles plus safe bake margin.
+
+    Blender Cycles reinitializes the target when baking, overwriting the
+    initial white background. UV occupancy is computed from the exact LOD
+    triangles, not guessed from dark AO pixels. Genuine dark AO stays intact.
+    """
+    import numpy as np
+    m=target.data
+    m.calc_loop_triangles()
+    uv=m.uv_layers.active.data
+    dim=512
+    occupied=np.zeros((dim,dim),dtype=np.bool_)
+    for face in m.loop_triangles:
+        points=np.array([(uv[li].uv.x*(dim-1),
+                          uv[li].uv.y*(dim-1)) for li in face.loops],
+                        dtype=np.float32)
+        if not np.isfinite(points).all():continue
+        a,b,c=points
+        d=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
+        if abs(d)<1e-7:continue
+        mn=np.maximum(np.floor(points.min(axis=0)).astype(int)-1,0)
+        mx=np.minimum(np.ceil(points.max(axis=0)).astype(int)+2,dim)
+        if mx[0]<=mn[0] or mx[1]<=mn[1]:continue
+        gx,gy=np.meshgrid(np.arange(mn[0],mx[0],dtype=np.float32)+.5,
+                          np.arange(mn[1],mx[1],dtype=np.float32)+.5)
+        v=((gx-a[0])*(c[1]-a[1])-(gy-a[1])*(c[0]-a[0]))/d
+        w=((b[0]-a[0])*(gy-a[1])-(b[1]-a[1])*(gx-a[0]))/d
+        covered=(v>=-0.0001)&(w>=-0.0001)&((v+w)<=1.0001)
+        occupied[mn[1]:mx[1],mn[0]:mx[0]]|=covered
+    # Preserve the actual Cycles-dilated pixels around each real UV island.
+    padded=occupied.copy()
+    for _ in range(pad):
+        src=padded.copy()
+        padded[1:,:]|=src[:-1,:]
+        padded[:-1,:]|=src[1:,:]
+        padded[:,1:]|=src[:,:-1]
+        padded[:,:-1]|=src[:,1:]
+    pixels=np.empty(dim*dim*4,dtype=np.float32)
+    image.pixels.foreach_get(pixels)
+    pixels=pixels.reshape(dim,dim,4)
+    # Blender Pixel buffers are bottom-up; UVs also use bottom-left origin.
+    blank=np.logical_not(padded)
+    pixels[blank,:3]=1.
+    pixels[blank,3]=1.
+    image.pixels.foreach_set(np.ascontiguousarray(pixels).reshape(-1))
+    image.update()
+    print("NF_BW01_UV_AO_REPAIR", target.name,
+          "UV occupancy",round(float(occupied.mean())*100,2),
+          "preserved with margin",round(float(padded.mean())*100,2),
+          "white-filled",round(float(blank.mean())*100,2))
+    if occupied.mean()<.01:
+        raise RuntimeError("UV occupancy unexpectedly small: "+target.name)
+
 def inspect_png(p):
     # numerical pixel variability is evidence that a map wasn't a flat
     # default; generated images have to contain meaningful geometry response.
@@ -131,8 +185,9 @@ for label,zone,material in candidates:
     bpy.context.view_layer.objects.active=temp
     bpy.context.view_layer.update()
     bpy.ops.object.bake(type="AO")
-    # High sample count reduces AO grain. Actual AO remains physical Cycles AO;
-    # the neutral-white out-of-island texels are padding, not fabricated AO.
+    # Blender overrides generated white AO even outside bake UVs. Restore
+    # only genuinely unoccupied UV texels; preserve computed dark occlusion.
+    repair_unused_ao_texels(img,temp,pad=20)
     path_ao=save(img,"NF_BW01_"+label+"_ACTUAL_AO.png")
     inspect_png(path_ao)
     print("NF_BW01_ACTUAL_AO_BAKE_OK",label,path_ao.stat().st_size)
