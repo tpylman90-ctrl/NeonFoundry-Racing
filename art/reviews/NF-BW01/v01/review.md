@@ -1,7 +1,7 @@
 # NF-BW01 / v01 — Production Gate Review
 
-**Gate:** 03 — Optimized mesh, UVs and LODs  
-**Status:** GATES 01–02 APPROVED / GATE 03 IN PROGRESS  
+**Gate:** 04 — PBR materials and detail baking  
+**Status:** GATES 01–03 VISUALLY APPROVED / GATE 04 IN PROGRESS  
 **Asset:** Aegis battery exchange workstation  
 **Asset class:** Inspectable industrial workshop equipment  
 **Target presentation:** Unity 6 garage cell works (close inspection)  
@@ -44,6 +44,14 @@ The previous visual review was encouraging, and the owner authorized further wor
 - Do not place the asset in Unity, infer game FPS, or claim kinematic clearance certification at this gate.
 - Gate 03 will require real model-based triangle/UV/collider audit plus same-view silhouette checks.
 
+## Gate 04 kickoff (2026-11-24)
+
+- Owner accepted actual Blender Gate 03 LOD comparison visuals (“From the images these look great”) and then explicitly requested to proceed.
+- Gate 03's geometry, UV0 and collision proxies are approved **visually** for continuing work, not physically benchmarked or proven animatable.
+- Gate 04 must distinguish procedural tiling material textures from **genuine** high-to-low normal/AO bake output. Any non-baked maps must be labeled accurately; a procedural normal image is not proof of transferred high-poly geometry.
+- Confirm Unity URP metallic R, smoothness alpha (1-roughness), normal import convention, and standalone AO path. Preserve the three established LODs and original Blender master.
+- Gate 04 materials and any bake artifacts require review before starting Gate 05 Unity comparison.
+
 ## Gate evidence
 
 - Proposed dimensions, mechanisms, design DNA, operations and integration: [ENGINEERING_BRIEF.md](ENGINEERING_BRIEF.md).
@@ -59,8 +67,8 @@ The previous visual review was encouraging, and the owner authorized further wor
 |---|---|---|
 | 01 — Art direction and engineering brief | **APPROVED** | Owner: “Looks good proceed.” (2026-11-23). Engineering brief and orthographic concept accepted |
 | 02 — High-poly master | **APPROVED** | Owner reviewed R2 clay views and said “These look really awesome,” then explicitly said “Ok proceed” when invited to move to Gate 03 (2026-11-24). Approved as visual shape, not functional kinematics. |
-| 03 — Game mesh, UVs and LODs | **IN_PROGRESS** | Create separate optimized GLB LOD0/1/2, UV audit and primitive collider review; owner quality approval pending. |
-| 04 — PBR and texture baking | NOT_STARTED | Await optimized game mesh |
+| 03 — Game mesh, UVs and LODs | **VISUALLY APPROVED** | LOD0/1/2 and UV checks passed run #45406053140; owner said “From the images these look great,” then “Ok perfect proceed” authorizing Gate 04. Animation and device performance remain unverified. |
+| 04 — PBR and texture baking | **IN PROGRESS** | Authoring measured metal/paint/rubber/glass finishes and URP-correct packed maps; true high-to-low normal/AO baking must be verified before declaring Gate 04 complete. |
 | 05 — Studio/Unity visual comparison | NOT_STARTED | Await Blender/Unity test meshes |
 | 06 — Unity integration | NOT_STARTED | No scene placement allowed |
 | 07 — Physical Android performance + owner approval | NOT_STARTED | No new APK is claimed |
