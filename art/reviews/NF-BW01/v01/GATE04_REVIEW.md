@@ -104,6 +104,18 @@ The user explicitly requested: “Ok proceed pushing R4 model details and textur
 - [R5 Blender CI](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/nf-bw01-gate04-r5.yml) must validate .blend, GLB, texture image and all five model-derived PNG views before a deliverable is treated as finished.
 - **Stage remains open:** extra R5 geometry still requires bake-ready UV audit, actual high-to-low normal/AO transfer at production level, in-engine URP review, and rig/clearance checks before Gate 05.
 
+## Verified R5 results and render inspection — 2026-11-26
+
+[Successful Gate04 R5 Blender workflow #45836543773](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45836543773) (the first run #45835940434 completed actual geometry and 5 renders, but failed a too-high size threshold on a highly compressible texture; fixed in the successful run).
+
+[Download verified R5 native Blender source, inspection GLB and five actual Cycles PNGs](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-gate04-r5-2)
+
+- **95 new independent, editable objects** in their own R5 collection; **294 total derivative export objects**. Actual Blender evaluated bounds of the R5 additions: X = −1.7995 to +1.7995 m; Y = −1.1265 to +0.873 m; Z = +0.354 to +2.403 m. Within approved envelope.
+- Successfully exported native **17.28MB .blend** and **22.92MB inspection GLB**; validated five real 1040×780 Cycles renders, a real authored 512×512 surface-color PNG and a release manifest.
+- **Real image review:** closed-glass R5 angle is now relatively clear and no longer dominated by cloudy blue panels; the orange arm and cassette remain clearly readable. Open-glass view makes detailed interior accessible. The toolhead has additional service fittings and two long gripper fingers; cassette and HMI display several new micro-details and panel diagrams. Topside arm housing still lacks sophisticated animation and most fine visual improvements cluster at close range, so avoid overstating runtime impact.
+- A 512×512 maintenance decal is genuinely UV-applied color texture, **not** an AO or normal geometry bake. R5 new mesh is not yet included in Gate03 performance LODs, so the 22.9MB GLB must not be treated as mobile-ready.
+- **Status: visually inspectable R5 candidate, owner signoff pending**. Retain R4 as the immutable comparison reference. Gate 04 requires production UV, full high-to-low normal/AO baking and transparent URP proof before Gate 05.
+
 ## Production QA state
 
 - [x] PBR lookdev material maps and derivative model generated and uploaded by successful GitHub run
