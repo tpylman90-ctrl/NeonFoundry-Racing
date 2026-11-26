@@ -275,44 +275,50 @@ def upgrade_garage(box, cyl, tor, loft, M):
 
 
 def author_texture_maps(output_root):
-    """Small, seamless shared albedo masks instead of large external PBR files.
-    Geometry remains dominant; these add roughness illusion and scale on mobile."""
-    import numpy as np
+    """Generate small deterministic seamless-ish albedo masks without NumPy.
+
+    Ubuntu Actions' Blender Python does not consistently bundle third-party
+    NumPy. The tiny 256px masks can be created using standard Python only,
+    preserving the visual families and eliminating runner dependencies.
+    """
+    import math
+    import random
     out=Path(output_root)/"Textures"
     out.mkdir(parents=True, exist_ok=True)
     n=256
-    y,x=np.indices((n,n),dtype=np.int32)
-    rng=np.random.default_rng(157)
-    high=rng.uniform(-1,1,(n,n)).astype(np.float32)
-    macro=(np.sin(x*.11)*np.cos(y*.073)).astype(np.float32)
-    def export(name,v,blue=.99):
-        v=np.clip(v,.38,1.0).astype(np.float32)
-        pixels=np.empty((n,n,4),dtype=np.float32)
-        pixels[:,:,0]=v
-        pixels[:,:,1]=v*.99
-        pixels[:,:,2]=v*blue
-        pixels[:,:,3]=1.
+    rng=random.Random(157)
+    maps={name:[] for name in (
+        "NF_FLOOR_SURFACE","NF_STEEL_BRUSHED","NF_WALL_STAMPED",
+        "NF_ARMOR_COATED","NF_CARBON_WEAVE"
+    )}
+    def add(name,v,blue=.99):
+        v=max(.38,min(1.0,v))
+        maps[name].extend((v,v*.99,v*blue,1.0))
+    for y in range(n):
+        for x in range(n):
+            high=rng.uniform(-1,1)
+            macro=math.sin(x*.11)*math.cos(y*.073)
+            seam=(x%64<2 or y%64<2)
+            floor=.86+macro*.050+high*.035
+            add("NF_FLOOR_SURFACE", .46 if seam else floor)
+            steel=.91+math.sin(y*.37)*.018+high*.022
+            add("NF_STEEL_BRUSHED",steel)
+            wall=.87+macro*.045+high*.022
+            add("NF_WALL_STAMPED",.62 if (y%128<2 or x%128<2) else wall)
+            armor=.93+macro*.036+high*.025
+            add("NF_ARMOR_COATED",armor)
+            carbon=.79+(((x+y)//3)%2)*.048+high*.025
+            add("NF_CARBON_WEAVE",carbon,.96)
+    for name,pixels in maps.items():
         image=bpy.data.images.new("NF_BAKED_"+name,width=n,height=n,alpha=True)
-        image.pixels.foreach_set(pixels.ravel())
+        image.pixels.foreach_set(pixels)
         image.filepath_raw=str(out/(name+".png"))
         image.file_format="PNG"
         image.save()
         bpy.data.images.remove(image)
-    seams=((x%64 <2)|(y%64 <2))
-    floor=.86+macro*.050+high*.035
-    floor=np.where(seams,.46,floor)
-    # Brushed metal, subtle elongated scratch pattern.
-    steel=.91+np.sin(y*.37)*.018+high*.022
-    wall=.87+macro*.045+high*.022
-    wall=np.where((y%128<2)|(x%128<2),.62,wall)
-    armor=.93+macro*.036+high*.025
-    carbon=.79+( ((x+y)//3)%2 )*.048+high*.025
-    export("NF_FLOOR_SURFACE",floor)
-    export("NF_STEEL_BRUSHED",steel)
-    export("NF_WALL_STAMPED",wall)
-    export("NF_ARMOR_COATED",armor)
-    export("NF_CARBON_WEAVE",carbon, .96)
-    print("NEON_FOUNDRY_BAKED_TEXTURES_OK", len(list(out.glob("*.png"))))
+    assert len(list(out.glob("*.png")))==5
+    print("NEON_FOUNDRY_BAKED_TEXTURES_OK",len(maps),
+          "stdlib-only textures (no NumPy)")
 
 
 def merge_by_material():
