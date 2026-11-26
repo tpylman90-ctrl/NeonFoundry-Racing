@@ -1,0 +1,105 @@
+name: NF-BW01 Gate 04 R3 Mechanical Refinement
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-gate04-r3.yml"
+      - "art/reviews/NF-BW01/v01/gate04_r3_mechanical_detail.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  geometry-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch approved PBR model as immutable base
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .r3-input
+          gh release download nf-bw01-gate04-lookdev-3 --repo "$GITHUB_REPOSITORY" \
+            --pattern NF_BW01_GATE04_PBR_LOOKDEV.blend --dir .r3-input
+          test "$(stat -c %s .r3-input/NF_BW01_GATE04_PBR_LOOKDEV.blend)" -gt 1000000
+          python3 -m py_compile art/reviews/NF-BW01/v01/gate04_r3_mechanical_detail.py
+      - name: Generate actual geometry, GLB and four Cycles images in Blender 4.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/gate04_r3_output
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              if command -v Xvfb >/dev/null; then
+                Xvfb :99 -screen 0 1600x1200x24 -nolisten tcp >/tmp/r3-x.log 2>&1 &
+              elif command -v Xvnc >/dev/null; then
+                Xvnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None >/tmp/r3-x.log 2>&1 &
+              else
+                echo "No virtual renderer";exit 20
+              fi
+              export DISPLAY=:99
+              sleep 2
+              "$BIN" --background --factory-startup \
+                .r3-input/NF_BW01_GATE04_PBR_LOOKDEV.blend \
+                --python art/reviews/NF-BW01/v01/gate04_r3_mechanical_detail.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/gate04_r3_output
+            ' 2>&1 | tee nf-bw01-r3.log
+          grep -q NF_BW01_R3_REVIEW_PACKAGE_OK nf-bw01-r3.log
+      - name: Verify original 3D geometry and PNG deliverables
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r3_output
+          test "$(stat -c %s "$out/NF_BW01_GATE04_R3_REFINEMENT.blend")" -gt 1000000
+          test "$(stat -c %s "$out/NF_BW01_GATE04_R3_INSPECTION_ONLY.glb")" -gt 1000000
+          python3 - <<'PY'
+          import json,pathlib,struct
+          p=pathlib.Path("art/reviews/NF-BW01/v01/gate04_r3_output")
+          data=json.loads((p/"R3_REVIEW.json").read_text())
+          assert data["new_parts"]>40 and data["status"]=="GEOMETRY_REVIEW_PENDING"
+          assert len(data["review_images"])==4
+          for name in data["review_images"]:
+              fn=p/(name+".png")
+              assert fn.stat().st_size>20000
+              h=fn.read_bytes()[:24]
+              assert h[:8]==b"\x89PNG\r\n\x1a\n"
+              assert struct.unpack(">II",h[16:24])==(1040,780)
+          print("NF_BW01_R3_CI_VERIFIED",data["new_parts"],len(data["review_images"]))
+          PY
+          sha256sum "$out"/*.blend "$out"/*.glb > "$out/SHA256SUMS.txt"
+      - name: Save actual Blender renders, updated GLB and editable source
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate04-R3-Mechanical-Review-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/gate04_r3_output/
+            nf-bw01-r3.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Release verified R3 review images and geometry
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r3_output
+          gh release create "nf-bw01-gate04-r3-$GITHUB_RUN_NUMBER" \
+            "$out/NF_BW01_GATE04_R3_REFINEMENT.blend" \
+            "$out/NF_BW01_GATE04_R3_INSPECTION_ONLY.glb" \
+            "$out/R3_FRONT_THREE_QUARTER.png" \
+            "$out/R3_ROBOT_GRIPPER_DETAIL.png" \
+            "$out/R3_CASSETTE_DOCK_DETAIL.png" \
+            "$out/R3_REAR_THREE_QUARTER.png" \
+            "$out/R3_REVIEW.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 R3 motor, gripper, cassette and safety enclosure REVIEW" \
+            --notes "Reversible detailed mechanical revision built on actual approved PBR Blender model. Four Cycles comparison renders are real geometry. Production Gate04 not approved; working clearance, texture bake and Unity game performance remain unverified." \
+            --prerelease
