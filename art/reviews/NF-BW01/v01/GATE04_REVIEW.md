@@ -70,6 +70,18 @@ The owner reviewed three actual Cycles beauty views and approved continuing refi
 - The baseline R2 approved mechanical geometry, the eight material families, and the original studio camera positions remain the visual reference.
 - **Pending verification:** both Actions workflows must finish and their output PNGs must be inspected for seams, grain and metallic roughness. Do not mark the re-bake successful until results are checked. Full 68-group bake coverage is still required and outside this three-group R2 pilot.
 
+## Gate 04 R3 — mechanical finish candidate (2026-11-25)
+
+Owner direction: “Agreed keep pushing this might be our best work yet.” This authorizes further refinement, **not** production signoff.
+
+- R3 source: [gate04_r3_mechanical_detail.py](gate04_r3_mechanical_detail.py), loaded onto the authentic [PBR lookdev-3 Blender source](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-gate04-lookdev-3) as a distinct reversible collection.
+- Targeted changes: 96-sided motor sleeves and machined annular retaining races; separate gripper wear pads, tool fasteners and pneumatic service parts; physically separate high-voltage/coolant cassette connections; closeable-look transparent side/rear/front shielding with interlock indicator, and revised HMI controls.
+- Exact structural shapes and all approved color/material families remain the visual baseline. This R3 derivative is **not** a replacement for the approved 579-part high-poly source or a final LOD.
+- [R3 actual Blender review workflow](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/nf-bw01-gate04-r3.yml) must pass world-envelope, native Blender, GLB and real four-view Cycles render checks. **Do not assert successful PNG artifacts or polished geometry before validation.**
+- Guarding is fictional design only. Door travel, mechanical swept-volume clearances, true interlock response, and the robot's actual cassette pickup have not been simulated.
+- Follow-up: inspect glass reflections, motor roundness and gripper/cassette connection alignment at 1:1; if accepted, integrate R3 into high-poly master/LOD and redo any affected UV/normal/AO bakes before Gate 04 approval.
+- The most recent three-group corrected AO pilot passed [workflow #45617137206](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45617137206); **that is not full 68-group AO coverage** and needs visual seam review.
+
 ## Production QA state
 
 - [x] PBR lookdev material maps and derivative model generated and uploaded by successful GitHub run
