@@ -1,0 +1,109 @@
+name: NF-BW01 Gate 04 R4 Clear Guard + Detail Review
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-gate04-r4.yml"
+      - "art/reviews/NF-BW01/v01/gate04_r4_visibility_detail.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  render-r4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download successful R3 source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .r4-input
+          gh release download nf-bw01-gate04-r3-1 --repo "$GITHUB_REPOSITORY" \
+            --pattern NF_BW01_GATE04_R3_REFINEMENT.blend --dir .r4-input
+          test "$(stat -c %s .r4-input/NF_BW01_GATE04_R3_REFINEMENT.blend)" -gt 1000000
+          python3 -m py_compile art/reviews/NF-BW01/v01/gate04_r4_visibility_detail.py
+      - name: Generate authentic Blender R4 model, GLB and 5 Cycles renders
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/gate04_r4_output
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              if command -v Xvfb >/dev/null; then
+                Xvfb :99 -screen 0 1600x1200x24 -nolisten tcp >/tmp/r4-x.log 2>&1 &
+              elif command -v Xvnc >/dev/null; then
+                Xvnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None >/tmp/r4-x.log 2>&1 &
+              else
+                echo "No headless display";exit 20
+              fi
+              export DISPLAY=:99
+              sleep 2
+              "$BIN" --background --factory-startup \
+                .r4-input/NF_BW01_GATE04_R3_REFINEMENT.blend \
+                --python art/reviews/NF-BW01/v01/gate04_r4_visibility_detail.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/gate04_r4_output
+            ' 2>&1 | tee nf-bw01-r4.log
+          grep -q NF_BW01_R4_PACKAGE_OK nf-bw01-r4.log
+      - name: Validate actual output files and review manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r4_output
+          test "$(stat -c %s "$out/NF_BW01_GATE04_R4_CLEAR_GUARD.blend")" -gt 1000000
+          test "$(stat -c %s "$out/NF_BW01_GATE04_R4_INSPECTION_ONLY.glb")" -gt 1000000
+          python3 - <<'PY'
+          import json,pathlib,struct
+          p=pathlib.Path("art/reviews/NF-BW01/v01/gate04_r4_output")
+          d=json.loads((p/"R4_REVIEW.json").read_text())
+          assert d["new_r4_parts"]>=50
+          assert d["r3_glazing_panels"]==5
+          assert d["status"]=="VISUAL_REVIEW_PENDING"
+          assert d["glass"]["transmission"]>=.95
+          assert len(d["views"])==5
+          for name in d["views"]:
+              f=p/(name+".png")
+              assert f.stat().st_size>20000
+              raw=f.read_bytes()[:24]
+              assert raw.startswith(b"\x89PNG\r\n\x1a\n")
+              assert struct.unpack(">II",raw[16:24])==(1040,780)
+          print("NF_BW01_R4_FILES_VERIFIED",d["new_r4_parts"],len(d["views"]))
+          PY
+          sha256sum "$out"/*.blend "$out"/*.glb > "$out/SHA256SUMS.txt"
+      - name: Save full R4 files
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-Gate04-R4-Inspection-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/gate04_r4_output/
+            nf-bw01-r4.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish R4 Blender model and five genuine inspection PNGs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r4_output
+          gh release create "nf-bw01-gate04-r4-$GITHUB_RUN_NUMBER" \
+            "$out/NF_BW01_GATE04_R4_CLEAR_GUARD.blend" \
+            "$out/NF_BW01_GATE04_R4_INSPECTION_ONLY.glb" \
+            "$out/R4_CLEAR_FRONT_THREE_QUARTER.png" \
+            "$out/R4_CLEAR_REAR_THREE_QUARTER.png" \
+            "$out/R4_OPEN_GRIPPER_DETAIL.png" \
+            "$out/R4_OPEN_CASSETTE_DETAIL.png" \
+            "$out/R4_OPEN_MECHANICAL_THREE_QUARTER.png" \
+            "$out/R4_REVIEW.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 R4 clear protective panels, industrial detail and open inspection" \
+            --notes "Reversible Blender R4 revision on R3 actual model. Cleaner neutral optical glazing, extra gripper, cassette, HMI and power service detail. 5 real Cycles renders with and without glazing; physical motion, URP glass, full 68-group geometry bake and Android optimization still pending." \
+            --prerelease
