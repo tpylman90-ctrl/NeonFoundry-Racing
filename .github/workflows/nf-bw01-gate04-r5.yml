@@ -1,0 +1,113 @@
+name: NF-BW01 Gate04 R5 Precision Details & Texture Review
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-gate04-r5.yml"
+      - "art/reviews/NF-BW01/v01/gate04_r5_detail_and_texture.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render-r5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download R4 original from approved review release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .r5-input
+          gh release download nf-bw01-gate04-r4-1 --repo "$GITHUB_REPOSITORY" \
+            --pattern NF_BW01_GATE04_R4_CLEAR_GUARD.blend --dir .r5-input
+          test "$(stat -c %s .r5-input/NF_BW01_GATE04_R4_CLEAR_GUARD.blend)" -gt 1000000
+          python3 -m py_compile art/reviews/NF-BW01/v01/gate04_r5_detail_and_texture.py
+      - name: Blender actual geometry, image-backed service textures, Cycles views
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/gate04_r5_output
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              if command -v Xvfb >/dev/null; then
+                Xvfb :99 -screen 0 1600x1200x24 -nolisten tcp >/tmp/r5-x.log 2>&1 &
+              elif command -v Xvnc >/dev/null; then
+                Xvnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None >/tmp/r5-x.log 2>&1 &
+              else
+                echo "No headless display"; exit 20
+              fi
+              export DISPLAY=:99
+              sleep 2
+              "$BIN" --background --factory-startup \
+                .r5-input/NF_BW01_GATE04_R4_CLEAR_GUARD.blend \
+                --python art/reviews/NF-BW01/v01/gate04_r5_detail_and_texture.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/gate04_r5_output
+            ' 2>&1 | tee nf-bw01-r5.log
+          grep -q NF_BW01_R5_BUILD_COMPLETE nf-bw01-r5.log
+      - name: Validate real mesh, texture, and output PNG dimensions
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r5_output
+          test "$(stat -c %s "$out/NF_BW01_GATE04_R5_DETAILS.blend")" -gt 1000000
+          test "$(stat -c %s "$out/NF_BW01_GATE04_R5_REVIEW.glb")" -gt 1000000
+          python3 - <<'PY'
+          import json,pathlib,struct
+          p=pathlib.Path("art/reviews/NF-BW01/v01/gate04_r5_output")
+          d=json.loads((p/"R5_REVIEW.json").read_text())
+          assert d["status"]=="MECHANICAL_TEXTURE_REVIEW_PENDING"
+          assert d["new_independent_objects"]>=55
+          assert d["texture_resolution"]==[512,512]
+          assert len(d["camera_views"])==5
+          assert d["unity_integrated"] is False and d["full_detail_bake_complete"] is False
+          for f,w,h in [(p/"textures"/"NF_BW01_R5_MAINTENANCE_DECAL.png",512,512)]+[(p/(x+".png"),1040,780) for x in d["camera_views"]]:
+              assert f.stat().st_size>8000,f
+              hdr=f.read_bytes()[:24]
+              assert hdr[:8]==b"\x89PNG\r\n\x1a\n"
+              assert struct.unpack(">II",hdr[16:24])==(w,h)
+          print("NF_BW01_R5_ASSET_VALIDATION_OK",d["new_independent_objects"],len(d["camera_views"]))
+          PY
+          sha256sum "$out"/*.blend "$out"/*.glb > "$out/SHA256SUMS.txt"
+          ls -lh "$out"
+      - name: Preserve R5 inspection package
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-R5-Actual-Model-Detail-Texture-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/gate04_r5_output/
+            nf-bw01-r5.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish R5 real GLB/Blender and texture views
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r5_output
+          gh release create "nf-bw01-gate04-r5-$GITHUB_RUN_NUMBER" \
+            "$out/NF_BW01_GATE04_R5_DETAILS.blend" \
+            "$out/NF_BW01_GATE04_R5_REVIEW.glb" \
+            "$out/R5_FRONT_WITH_GLASS.png" \
+            "$out/R5_FRONT_OPEN_MECHANICAL.png" \
+            "$out/R5_GRIPPER_DETAIL.png" \
+            "$out/R5_BATTERY_CASSETTE.png" \
+            "$out/R5_CONTROL_CABINET.png" \
+            "$out/textures/NF_BW01_R5_MAINTENANCE_DECAL.png" \
+            "$out/R5_REVIEW.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 R5 engineered texture/detail — not yet Gate04 approved" \
+            --notes "Real Blender R5 reversible refinement from actual R4 source. Five Cycles views. A genuine generated service-decal BaseColor PNG is included; it is NOT high-to-low normal/AO bake. No Unity integration, swept-volume validation, or Android performance proof." \
+            --prerelease
