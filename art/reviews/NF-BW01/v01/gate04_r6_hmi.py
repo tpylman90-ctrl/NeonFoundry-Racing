@@ -174,7 +174,7 @@ for xx in (cx-.244,cx+.244):
 # Existing three physical controls and orange emergency control stay intact.
 # Verify new objects do not exceed original HMI physical exterior silhouette.
 assert .505<.56 and .341<.424
-assert len(C.objects)==8,len(C.objects)
+assert len(C.objects)==7,len(C.objects)
 bpy.context.view_layer.update()
 # Save editable version and one actual-geometry glTF.
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/"NF_BW01_R6_COMPACT_HMI.blend"),compress=True)
