@@ -82,6 +82,17 @@ Owner direction: “Agreed keep pushing this might be our best work yet.” This
 - Follow-up: inspect glass reflections, motor roundness and gripper/cassette connection alignment at 1:1; if accepted, integrate R3 into high-poly master/LOD and redo any affected UV/normal/AO bakes before Gate 04 approval.
 - The most recent three-group corrected AO pilot passed [workflow #45617137206](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/runs/45617137206); **that is not full 68-group AO coverage** and needs visual seam review.
 
+## R4 visibility and detail revision — 2026-11-25
+
+User reviewed **actual R3 full-view and gripper/cassette close-up screenshots** and requested **greater transparency and more mechanical detail**. R3 glass was near-opaque blue in several studio views, obscuring the robot and cassette.
+
+- New [R4 reversible geometry layer](gate04_r4_visibility_detail.py) derives from the [verified R3 source release](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-gate04-r3-1) without replacing it.
+- Revised glass: near-neutral color, IOR 1.49, roughness 0.015, transmission 0.97, shader alpha 0.12, with **explicit note that Unity URP opacity is not validated yet**.
+- Added physical contact shoes, jaw sensors and routed pneumatic lines, cassette cam-locks and connection labels, radiator service fins and hose adapters, richer HMI signals and door protective edge moldings. Avoids unmotivated random bolt spam.
+- The five actual-model review cameras include front/rear enclosed views and gripper, cassette and full-machine **glass-hidden cutaway** views. Geometry in the cutaway is unchanged; only panel visibility is toggled for inspection.
+- [R4 GitHub render/GLB build](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/nf-bw01-gate04-r4.yml). **Do not claim complete until verified.**
+- Still needed: assess physical gripper and door clearances, surface/intersecting details, full low-mesh bake, and URP transparent material compatibility. Keep Gate 04 pending owner review.
+
 ## Production QA state
 
 - [x] PBR lookdev material maps and derivative model generated and uploaded by successful GitHub run
