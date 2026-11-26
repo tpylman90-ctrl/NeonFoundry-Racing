@@ -93,6 +93,17 @@ User reviewed **actual R3 full-view and gripper/cassette close-up screenshots** 
 - [R4 GitHub render/GLB build](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/nf-bw01-gate04-r4.yml). **Do not claim complete until verified.**
 - Still needed: assess physical gripper and door clearances, surface/intersecting details, full low-mesh bake, and URP transparent material compatibility. Keep Gate 04 pending owner review.
 
+## Gate 04 R5 precision-detail and surface-texture review — 2026-11-26
+
+The user explicitly requested: “Ok proceed pushing R4 model details and texture.” This authorizes **another non-destructive refinement**, not final Gate 04 acceptance.
+
+- **Editable source of truth:** published real [R4 Blender master](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/releases/tag/nf-bw01-gate04-r4-1), unchanged.
+- New [R5 additive geometry and texture source](gate04_r5_detail_and_texture.py) introduces independently modeled gripper friction pads, sleeve fasteners, jaw sensor details, cassette HV/contact guards, coolant shields, diagnostic louvers, status lights, and service-guard brackets in a separate collection.
+- Includes a real **512×512 image-backed maintenance label texture** with a repeatable print pattern; this is explicitly **surface color artwork, not geometry-transferred normal/AO data**.
+- Preserves the base eight industrial PBR surface classes and the clearer R4 glass. Two render modes are required: real closed-glass camera plus actual Blender cutaway views for machine-detail inspection.
+- [R5 Blender CI](https://github.com/tpylman90-ctrl/NeonFoundry-Racing/actions/workflows/nf-bw01-gate04-r5.yml) must validate .blend, GLB, texture image and all five model-derived PNG views before a deliverable is treated as finished.
+- **Stage remains open:** extra R5 geometry still requires bake-ready UV audit, actual high-to-low normal/AO transfer at production level, in-engine URP review, and rig/clearance checks before Gate 05.
+
 ## Production QA state
 
 - [x] PBR lookdev material maps and derivative model generated and uploaded by successful GitHub run
