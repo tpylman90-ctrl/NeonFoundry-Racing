@@ -88,8 +88,13 @@ def txt(x,y,text,scale=3,color=WHT):
         glyph=FONT.get(ch,FONT[" "])
         for row,bits in enumerate(glyph):
             for col,v in enumerate(bits):
-                if v=="1":rect(x+col*scale,y+row*scale,
-                               x+(col+1)*scale,y+(row+1)*scale,color)
+                if v=="1":
+                    # Blender pixel data starts at the bottom-left of the image.
+                    # Font rows are conventionally top-to-bottom; reverse them
+                    # so the physical LCD lettering is upright and legible.
+                    rr=6-row
+                    rect(x+col*scale,y+rr*scale,
+                         x+(col+1)*scale,y+(rr+1)*scale,color)
         x+=scale*6
 # Image pixels use bottom-left origin. Compose lower -> upper UI in texture
 rect(0,0,W,52,(.018,.052,.067))
