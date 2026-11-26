@@ -50,7 +50,7 @@ for o in meshes:
     mats=[m.name.upper() for m in o.data.materials]
     joined=" ".join(mats)
     role="HOUSING"
-    if "HMI" in joined and ("EMISSIVE" in joined or "LCD" in joined):
+    if "LCD" in joined and ("EMISSIVE" in joined or "HMI" in joined):
         role="LCD"
     elif "CLEAR INTERLOCKED POLYCARBONATE" in joined:
         role="GLASS"
