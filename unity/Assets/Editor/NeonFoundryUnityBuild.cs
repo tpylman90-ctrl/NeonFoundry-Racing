@@ -14,6 +14,8 @@ public static class NeonFoundryUnityBuild
     private const string ScenePath = "Assets/Scenes/FoundryGarage.unity";
     private const string CraftPath = "Assets/Resources/Foundry/ForgeReviewCraft.obj";
     private const string GaragePath = "Assets/Resources/Foundry/FoundryGarage.obj";
+    private const string CellStationPath = "Assets/Resources/Foundry/NF_BW01_R6_UnityInspection.fbx";
+    private const string HmiTexturePath = "Assets/Resources/Foundry/NF_BW01_R6_HMI_LCD.png";
     private const string RendererPath = "Assets/Settings/FoundryRenderer.asset";
     private const string PipelinePath = "Assets/Settings/FoundryURP.asset";
     private const string MaterialsPath = "Assets/Settings/FoundryMaterials";
@@ -27,6 +29,8 @@ public static class NeonFoundryUnityBuild
         EnsureFolder(MaterialsPath);
         Require(CraftPath);
         Require(GaragePath);
+        Require(CellStationPath);
+        Require(HmiTexturePath);
 
         UniversalRendererData renderer = AssetDatabase.LoadAssetAtPath<UniversalRendererData>(RendererPath);
         if (renderer == null)
@@ -57,6 +61,7 @@ public static class NeonFoundryUnityBuild
         craft.transform.position = new Vector3(0f, 0.28f, 0f);
         ApplyMaterials(garage);
         ApplyMaterials(craft);
+        var workstation = PlaceInspectionWorkstation();
         SetupWalkableSurfaces();
 
         var craftFocus = new GameObject("Target | Craft");
@@ -65,6 +70,9 @@ public static class NeonFoundryUnityBuild
         batteryFocus.transform.position = new Vector3(-4.2f, 2.2f, -12.2f);
         var deckFocus = new GameObject("Target | Observation deck");
         deckFocus.transform.position = new Vector3(11.8f, 3.5f, -12.5f);
+
+        var stationFocus = new GameObject("Target | NF-BW01 inspection station");
+        stationFocus.transform.position = new Vector3(-9.4f,1.55f,-8.35f);
 
         var cameraObject = new GameObject("Main Camera | Touch inspection");
         cameraObject.tag = "MainCamera";
@@ -77,7 +85,7 @@ public static class NeonFoundryUnityBuild
         var cameraData = cameraObject.AddComponent<UniversalAdditionalCameraData>();
         cameraData.renderPostProcessing = true;
         cameraObject.AddComponent<FoundryGarageViewer>()
-            .Initialize(craftFocus.transform,batteryFocus.transform,deckFocus.transform);
+            .Initialize(craftFocus.transform,batteryFocus.transform,deckFocus.transform,stationFocus.transform,workstation);
 
         SetupLocalLighting();
         SetupPostProcessing();
@@ -167,6 +175,142 @@ public static class NeonFoundryUnityBuild
             r.receiveShadows=true;
         }
     }
+    /// <summary>Review-only R6 source mesh in the garage, deliberately
+    /// separate from approved production LODs and baked material assets.</summary>
+    private static GameObject PlaceInspectionWorkstation()
+    {
+        var station = Instantiate(CellStationPath, "NF-BW01 | R6 battery works inspection");
+        station.transform.localScale = Vector3.one;
+        // Imported FBX may have a root transform. Align measured floor to
+        // garage zero and place centered in an open inspection aisle.
+        var renderers = station.GetComponentsInChildren<Renderer>(true);
+        if (renderers.Length < 90)
+            throw new Exception("NF-BW01 renderer parts unexpectedly missing: "+renderers.Length);
+        Bounds bounds = renderers[0].bounds;
+        foreach(var renderer in renderers) bounds.Encapsulate(renderer.bounds);
+        if (bounds.size.x < 2.6f || bounds.size.x > 5.5f
+            || bounds.size.y < 1.7f || bounds.size.y > 4.4f
+            || bounds.size.z < 1.6f || bounds.size.z > 5.0f)
+            throw new Exception("NF-BW01 FBX scale/axis mismatch: "+bounds.size);
+        // The workstation is opposite the hero bay and ahead of the
+        // existing battery line, leaving a walking aisle for inspection.
+        station.transform.position +=
+            new Vector3(-9.4f-bounds.center.x, -bounds.min.y, -8.35f-bounds.center.z);
+        ApplyWorkstationMaterials(station);
+        // Broad, cheap bounds for camera/walk collision review; NO mesh collider
+        // or false claim that the robot/gripper is physically functional.
+        var blocker = new GameObject("NF-BW01 | static footprint blocker");
+        blocker.transform.SetParent(station.transform,false);
+        blocker.transform.position = new Vector3(-9.4f,1.30f,-8.35f);
+        var collider = blocker.AddComponent<BoxCollider>();
+        collider.size = new Vector3(3.77f,2.60f,2.36f);
+        Debug.Log("NF_BW01_UNITY_PLACED rendererParts="+renderers.Length+
+                  " bounds="+bounds.size+" at="+station.transform.position);
+        return station;
+    }
+    private static Material MakeStationMaterial(string role)
+    {
+        Color color = new Color(.17f,.19f,.215f);
+        float metallic = .38f, smooth = .46f, emission = 0f;
+        switch (role)
+        {
+            case "ARMOR": color=new Color(.82f,.255f,.067f); metallic=.42f; smooth=.62f; break;
+            case "STEEL": color=new Color(.46f,.50f,.53f); metallic=.94f; smooth=.65f; break;
+            case "BRUSH": color=new Color(.59f,.64f,.67f); metallic=.93f; smooth=.74f; break;
+            case "DARK": color=new Color(.06f,.074f,.085f); metallic=.12f; smooth=.31f; break;
+            case "SEAL": color=new Color(.052f,.063f,.068f); metallic=0f; smooth=.22f; break;
+            case "MARK": color=new Color(.73f,.74f,.69f); metallic=.02f; smooth=.40f; break;
+            case "GLAZE": color=new Color(.039f,.112f,.145f); metallic=.17f; smooth=.84f; break;
+            case "CYAN": color=new Color(.06f,.73f,.88f); metallic=.02f; smooth=.65f; emission=2.0f; break;
+            case "AMBER": color=new Color(1f,.41f,.07f); metallic=.02f; smooth=.55f; emission=1.6f; break;
+            case "DECAL": color=Color.white; metallic=0f; smooth=.4f; break;
+            case "GLASS": color=new Color(.97f,.99f,1f,.12f); metallic=0f; smooth=.96f; break;
+            case "LCD": color=new Color(.025f,.035f,.04f); metallic=0f; smooth=.85f; break;
+        }
+        string path = MaterialsPath+"/BW01_"+role+".mat";
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (mat==null)
+        {
+            Shader shader=Shader.Find("Universal Render Pipeline/Lit");
+            if (shader==null)throw new Exception("Missing URP Lit for workstation");
+            mat=new Material(shader){name="BW01_"+role};
+            AssetDatabase.CreateAsset(mat,path);
+        }
+        mat.SetColor("_BaseColor",color);
+        mat.SetFloat("_Metallic",metallic);
+        mat.SetFloat("_Smoothness",smooth);
+        if (emission>0f)
+        {
+            mat.SetColor("_EmissionColor",color*emission);
+            mat.EnableKeyword("_EMISSION");
+            mat.globalIlluminationFlags=MaterialGlobalIlluminationFlags.RealtimeEmissive;
+        }
+        if (role=="GLASS")
+        {
+            // URP Lit transparent surface, alpha blend and no depth writing.
+            // Actual Android appearance still requires inspection.
+            mat.SetFloat("_Surface",1f);
+            mat.SetFloat("_Blend",0f);
+            mat.SetFloat("_SrcBlend",(float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend",(float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_ZWrite",0f);
+            mat.SetOverrideTag("RenderType","Transparent");
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue=(int)RenderQueue.Transparent;
+        }
+        if (role=="LCD")
+        {
+            Texture2D screen=AssetDatabase.LoadAssetAtPath<Texture2D>(HmiTexturePath);
+            if (screen==null)throw new Exception("R6 LCD texture not imported");
+            mat.SetColor("_BaseColor",new Color(.028f,.037f,.043f));
+            mat.SetTexture("_EmissionMap",screen);
+            mat.SetColor("_EmissionColor",new Color(3.0f,3.0f,3.0f));
+            mat.EnableKeyword("_EMISSION");
+            mat.globalIlluminationFlags=MaterialGlobalIlluminationFlags.RealtimeEmissive;
+        }
+        mat.enableInstancing=true;
+        EditorUtility.SetDirty(mat);
+        return mat;
+    }
+    private static void ApplyWorkstationMaterials(GameObject root)
+    {
+        var roles=new System.Collections.Generic.Dictionary<string,Material>();
+        int glass=0,lcd=0,parts=0;
+        foreach(var renderer in root.GetComponentsInChildren<Renderer>(true))
+        {
+            string n=renderer.gameObject.name.ToUpperInvariant();
+            int marker=n.LastIndexOf("__NFSTYLE_",StringComparison.Ordinal);
+            if(marker<0) throw new Exception("Unlabeled NF-BW01 material role: "+n);
+            string role=n.Substring(marker+10).Replace("(CLONE)","").Trim();
+            if(!roles.TryGetValue(role,out Material material))
+            {
+                material=MakeStationMaterial(role);
+                roles.Add(role,material);
+            }
+            var source=renderer.sharedMaterials;
+            var mapped=new Material[source.Length];
+            for(int i=0;i<mapped.Length;i++)mapped[i]=material;
+            renderer.sharedMaterials=mapped;
+            if(role=="GLASS")
+            {
+                glass++;
+                renderer.shadowCastingMode=ShadowCastingMode.Off;
+                renderer.receiveShadows=false;
+            }
+            else
+            {
+                renderer.shadowCastingMode=role=="LCD"?ShadowCastingMode.Off:ShadowCastingMode.On;
+                renderer.receiveShadows=role!="LCD";
+            }
+            if(role=="LCD")lcd++;
+            parts++;
+        }
+        if(lcd<1 || glass<5)
+            throw new Exception("Missing LCD or clear guarding material after FBX import: "+lcd+"/"+glass);
+        Debug.Log("NF_BW01_UNITY_MATERIALS_OK parts="+parts+
+                  " lcd="+lcd+" glass="+glass+" roles="+roles.Count);
+    }
+
     private static void ApplyBakedAlbedo(Material mat, string textureName, Vector2 tiling)
     {
         string path = "Assets/Resources/Foundry/Textures/" + textureName + ".png";
@@ -303,7 +447,7 @@ public static class NeonFoundryUnityBuild
         PrepareScene();
         PlayerSettings.companyName="Neon Foundry";
         PlayerSettings.productName="Neon Foundry Garage Preview";
-        PlayerSettings.bundleVersion="0.2.0";
+        PlayerSettings.bundleVersion="0.3.0";
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.LandscapeLeft;
         PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android,
             "com.tpylman.neonfoundryracing.unityreview");
