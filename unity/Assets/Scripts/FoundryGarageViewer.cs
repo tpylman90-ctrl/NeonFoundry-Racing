@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>Android-first garage inspection and walkaround controls.
 /// Preview deliberately preserves an accessible orbit mode before any racing physics.
@@ -6,9 +7,12 @@ using UnityEngine;
 public sealed class FoundryGarageViewer : MonoBehaviour
 {
     private Camera cam;
-    [SerializeField] private Transform craftTarget, cellTarget, deckTarget;
+    [SerializeField] private Transform craftTarget, cellTarget, deckTarget, stationTarget;
+    [SerializeField] private GameObject stationRoot;
+    private readonly List<Renderer> guardPanels = new List<Renderer>();
+    private bool guardsVisible = true;
     private Transform[] destinations;
-    private string[] labels = { "CRAFT", "CELL WORKS", "OVERLOOK" };
+    private string[] labels = { "CRAFT", "CELL WORKS", "OVERLOOK", "NF-BW01" };
     private int locationIndex;
     private Vector3 focus;
     private bool walkMode;
@@ -25,18 +29,42 @@ public sealed class FoundryGarageViewer : MonoBehaviour
     private GUIStyle headStyle, bodyStyle, buttonStyle, tinyStyle;
     private Texture2D darkButtonTexture;
 
-    public void Initialize(Transform craft, Transform cellWorks, Transform overlook)
+    public void Initialize(Transform craft, Transform cellWorks, Transform overlook,
+                           Transform station, GameObject machine)
     {
         craftTarget = craft;
         cellTarget = cellWorks;
         deckTarget = overlook;
-        destinations = new[] { craft, cellWorks, overlook };
+        stationTarget = station;
+        stationRoot = machine;
+        destinations = new[] { craft, cellWorks, overlook, station };
         focus = craft.position;
+        CacheGuardPanels();
+    }
+    private void CacheGuardPanels()
+    {
+        guardPanels.Clear();
+        if (stationRoot == null) return;
+        foreach(Renderer r in stationRoot.GetComponentsInChildren<Renderer>(true))
+        {
+            string n = r.gameObject.name.ToUpperInvariant();
+            if (n.Contains("SLIDING TRANSPARENT GATE")
+                || n.Contains("SAFETY GLAZING")
+                || n.Contains("CLEAR GUARDING"))
+                guardPanels.Add(r);
+        }
+    }
+    private void ToggleGuarding()
+    {
+        guardsVisible = !guardsVisible;
+        foreach(Renderer r in guardPanels)
+            if (r != null) r.enabled = guardsVisible;
     }
     void Awake()
     {
         cam = GetComponent<Camera>();
-        destinations = new[] { craftTarget, cellTarget, deckTarget };
+        destinations = new[] { craftTarget, cellTarget, deckTarget, stationTarget };
+        CacheGuardPanels();
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 0;
         fpsTime = Time.unscaledTime;
@@ -78,7 +106,7 @@ public sealed class FoundryGarageViewer : MonoBehaviour
                 previousPinch = pinch;
             else
             {
-                orbitDistance = Mathf.Clamp(orbitDistance - (pinch - previousPinch) * .028f, 5f, 26f);
+                orbitDistance = Mathf.Clamp(orbitDistance - (pinch - previousPinch) * .028f, locationIndex==3?2.4f:5f, 26f);
                 Vector2 pan = (a.deltaPosition + b.deltaPosition) * .5f;
                 focus += (-transform.right * pan.x - transform.up * pan.y) * (orbitDistance * .0011f);
                 previousPinch = pinch;
@@ -96,7 +124,7 @@ public sealed class FoundryGarageViewer : MonoBehaviour
                 pitch = Mathf.Clamp(pitch - d.y * .14f, -12f, 80f);
                 previousPointer = p;
             }
-            orbitDistance = Mathf.Clamp(orbitDistance - Input.mouseScrollDelta.y * 1.2f, 5f, 26f);
+            orbitDistance = Mathf.Clamp(orbitDistance - Input.mouseScrollDelta.y * 1.2f, locationIndex==3?2.4f:5f, 26f);
         }
     }
     void UpdateWalk()
@@ -189,9 +217,10 @@ public sealed class FoundryGarageViewer : MonoBehaviour
         locationIndex = index;
         focus = destinations[index].position;
         walkMode = false;
-        orbitDistance = index == 0 ? 12.9f : index == 1 ? 12.5f : 11.6f;
-        pitch = index == 2 ? 8f : 11f;
-        yaw = index == 1 ? -155f : -138f;
+        orbitDistance = index == 0 ? 12.9f : index == 1 ? 12.5f
+                      : index == 2 ? 11.6f : 5.8f;
+        pitch = index == 2 ? 8f : index==3?15f:11f;
+        yaw = index==3?-136f:index==1?-155f:-138f;
     }
     void SwitchMode()
     {
@@ -261,6 +290,17 @@ public sealed class FoundryGarageViewer : MonoBehaviour
             SelectLocation(1);
         if (GUI.Button(new Rect(x-469,17,96,47),"CRAFT",buttonStyle))
             SelectLocation(0);
+        if (GUI.Button(new Rect(x-579,17,104,47),"NF-BW01",buttonStyle))
+            SelectLocation(3);
+        if (locationIndex == 3 && !walkMode)
+        {
+            GUI.color=new Color(.014f,.031f,.052f,.91f);
+            GUI.Box(new Rect(w-227,72,215,45),GUIContent.none);
+            GUI.color=Color.white;
+            if (GUI.Button(new Rect(w-219,77,199,34),
+                guardsVisible ? "HIDE GLASS" : "SHOW GLASS",buttonStyle))
+                ToggleGuarding();
+        }
 
         GUI.color = new Color(.014f,.031f,.052f,.76f);
         GUI.Box(new Rect(w*.5f-271,h-51,542,37),GUIContent.none);
