@@ -42,6 +42,34 @@ lcd.filepath_raw=str(out/"NF_BW01_R6_HMI_LCD.png")
 lcd.file_format="PNG";lcd.save()
 if (out/"NF_BW01_R6_HMI_LCD.png").stat().st_size<1500:
     raise RuntimeError("LCD PNG extraction unexpectedly empty")
+# Store material role in the FBX object name: Unity's imported material
+# asset names vary across FBX importer versions, but a mesh's hierarchy name
+# remains deterministic for URP remapping and glass inspection toggles.
+role_counts=collections.Counter()
+for o in meshes:
+    mats=[m.name.upper() for m in o.data.materials]
+    joined=" ".join(mats)
+    role="HOUSING"
+    if "HMI" in joined and ("EMISSIVE" in joined or "LCD" in joined):
+        role="LCD"
+    elif "CLEAR INTERLOCKED POLYCARBONATE" in joined:
+        role="GLASS"
+    elif "MAINTENANCE DECAL" in joined:
+        role="DECAL"
+    elif "DIAGNOSTIC CYAN" in joined:
+        role="CYAN"
+    elif "WARNING AMBER" in joined:
+        role="AMBER"
+    else:
+        for k in ("ARMOR","STEEL","BRUSH","DARK","SEAL","MARK","GLAZE","HOUSING"):
+            if "NF_BW01_PBR_"+k in joined:
+                role=k
+                break
+    o.name=o.name[:45]+"__NFSTYLE_"+role
+    role_counts[role]+=1
+if role_counts["LCD"]<1 or role_counts["GLASS"]<5:
+    raise RuntimeError("R6 screen or guard material roles missing "+str(role_counts))
+print("NF_BW01_UNITY_MATERIAL_ROLES",dict(role_counts))
 # Unity FBX import receives Y-up scene; FBX bake_space_transform default
 # false is correct for Unity. Transform has no global arbitrary re-centering.
 bpy.ops.object.select_all(action="DESELECT")
@@ -56,7 +84,7 @@ bpy.ops.export_scene.fbx(filepath=str(dst),use_selection=True,
 if dst.stat().st_size<500000:raise RuntimeError("FBX too small")
 manifest={
  "source_glb":source.name,"triangles":triangles,"meshes":len(meshes),
- "material_names":dict(names),
+ "material_names":dict(names),"unity_material_roles":dict(role_counts),
  "lcd_source":lcd.name,
  "unity_scene":"FoundryGarage — review station only",
  "note":"FBX materials intentionally remapped to URP; original untouched",
