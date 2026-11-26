@@ -1,0 +1,104 @@
+name: NF-BW01 Gate04 R6 Compact HMI Screen
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nf-bw01-gate04-r6-hmi.yml"
+      - "art/reviews/NF-BW01/v01/gate04_r6_hmi.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  compact-screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch verified R5 Blender source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .r6-input
+          gh release download nf-bw01-gate04-r5-2 --repo "$GITHUB_REPOSITORY" --pattern NF_BW01_GATE04_R5_DETAILS.blend --dir .r6-input
+          test "$(stat -c %s .r6-input/NF_BW01_GATE04_R5_DETAILS.blend)" -gt 1000000
+          python3 -m py_compile art/reviews/NF-BW01/v01/gate04_r6_hmi.py
+      - name: Author 3D LCD, image texture, GLB and Cycles comparison views
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p art/reviews/NF-BW01/v01/gate04_r6_output
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            --entrypoint /bin/bash blenderkit/headless-blender:blender-4.3 \
+            -lc '
+              set -euo pipefail
+              BIN="$(command -v blender || true)"
+              if [[ -z "$BIN" ]]; then BIN="$(find / -maxdepth 8 -type f -name blender -executable 2>/dev/null | head -1)"; fi
+              test -x "$BIN"
+              export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+              if command -v Xvfb >/dev/null; then
+                Xvfb :99 -screen 0 1600x1200x24 -nolisten tcp >/tmp/r6-x.log 2>&1 &
+              elif command -v Xvnc >/dev/null; then
+                Xvnc :99 -geometry 1600x1200 -depth 24 -SecurityTypes None >/tmp/r6-x.log 2>&1 &
+              else
+                echo "No headless display"; exit 20
+              fi
+              export DISPLAY=:99
+              sleep 2
+              "$BIN" --background --factory-startup \
+                .r6-input/NF_BW01_GATE04_R5_DETAILS.blend \
+                --python art/reviews/NF-BW01/v01/gate04_r6_hmi.py \
+                -- --out /workspace/art/reviews/NF-BW01/v01/gate04_r6_output
+            ' 2>&1 | tee nf-bw01-r6.log
+          grep -q NF_BW01_R6_HMI_PACKAGE_OK nf-bw01-r6.log
+      - name: Verify screen proportions, texture and three actual Blender renders
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r6_output
+          test "$(stat -c %s "$out/NF_BW01_R6_COMPACT_HMI.blend")" -gt 1000000
+          test "$(stat -c %s "$out/NF_BW01_R6_HMI_INSPECTION.glb")" -gt 1000000
+          python3 - <<'PY'
+          import json, pathlib, struct
+          p=pathlib.Path("art/reviews/NF-BW01/v01/gate04_r6_output")
+          j=json.loads((p/"R6_HMI_REVIEW.json").read_text())
+          assert j["original_physical_hmi_enlarged"] is False
+          w,h=j["added_lcd_dimensions_m"]
+          assert 0.4<w<0.5 and 0.26<h<0.34
+          assert j["lcd_static"] is True and len(j["views"])==3
+          for f,sz in [(p/"textures"/"NF_BW01_R6_HMI_LCD.png",(1024,512))]+[(p/(v+".png"),(1040,780)) for v in j["views"]]:
+              assert f.stat().st_size>1000
+              head=f.read_bytes()[:24]
+              assert head[:8]==b"\x89PNG\r\n\x1a\n"
+              assert struct.unpack(">II",head[16:24])==sz
+          print("NF_BW01_R6_HMI_QA_OK",w,h)
+          PY
+      - name: Preserve source and original model evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: NF-BW01-R6-Compact-HMI-Review-${{ github.run_number }}
+          path: |
+            art/reviews/NF-BW01/v01/gate04_r6_output/
+            nf-bw01-r6.log
+          retention-days: 30
+          if-no-files-found: error
+      - name: Release verified Blender-screen model and views
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out=art/reviews/NF-BW01/v01/gate04_r6_output
+          gh release create "nf-bw01-gate04-r6-hmi-$GITHUB_RUN_NUMBER" \
+            "$out/NF_BW01_R6_COMPACT_HMI.blend" \
+            "$out/NF_BW01_R6_HMI_INSPECTION.glb" \
+            "$out/textures/NF_BW01_R6_HMI_LCD.png" \
+            "$out/R6_HMI_CLOSEUP.png" \
+            "$out/R6_HMI_FRONT.png" \
+            "$out/R6_COMPLETE_ENCLOSED.png" \
+            "$out/R6_HMI_REVIEW.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "NF-BW01 R6 small illuminated HMI ON actual Blender model" \
+            --notes "Actual reversible R6 Blender LCD within untouched compact original HMI footprint. Authored 1024x512 UV/emission UI image, three real Blender renders, GLB. Display values are static illustrative data; Unity animation/URP and final PBR bakes not yet validated." \
+            --prerelease
