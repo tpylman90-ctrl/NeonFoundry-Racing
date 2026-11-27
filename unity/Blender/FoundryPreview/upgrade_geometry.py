@@ -210,7 +210,7 @@ def upgrade_garage(box, cyl, tor, loft, M):
             box("CELL | insulated high-voltage handle", (bx,11.87,2.65),
                 (.35,.08,.092),"AMBER",.015)
     # 2 distinct industrial power towers at aisle edges; preserve separation.
-    for x,yc in ((-14.3,6.5),(9.45,12.2)):
+    for x,yc in ((-14.3,6.5),(6.15,12.2)):
         box("CELL | power converter stone base", (x,yc,.48),
             (2.15,2.50,.89),"RUBBER",.06)
         box("CELL | standing converter steel shell", (x,yc,2.83),
