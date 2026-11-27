@@ -69,7 +69,7 @@ public static class NeonFoundryUnityBuild
         var batteryFocus = new GameObject("Target | Battery works");
         batteryFocus.transform.position = new Vector3(-4.2f, 2.2f, -12.2f);
         var deckFocus = new GameObject("Target | Observation deck");
-        deckFocus.transform.position = new Vector3(11.8f, 4.45f, -12.5f);
+        deckFocus.transform.position = new Vector3(12.50f, 4.50f, -14.0f);
 
         var stationFocus = new GameObject("Target | NF-BW01 inspection station");
         stationFocus.transform.position = new Vector3(13.25f,1.65f,-12.50f);
@@ -337,8 +337,8 @@ public static class NeonFoundryUnityBuild
         // Mirror exact Blender tread coordinates and the raised deck.
         // Keeping render and collision geometry consistent avoids invisible
         // steps, inaccessible top landings and camera/floor mismatches.
-        AddWalkBox(root.transform, "Observation deck", new Vector3(11.8f,4.35f,-12.5f),
-            new Vector3(8.1f,.25f,6.55f));
+        AddWalkBox(root.transform, "Observation deck", new Vector3(12.5125f,4.35f,-13.725f),
+            new Vector3(9.525f,.25f,9.0f));
         for(int i=0;i<24;i++)
             AddWalkBox(root.transform, "Access stair " + (i+1),
                 new Vector3(9.35f,.12f+i*.184f,-(-1.20f+i*.46f)),
@@ -453,7 +453,7 @@ public static class NeonFoundryUnityBuild
         PrepareScene();
         PlayerSettings.companyName="Neon Foundry";
         PlayerSettings.productName="Neon Foundry Garage Preview";
-        PlayerSettings.bundleVersion="0.3.1";
+        PlayerSettings.bundleVersion="0.3.2";
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.LandscapeLeft;
         PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android,
             "com.tpylman.neonfoundryracing.unityreview");
