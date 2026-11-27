@@ -234,28 +234,32 @@ def upgrade_garage(box, cyl, tor, loft, M):
             (20.8,.10,.14),"AMBER",.016)
     add_label("CELL WORKS  /  BAY 04", (-12.9,17.44,6.65), .71,"STEEL",M)
     add_label("HIGH VOLTAGE     AUTHORIZED PERSONNEL", (-9.8,17.42,1.45), .36,"AMBER",M)
-    # Proper overlook railing: edge facing central bay, with clear stair landing.
+    # Raised 4.35m upper deck. The front railing has a REAL landing opening
+    # aligned with the new 9.35m-X staircase; posts cannot block the last tread.
+    deck_dz=.90
     for y in (9.48,10.71,11.94,13.17,14.40,15.53):
-        box("DECK | internal balustrade mullion", (7.78,y,4.25),
+        box("DECK | internal balustrade mullion", (7.78,y,4.25+deck_dz),
             (.10,.10,1.43),"STEEL",.015)
-    box("DECK | interior continuous grasp rail", (7.78,12.53,4.97),
+    box("DECK | interior continuous grasp rail", (7.78,12.53,4.97+deck_dz),
         (.13,6.14,.11),"STEEL",.023)
-    for x in (8.0,8.9,13.1,14.1,15.5):
-        box("DECK | forward glazing rail post", (x,9.28,4.29),
+    for x in (7.82,10.64,12.02,13.8,15.5):
+        box("DECK | forward glazing rail post", (x,9.28,4.29+deck_dz),
             (.10,.10,1.42),"STEEL",.013)
-    # Split front edge: 2.8m open passage at stair top, no guard blocking it.
-    box("DECK | left guard run", (8.68,9.29,4.95),(1.65,.10,.10),"STEEL",.01)
-    box("DECK | right guard run", (13.76,9.29,4.95),(3.14,.10,.10),"STEEL",.01)
+    # Unobstructed landing x=8.25..10.55; full 2m stair tread fits.
+    box("DECK | short left guard", (8.0,9.29,4.95+deck_dz),
+        (.48,.10,.10),"STEEL",.01)
+    box("DECK | long right guard", (13.20,9.29,4.95+deck_dz),
+        (5.25,.10,.10),"STEEL",.01)
     for side in (-1,1):
-        sx=10.85+side*1.06
-        start=(sx,2.45,.37)
-        end=(sx,11.94,3.69)
-        bar_between(box,"DECK | true continuous stair handrail",start,end,.10,"STEEL")
-        for i in (1,4,7,10,13,16):
-            y=2.55+i*.53
+        sx=9.35+side*1.06
+        start=(sx,-1.40,.88)
+        end=(sx,9.67,5.34)
+        bar_between(box,"DECK | matched stair handrail",start,end,.10,"STEEL")
+        for i in (1,4,7,10,13,16,19,22):
+            y=-1.20+i*.46
             z=.12+i*.184
-            bar_between(box,"DECK | guard fixing post",
-                (sx,y,z+.05),(sx,y,z+.95),.075,"STEEL")
+            bar_between(box,"DECK | stair guard fixing post",
+                (sx,y,z+.06),(sx,y,z+1.04),.075,"STEEL")
     # Left wall auxiliary parts area: physical spare pods, armatures and tools.
     for y in (-12.5,-8.5,-4.5):
         box("PARTS | black wall rack carcass", (-14.30,y,2.33),
