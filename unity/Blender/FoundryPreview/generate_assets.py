@@ -191,9 +191,12 @@ STAIR_START_Y=-1.20
 STAIR_STEP_RUN=.46
 STAIR_RISE=.184
 STAIR_COUNT=24
-box("DECK | elevated overlook",(11.8,12.5,DECK_Z),(8.1,6.55,.25),"STEEL",.06)
-for x in (8.1,15.5):
-    box("DECK | safety glazing",(x,12.5,DECK_Z+.87),(.09,6.1,1.6),"GLASS",.02)
+# Fill the corner exactly to the inner surfaces of the existing walls.
+# Front edge remains Y=9.225 for the staircase landing and inspection aisle.
+# Inner right wall X=17.275; inner back wall Y=18.225.
+box("DECK | elevated overlook",(12.5125,13.725,DECK_Z),(9.525,9.0,.25),"STEEL",.06)
+for x in (7.80,17.21):
+    box("DECK | safety glazing",(x,13.725,DECK_Z+.87),(.09,8.68,1.6),"GLASS",.02)
 for i in range(STAIR_COUNT):
     box("DECK | accessible stair tread",
         (STAIR_X,STAIR_START_Y+i*STAIR_STEP_RUN,.12+i*STAIR_RISE),
