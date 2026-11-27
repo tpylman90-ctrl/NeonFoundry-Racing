@@ -174,7 +174,7 @@ for x in (-11.6,-6.6,-1.6,3.4):
     box("CELL | robot angled link",(x-1.00,y+.75,3.45),(1.15,.24,.25),"STEEL",.05)
     box("CELL | robot gripper",(x-.45,y+.75,3.20),(.35,.50,.55),"CARBON",.03)
 # independent charger gantry, no machine overlap
-for x in (-14,14):
+for x in (-14,16.25):
     box("CELL | main high-voltage cabinet",(x,11.4,2.2),(1.35,3.0,4.4),"STEEL",.09)
     for z in (1.0,1.8,2.6,3.4):
         box("CELL | voltage indicator",(x,9.88,z),(.72,.075,.085),"CYAN",.012)
