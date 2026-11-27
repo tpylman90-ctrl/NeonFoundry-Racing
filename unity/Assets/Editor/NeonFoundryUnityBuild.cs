@@ -69,10 +69,10 @@ public static class NeonFoundryUnityBuild
         var batteryFocus = new GameObject("Target | Battery works");
         batteryFocus.transform.position = new Vector3(-4.2f, 2.2f, -12.2f);
         var deckFocus = new GameObject("Target | Observation deck");
-        deckFocus.transform.position = new Vector3(11.8f, 3.5f, -12.5f);
+        deckFocus.transform.position = new Vector3(11.8f, 4.45f, -12.5f);
 
         var stationFocus = new GameObject("Target | NF-BW01 inspection station");
-        stationFocus.transform.position = new Vector3(-9.4f,1.55f,-8.35f);
+        stationFocus.transform.position = new Vector3(13.25f,1.65f,-12.50f);
 
         var cameraObject = new GameObject("Main Camera | Touch inspection");
         cameraObject.tag = "MainCamera";
@@ -192,16 +192,19 @@ public static class NeonFoundryUnityBuild
             || bounds.size.y < 1.7f || bounds.size.y > 4.4f
             || bounds.size.z < 1.6f || bounds.size.z > 5.0f)
             throw new Exception("NF-BW01 FBX scale/axis mismatch: "+bounds.size);
-        // The workstation is opposite the hero bay and ahead of the
-        // existing battery line, leaving a walking aisle for inspection.
+        // Locate under the raised overlook, to the RIGHT of the staircase.
+        // Upper deck underside is at 4.225 m; visual mesh must fit under it.
+        const float bayX=13.25f, bayZ=-12.50f, underside=4.225f;
+        if (bounds.size.y > underside-.30f)
+            throw new Exception("NF-BW01 too tall for under-deck bay: "+bounds.size.y);
         station.transform.position +=
-            new Vector3(-9.4f-bounds.center.x, -bounds.min.y, -8.35f-bounds.center.z);
+            new Vector3(bayX-bounds.center.x, -bounds.min.y, bayZ-bounds.center.z);
         ApplyWorkstationMaterials(station);
         // Broad, cheap bounds for camera/walk collision review; NO mesh collider
         // or false claim that the robot/gripper is physically functional.
         var blocker = new GameObject("NF-BW01 | static footprint blocker");
         blocker.transform.SetParent(station.transform,false);
-        blocker.transform.position = new Vector3(-9.4f,1.30f,-8.35f);
+        blocker.transform.position = new Vector3(13.25f,1.30f,-12.50f);
         var collider = blocker.AddComponent<BoxCollider>();
         collider.size = new Vector3(3.77f,2.60f,2.36f);
         Debug.Log("NF_BW01_UNITY_PLACED rendererParts="+renderers.Length+
@@ -331,12 +334,15 @@ public static class NeonFoundryUnityBuild
         var root = new GameObject("Walkable | collision proxies");
         AddWalkBox(root.transform, "Garage floor", new Vector3(0,-.22f,0),
             new Vector3(35,.32f,37));
-        AddWalkBox(root.transform, "Observation deck", new Vector3(11.8f,3.45f,-12.5f),
+        // Mirror exact Blender tread coordinates and the raised deck.
+        // Keeping render and collision geometry consistent avoids invisible
+        // steps, inaccessible top landings and camera/floor mismatches.
+        AddWalkBox(root.transform, "Observation deck", new Vector3(11.8f,4.35f,-12.5f),
             new Vector3(8.1f,.25f,6.55f));
-        for(int i=0;i<18;i++)
+        for(int i=0;i<24;i++)
             AddWalkBox(root.transform, "Access stair " + (i+1),
-                new Vector3(10.85f,.12f+i*.184f,-(2.55f+i*.53f)),
-                new Vector3(2f,.16f,.51f));
+                new Vector3(9.35f,.12f+i*.184f,-(-1.20f+i*.46f)),
+                new Vector3(2f,.16f,.446f));
     }
     private static void AddWalkBox(Transform root, string label, Vector3 center, Vector3 dimensions)
     {
@@ -447,7 +453,7 @@ public static class NeonFoundryUnityBuild
         PrepareScene();
         PlayerSettings.companyName="Neon Foundry";
         PlayerSettings.productName="Neon Foundry Garage Preview";
-        PlayerSettings.bundleVersion="0.3.0";
+        PlayerSettings.bundleVersion="0.3.1";
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.LandscapeLeft;
         PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android,
             "com.tpylman.neonfoundryracing.unityreview");
