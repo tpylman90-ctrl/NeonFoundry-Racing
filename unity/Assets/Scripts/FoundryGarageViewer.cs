@@ -17,7 +17,7 @@ public sealed class FoundryGarageViewer : MonoBehaviour
     private Vector3 focus;
     private bool walkMode;
     private float yaw = -138f, pitch = 11f, orbitDistance = 12.9f;
-    private Vector3 walker = new Vector3(0f, 1.75f, -10f);
+    private Vector3 walker = new Vector3(9.35f, 1.64f, 2.65f);
     private float lookPitch = 8f, walkYaw = 0f;
     private Vector2 previousPointer;
     private float previousPinch;
@@ -173,21 +173,30 @@ public sealed class FoundryGarageViewer : MonoBehaviour
         }
         Vector3 motion = new Vector3(leftStick.x, 0f, leftStick.y);
         if (motion.sqrMagnitude > 1f) motion.Normalize();
-        walker += Quaternion.Euler(0, walkYaw, 0) * motion * (5.1f * Time.deltaTime);
+        walker += Quaternion.Euler(0, walkYaw, 0) * motion * (3.15f * Time.deltaTime);
         walker.x = Mathf.Clamp(walker.x, -15.7f, 15.7f);
         walker.z = Mathf.Clamp(walker.z, -16.5f, 16.5f);
-        // Surface proxies in the Unity scene allow actual ascent on 18 steps and
-        // walking across the observation deck without expensive MeshColliders.
-        Vector3 groundTest = new Vector3(walker.x, walker.y + .48f, walker.z);
-        if (Physics.Raycast(groundTest, Vector3.down, out RaycastHit surface, 3.15f,
-            Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        // Robust under-deck stair ascent. Previously the low raycast would
+        // reject the overhead deck and could instead hit unrelated equipment.
+        // Use the SAME stair run/rise and floor coordinates as Blender.
+        const float floorTop=-.06f, deckTop=4.475f;
+        float surfaceHeight=floorTop;
+        bool onStair = walker.x >= 8.27f && walker.x <= 10.43f
+            && walker.z <= 1.43f && walker.z >= -9.65f;
+        if (onStair)
         {
-            float desiredEyeHeight = surface.point.y + 1.70f;
-            // Ignore a balcony directly overhead or an implausibly tall step.
-            if (desiredEyeHeight <= walker.y + .48f)
-                walker.y = Mathf.MoveTowards(walker.y, desiredEyeHeight,
-                    3.4f * Time.deltaTime);
+            int index=Mathf.Clamp(Mathf.FloorToInt((1.20f-walker.z+.23f)/.46f),0,23);
+            surfaceHeight=.20f+index*.184f;
         }
+        bool inDeck = walker.x >= 7.75f && walker.x <= 17.275f
+            && walker.z <= -9.225f && walker.z >= -18.225f;
+        // A player on the ground under the deck must NOT be lifted through
+        // the slab. Only someone who climbed the stairs can occupy this level.
+        if (inDeck && walker.y >= 5.10f)
+            surfaceHeight=deckTop;
+        if (!onStair && !inDeck) surfaceHeight=floorTop;
+        float targetEye=surfaceHeight+1.70f;
+        walker.y=Mathf.MoveTowards(walker.y,targetEye,7.0f*Time.deltaTime);
     }
     bool OverTopButtons(Vector2 point)
     {
@@ -206,7 +215,9 @@ public sealed class FoundryGarageViewer : MonoBehaviour
             Vector3 proposed = focus - q * Vector3.forward * orbitDistance;
             // The original high-angle orbit started inside the 7m ceiling,
             // making bright overhead rails fill most of the screen.
-            proposed.y = Mathf.Clamp(proposed.y, 1.10f, 6.48f);
+            // The inspection viewpoint stays UNDER the raised deck.
+            proposed.y = Mathf.Clamp(proposed.y, 1.10f,
+                                     locationIndex==3?3.55f:6.48f);
             transform.position = proposed;
             transform.LookAt(focus, Vector3.up);
         }
@@ -219,20 +230,26 @@ public sealed class FoundryGarageViewer : MonoBehaviour
         walkMode = false;
         orbitDistance = index == 0 ? 12.9f : index == 1 ? 12.5f
                       : index == 2 ? 11.6f : 5.8f;
-        pitch = index == 2 ? 8f : index==3?15f:11f;
-        yaw = index==3?-136f:index==1?-155f:-138f;
+        pitch = index == 2 ? 8f : index==3?7f:11f;
+        // Station must be viewed from the accessible central aisle.
+        // The former -136 yaw placed the camera behind the right wall.
+        yaw = index==3?164f:index==1?-155f:-138f;
     }
     void SwitchMode()
     {
         walkMode = !walkMode;
         leftFinger = rightFinger = -1;
-        if (walkMode)
-        {
-            walker = new Vector3(0f, 1.75f, -10.5f);
-            walkYaw = 0f;
-            lookPitch = 8f;
-        }
+        if (walkMode) SpawnAtStairEntry();
         else SelectLocation(locationIndex);
+    }
+    private void SpawnAtStairEntry()
+    {
+        // Clearly reproducible entry, facing along -Z toward the staircase.
+        walker = new Vector3(9.35f,1.64f,2.65f);
+        walkYaw = 180f;
+        lookPitch = 3f;
+        leftStick = Vector2.zero;
+        leftFinger = rightFinger = -1;
     }
     void EnsureStyles()
     {
@@ -292,6 +309,9 @@ public sealed class FoundryGarageViewer : MonoBehaviour
             SelectLocation(0);
         if (GUI.Button(new Rect(x-579,17,104,47),"NF-BW01",buttonStyle))
             SelectLocation(3);
+        if (walkMode && GUI.Button(new Rect(w-579,76,135,37),
+            "STAIR ENTRY",buttonStyle))
+            SpawnAtStairEntry();
         if (locationIndex == 3 && !walkMode)
         {
             GUI.color=new Color(.014f,.031f,.052f,.91f);
