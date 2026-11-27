@@ -237,19 +237,19 @@ def upgrade_garage(box, cyl, tor, loft, M):
     # Raised 4.35m upper deck. The front railing has a REAL landing opening
     # aligned with the new 9.35m-X staircase; posts cannot block the last tread.
     deck_dz=.90
-    for y in (9.48,10.71,11.94,13.17,14.40,15.53):
+    for y in (9.48,10.71,12.15,13.59,15.03,16.47,17.92):
         box("DECK | internal balustrade mullion", (7.78,y,4.25+deck_dz),
             (.10,.10,1.43),"STEEL",.015)
-    box("DECK | interior continuous grasp rail", (7.78,12.53,4.97+deck_dz),
-        (.13,6.14,.11),"STEEL",.023)
-    for x in (7.82,10.64,12.02,13.8,15.5):
+    box("DECK | interior continuous grasp rail", (7.78,13.725,4.97+deck_dz),
+        (.13,8.91,.11),"STEEL",.023)
+    for x in (7.82,10.64,12.02,13.8,15.5,17.19):
         box("DECK | forward glazing rail post", (x,9.28,4.29+deck_dz),
             (.10,.10,1.42),"STEEL",.013)
     # Unobstructed landing x=8.25..10.55; full 2m stair tread fits.
     box("DECK | short left guard", (8.0,9.29,4.95+deck_dz),
         (.48,.10,.10),"STEEL",.01)
-    box("DECK | long right guard", (13.20,9.29,4.95+deck_dz),
-        (5.25,.10,.10),"STEEL",.01)
+    box("DECK | long right guard", (13.91,9.29,4.95+deck_dz),
+        (6.68,.10,.10),"STEEL",.01)
     for side in (-1,1):
         sx=9.35+side*1.06
         start=(sx,-1.40,.88)
