@@ -182,13 +182,24 @@ for x in (-15.7,-10.7,-5.7,-.7,4.3,9.3,14.3):
     box("GARAGE | ceiling service truss",(x,0,7.1),(.18,35,.18),"STEEL",.012)
 for y in (-14,-7,0,7,14):
     box("GARAGE | overhead light rail",(0,y,7.00),(31,.18,.12),"CYAN",.02)
-# Observation deck on right wall, 3m above machine floor.
-box("DECK | elevated overlook",(11.8,12.5,3.45),(8.1,6.55,.25),"STEEL",.06)
+# Raised overlook: a genuine walk-under service bay at the right-hand
+# end, with 3.9m+ headroom below the deck and enough clearance for NF-BW01.
+# The stair ends on the deck, and the display/physics proxies share this plan.
+DECK_Z=4.35
+STAIR_X=9.35
+STAIR_START_Y=-1.20
+STAIR_STEP_RUN=.46
+STAIR_RISE=.184
+STAIR_COUNT=24
+box("DECK | elevated overlook",(11.8,12.5,DECK_Z),(8.1,6.55,.25),"STEEL",.06)
 for x in (8.1,15.5):
-    box("DECK | safety glazing",(x,12.5,4.32),(.09,6.1,1.6),"GLASS",.02)
-for i in range(18):
-    box("DECK | accessible stair tread",(10.85,2.55+i*.53,.12+i*.184),
-        (2.0,.51,.16),"STEEL",.025)
+    box("DECK | safety glazing",(x,12.5,DECK_Z+.87),(.09,6.1,1.6),"GLASS",.02)
+for i in range(STAIR_COUNT):
+    box("DECK | accessible stair tread",
+        (STAIR_X,STAIR_START_Y+i*STAIR_STEP_RUN,.12+i*STAIR_RISE),
+        (2.0,STAIR_STEP_RUN-.014,.16),"STEEL",.025)
+# The top stair surface (4.432m) reaches the raised deck top (4.475m).
+# No floating/hidden access slope is used in the physical scene.
 for z in (1.5,3.3,5.2):
     box("GARAGE | wall panel light",(-17.16,-14,z),(.06,2.7,.11),"AMBER",.008)
 upgrade_garage(box,cyl,tor,loft,M)
